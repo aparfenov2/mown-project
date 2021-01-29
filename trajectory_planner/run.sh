@@ -1,1 +1,0 @@
-docker run -ti ros-mower
