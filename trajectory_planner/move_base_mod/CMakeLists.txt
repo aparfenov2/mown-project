@@ -8,6 +8,7 @@ find_package(catkin REQUIRED
         cmake_modules
         costmap_2d
 #        dynamic_reconfigure
+        actionlib_msgs
         geometry_msgs
         message_generation
 #        move_base_msgs
@@ -30,10 +31,26 @@ add_definitions(${EIGEN3_DEFINITIONS})
 #     cfg/MoveBase.cfg
 # )
 
+# actions
+add_action_files(
+  DIRECTORY
+    action
+  FILES
+    TrajectoryController.action
+)
+
+generate_messages(
+  DEPENDENCIES
+    actionlib_msgs
+    geometry_msgs
+)
+
 catkin_package(
     CATKIN_DEPENDS
         # dynamic_reconfigure
         geometry_msgs
+        actionlib_msgs
+        message_runtime
         # move_base_msgs
         nav_msgs
         roscpp
