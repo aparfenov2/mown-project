@@ -1,5 +1,5 @@
 
-set -e
+set -ex
 ROOT_DIR="$(dirname $PWD/$0)"
 echo ROOT_DIR=${ROOT_DIR}
 
@@ -26,19 +26,4 @@ IMAGE=ros-mower
 NAME=mower-sim
 SCRIPT=$0
 
-xhost +
-docker run -ti --rm \
-    --gpus all \
-    -e "DISPLAY" \
-    -e "QT_X11_NO_MITSHM=1" \
-    -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-    -e XAUTHORITY \
-    -v /dev:/dev \
-    --privileged \
-    --net=host \
-    --name "$NAME" \
-    -v ${PWD}:/cdir \
-    -v ~/.gazebo/models:/root/.gazebo/models \
-    -w /cdir \
-    $IMAGE bash "$SCRIPT" --inner
-    
+bash _run_in_docker.sh --script /cdir/$0 --name run_sim
