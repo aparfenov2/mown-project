@@ -94,5 +94,10 @@ RUN apt install -y ros-noetic-joy ros-noetic-teleop-twist-joy \
   ros-noetic-compressed-image-transport ros-noetic-rqt-image-view \
   ros-noetic-gmapping ros-noetic-navigation ros-noetic-interactive-markers
 
-RUN apt install -y ros-noetic-turtlebot3-msgs
-RUN apt install -y ros-noetic-turtlebot3
+# RUN apt install -y ros-noetic-turtlebot3-msgs
+# RUN apt install -y ros-noetic-turtlebot3
+
+
+# Additional ROS packages
+# RUN apt-get update && apt-get install -y ros-noetic-teleop-twist-keyboard ros-noetic-hector-models
+RUN apt-get update && apt-get install -y ros-noetic-velodyne-simulator

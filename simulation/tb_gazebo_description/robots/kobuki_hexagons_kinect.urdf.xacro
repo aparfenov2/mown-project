@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+    - Base      : kobuki
+    - Stacks    : hexagons
+    - 3d Sensor : kinect
+-->    
+<robot name="turtlebot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="gpu" default="false"/>
+  <xacro:property name="gpu" value="$(arg gpu)" />
+
+  <xacro:include filename="$(find tb_gazebo_description)/urdf/turtlebot_common_library.urdf.xacro" />
+  <xacro:include filename="$(find tb_gazebo_description)/urdf/kobuki.urdf.xacro" />
+  <xacro:include filename="$(find tb_gazebo_description)/urdf/stacks/hexagons.urdf.xacro"/>
+  <xacro:include filename="$(find tb_gazebo_description)/urdf/sensors/kinect.urdf.xacro"/>
+
+<!--   <xacro:include filename="$(find hector_sensors_description)/urdf/hokuyo_utm30lx.urdf.xacro" />
+  <xacro:hokuyo_utm30lx name="laser" parent="base_link" ros_topic="scan" update_rate="40" ray_count="1040" min_angle="180" max_angle="-180">
+    <origin xyz="0.00 0.00 0.20" rpy="0 0 0"/>
+  </xacro:hokuyo_utm30lx>
+ -->  
+  <xacro:include filename="$(find velodyne_description)/urdf/HDL-32E.urdf.xacro"/>
+  <xacro:HDL-32E parent="base_link" name="velodyne" topic="/velodyne_points" hz="10" samples="440" gpu="${gpu}">
+    <origin xyz="0 0 0.4" rpy="0 0 0" />
+  </xacro:HDL-32E>
+
+  <xacro:kobuki/>
+  <xacro:stack_hexagons parent="base_link"/>
+  <xacro:sensor_kinect  parent="base_link"/>
+</robot>

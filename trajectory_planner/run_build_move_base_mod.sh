@@ -16,4 +16,4 @@ IMAGE=ros-mower
 NAME=mower-sim
 SCRIPT=$0
 
-bash _run_in_docker.sh --script /cdir/$0 --name run_sim
+bash _run_in_docker.sh --script $0 --name run_sim
