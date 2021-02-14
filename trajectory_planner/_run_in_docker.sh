@@ -27,7 +27,7 @@ done
     exit 1
 }
 
-DOCKERWS="."
+DOCKERWS="docker"
 IMAGE=ros-mower
 
 echo DOCKERWS=$DOCKERWS
@@ -49,6 +49,7 @@ docker run -ti --rm \
     --net=host \
     --name "$NAME" \
     -v ${PWD}:/cdir \
+    -v $(readlink -f $SCRIPT):/cdir/_outer.sh \
     -v ~/.gazebo/models:/root/.gazebo/models \
     -w /cdir \
-    $IMAGE bash "$SCRIPT" --inner
+    $IMAGE bash _outer.sh --inner

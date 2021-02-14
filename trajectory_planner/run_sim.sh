@@ -3,7 +3,7 @@ set -ex
 ROOT_DIR="$(dirname $PWD/$0)"
 echo ROOT_DIR=${ROOT_DIR}
 
-export TURTLEBOT3_MODEL=burger
+export TURTLEBOT3_MODEL=waffle
 
 [ -d "catkin_ws/src" ] || {
     mkdir -p catkin_ws/src || true
@@ -26,4 +26,4 @@ IMAGE=ros-mower
 NAME=mower-sim
 SCRIPT=$0
 
-bash _run_in_docker.sh --script /cdir/$0 --name run_sim
+bash _run_in_docker.sh --script $0 --name run_sim
