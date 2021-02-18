@@ -1,6 +1,9 @@
 #!/bin/bash
-set -ex
+set -e
 VOLUMES=()
+OTHERS=()
+DOCKERWS="docker"
+
 while [[ $# -gt 0 ]]
 do
 key="$1"
@@ -10,6 +13,20 @@ case $key in
     NAME="$2"
     shift # past argument
     shift # past value
+    ;;
+    --build_image)
+    BUILD_IMAGE=1
+    shift # past argument
+    ;;
+    --image)
+    IMAGE="$1"
+    shift # past argument
+    shift # past argument
+    ;;
+    --ws)
+    DOCKERWS="$1"
+    shift # past argument
+    shift # past argument
     ;;
     --script)
     SCRIPT="$2"
@@ -22,6 +39,7 @@ case $key in
     shift # past value
     ;;
     *)    # unknown option
+    OTHERS+=($1)
     shift # past argument
     ;;
 esac
@@ -36,15 +54,19 @@ done
     _NAME="--name $NAME"
 }
 
-DOCKERWS="docker"
-IMAGE=ros-mower
+[ -z "$IMAGE" ] && {
+    IMAGE=$(cat $DOCKERWS/image)
+}
 
 echo DOCKERWS=$DOCKERWS
 echo IMAGE=$IMAGE
+echo OTHERS="${OTHERS[@]}"
 
-_pwd=$PWD
-cd $DOCKERWS && bash ./build.sh
-cd ${_pwd}
+[ -n "${BUILD_IMAGE}" ] && {
+    _pwd=$PWD
+    cd $DOCKERWS && bash ./build.sh
+    cd ${_pwd}
+}
 
 xhost +
 docker run -ti --rm \
@@ -62,4 +84,4 @@ docker run -ti --rm \
     -v ~/.gazebo/models:/root/.gazebo/models \
     ${VOLUMES[@]} \
     -w /cdir \
-    $IMAGE bash /tmp/_outer.sh --inner
+    $IMAGE bash /tmp/_outer.sh --inner "${OTHERS[@]}"

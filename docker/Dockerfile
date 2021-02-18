@@ -85,7 +85,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-desktop-full=1.5.0-1*
 
 # Turtlebot 3
-RUN apt install -y ros-noetic-joy ros-noetic-teleop-twist-joy \
+RUN apt-get update && apt-get install -y ros-noetic-joy ros-noetic-teleop-twist-joy \
   ros-noetic-teleop-twist-keyboard ros-noetic-laser-proc \
   ros-noetic-rgbd-launch ros-noetic-rosserial-arduino \
   ros-noetic-rosserial-python ros-noetic-rosserial-client \
@@ -101,3 +101,21 @@ RUN apt install -y ros-noetic-joy ros-noetic-teleop-twist-joy \
 # Additional ROS packages
 # RUN apt-get update && apt-get install -y ros-noetic-teleop-twist-keyboard ros-noetic-hector-models
 RUN apt-get update && apt-get install -y ros-noetic-velodyne-simulator
+# kitti_to_rosbag
+RUN apt-get update && apt-get install -y libgflags-dev libgoogle-glog-dev
+RUN apt-get update && apt-get install -y libtool libtool-bin
+
+RUN apt-get update && apt-get install -y python3-pip
+
+# pytorch
+RUN pip3 install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
+
+# mmsegmentation
+# RUN pip3 install mmcv-full==latest+torch1.6.0+cu101 -f https://download.openmmlab.com/mmcv/dist/index.html
+RUN pip3 install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html
+RUN git clone https://github.com/open-mmlab/mmsegmentation.git /mmsegmentation
+WORKDIR /mmsegmentation
+RUN pip3 install -r requirements/readthedocs.txt
+# RUN pip3 install -r requirements/runtime.txt
+RUN pip3 install --no-cache-dir -e .
+

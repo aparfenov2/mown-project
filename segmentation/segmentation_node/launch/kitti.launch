@@ -1,0 +1,26 @@
+<launch>
+
+  <!-- <arg name="deeplab_ros_node_params" default="$(find segmentation_node)/cfg/freiburg_rgbd.yaml"/> -->
+  <node name="deeplab_ros_node" pkg="segmentation_node" type="segmentation_node.py" output="screen">
+    <!-- <rosparam file="$(arg deeplab_ros_node_params)" command="load" /> -->
+    <!-- <param name="rgb_input" value="/camera/rgb/image_color" /> -->
+    <param name="rgb_input" value="/cam02/image_raw" />
+    <param name="checkpoint" value="$(find segmentation_node)/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth" />
+    <param name="config" value="$(find segmentation_node)/configs/hrnet/fcn_hr18s_512x1024_40k_cityscapes.py" />
+  </node>
+
+  <node name="bag" pkg="rosbag" type="play"
+      args="-l $(find segmentation_node)/bags/kitti.bag" />
+
+  <!-- Start a nodelet manager; the name must be unqualified here -->
+  <node pkg="nodelet" type="nodelet" name="pipeline" args="manager" />
+
+  <!-- Include the stereo_image_proc.launch file and pass in a qualified manager name -->
+<!--   <include file="$(find stereo_image_proc)/launch/stereo_image_proc.launch" ns="stereo">
+    <arg name="manager" value="/pipeline" />
+    <arg name="left" value="/cam02" />
+    <arg name="right" value="/cam03" />
+  </include>
+ -->
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find segmentation_node)/rviz/deeplab_ros.rviz" /> -->
+</launch>

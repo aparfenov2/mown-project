@@ -1,1 +1,1 @@
-docker build -t ros-mower .
+docker build -t $(cat image) .
