@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 
 # runs mmdetection on ros camera topics
 # outputs: segmented RGBD
@@ -63,7 +63,7 @@ class MMSegmentationNode:
         rospy.Subscriber(rgb_input, Image, self._image_callback, queue_size=1)
 
         self.label_pub = rospy.Publisher('~segmentation', Image, queue_size=1)
-        self.vis_pub = rospy.Publisher('~segmentation_viz', Image, queue_size=1)
+        self.vis_pub = rospy.Publisher('~segmentation_vis', Image, queue_size=1)
 
         model_path = rospy.get_param('~checkpoint', 'mobilenetv2_coco_voctrainaug')
         config_path = rospy.get_param('~config', 'mobilenetv2_coco_voctrainaug')
@@ -101,11 +101,12 @@ class MMSegmentationNode:
 
                 # Run detection.
                 result = self.detect(rgb_image)
-                # seg_map = result[0]
+                seg_map = result[0].astype(np.uint16)
+                # print(f"seg_map.shape {seg_map.shape}")
                 # rospy.logdebug("Publishing semantic labels.")
-                # label_msg = self._cv_bridge.cv2_to_imgmsg(seg_map, 'mono16')
-                # label_msg.header = msg.header
-                # self.label_pub.publish(label_msg)
+                label_msg = self._cv_bridge.cv2_to_imgmsg(seg_map, 'mono16')
+                label_msg.header = msg.header
+                self.label_pub.publish(label_msg)
 
                 if self._visualize:
                     # Overlay segmentation on RGB image.
