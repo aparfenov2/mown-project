@@ -101,10 +101,10 @@ class MMSegmentationNode:
 
                 # Run detection.
                 result = self.detect(rgb_image)
-                seg_map = result[0].astype(np.uint16)
+                seg_map = result[0].astype(np.uint8)
                 # print(f"seg_map.shape {seg_map.shape}")
                 # rospy.logdebug("Publishing semantic labels.")
-                label_msg = self._cv_bridge.cv2_to_imgmsg(seg_map, 'mono16')
+                label_msg = self._cv_bridge.cv2_to_imgmsg(seg_map, 'mono8')
                 label_msg.header = msg.header
                 self.label_pub.publish(label_msg)
 
