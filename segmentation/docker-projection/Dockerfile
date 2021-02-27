@@ -100,6 +100,16 @@ RUN apt-get update && apt-get install -y ros-noetic-joy ros-noetic-teleop-twist-
 
 # Additional ROS packages
 # RUN apt-get update && apt-get install -y ros-noetic-teleop-twist-keyboard ros-noetic-hector-models
-# RUN apt-get update && apt-get install -y ros-noetic-velodyne-simulator
+RUN apt-get update && apt-get install -y ros-noetic-velodyne-simulator
+# kitti_to_rosbag
+RUN apt-get update && apt-get install -y libgflags-dev libgoogle-glog-dev
+RUN apt-get update && apt-get install -y libtool libtool-bin
 
 # RUN apt-get update && apt-get install -y python3-pip
+
+# ANYbotics/elevation_mapping
+RUN apt-get update && apt-get install -y ros-noetic-octomap-msgs
+RUN apt install -y ros-noetic-turtlebot3-msgs
+RUN apt install -y ros-noetic-turtlebot3
+RUN apt install -y ros-noetic-turtlebot3-simulations
+RUN ln -s /usr/bin/python3 /usr/bin/python
