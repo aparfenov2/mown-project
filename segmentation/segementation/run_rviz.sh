@@ -1,0 +1,1 @@
+bash run_my.sh --name rviz rviz.launch
