@@ -5,8 +5,12 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /TF1
+        - /TF1/Tree1
         - /DepthCloud1/Auto Size1
         - /seg_pcl1
+        - /segmentation_vis1
+        - /Elevation Map1
       Splitter Ratio: 0.5154867172241211
     Tree Height: 635
   - Class: rviz/Selection
@@ -113,6 +117,162 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_footprint:
+          Value: true
+        base_link:
+          Value: false
+        camera_depth_frame:
+          Value: false
+        camera_depth_optical_frame:
+          Value: false
+        camera_link:
+          Value: false
+        camera_rgb_frame:
+          Value: false
+        camera_rgb_optical_frame:
+          Value: false
+        caster_back_link:
+          Value: false
+        caster_front_link:
+          Value: false
+        cliff_sensor_front_link:
+          Value: false
+        cliff_sensor_left_link:
+          Value: false
+        cliff_sensor_right_link:
+          Value: false
+        gyro_link:
+          Value: false
+        odom:
+          Value: false
+        plate_bottom_link:
+          Value: false
+        plate_middle_link:
+          Value: false
+        plate_top_link:
+          Value: false
+        pole_bottom_0_link:
+          Value: false
+        pole_bottom_1_link:
+          Value: false
+        pole_bottom_2_link:
+          Value: false
+        pole_bottom_3_link:
+          Value: false
+        pole_bottom_4_link:
+          Value: false
+        pole_bottom_5_link:
+          Value: false
+        pole_kinect_0_link:
+          Value: false
+        pole_kinect_1_link:
+          Value: false
+        pole_middle_0_link:
+          Value: false
+        pole_middle_1_link:
+          Value: false
+        pole_middle_2_link:
+          Value: false
+        pole_middle_3_link:
+          Value: false
+        pole_top_0_link:
+          Value: false
+        pole_top_1_link:
+          Value: false
+        pole_top_2_link:
+          Value: false
+        pole_top_3_link:
+          Value: false
+        velodyne:
+          Value: false
+        velodyne_base_link:
+          Value: false
+        wheel_left_link:
+          Value: false
+        wheel_right_link:
+          Value: false
+      Marker Alpha: 1
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        odom:
+          base_footprint:
+            base_link:
+              camera_rgb_frame:
+                camera_depth_frame:
+                  camera_depth_optical_frame:
+                    {}
+                camera_link:
+                  {}
+                camera_rgb_optical_frame:
+                  {}
+              caster_back_link:
+                {}
+              caster_front_link:
+                {}
+              cliff_sensor_front_link:
+                {}
+              cliff_sensor_left_link:
+                {}
+              cliff_sensor_right_link:
+                {}
+              gyro_link:
+                {}
+              plate_bottom_link:
+                {}
+              plate_middle_link:
+                {}
+              plate_top_link:
+                {}
+              pole_bottom_0_link:
+                {}
+              pole_bottom_1_link:
+                {}
+              pole_bottom_2_link:
+                {}
+              pole_bottom_3_link:
+                {}
+              pole_bottom_4_link:
+                {}
+              pole_bottom_5_link:
+                {}
+              pole_kinect_0_link:
+                {}
+              pole_kinect_1_link:
+                {}
+              pole_middle_0_link:
+                {}
+              pole_middle_1_link:
+                {}
+              pole_middle_2_link:
+                {}
+              pole_middle_3_link:
+                {}
+              pole_top_0_link:
+                {}
+              pole_top_1_link:
+                {}
+              pole_top_2_link:
+                {}
+              pole_top_3_link:
+                {}
+              velodyne_base_link:
+                velodyne:
+                  {}
+              wheel_left_link:
+                {}
+              wheel_right_link:
+                {}
+      Update Interval: 0
+      Value: true
     - Alpha: 1
       Auto Size:
         Auto Size Factor: 1
@@ -175,7 +335,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -192,7 +352,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: false
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -252,15 +412,15 @@ Visualization Manager:
       Min Intensity: 0
       Name: Elevation Map
       Show Grid Lines: true
-      Topic: /elevation_mapping/elevation_map_raw
+      Topic: /elevation_mapping/elevation_map
       Unreliable: false
       Use Rainbow: true
-      Value: true      
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: base_link
+    Fixed Frame: base_footprint
     Frame Rate: 30
   Name: root
   Tools:
@@ -284,7 +444,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.7812387943267822
+      Distance: 16.81011390686035
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -300,9 +460,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.1802029311656952
+      Pitch: 0.3252028822898865
       Target Frame: <Fixed Frame>
-      Yaw: 2.9035680294036865
+      Yaw: 3.068571090698242
     Saved: ~
 Window Geometry:
   Displays:

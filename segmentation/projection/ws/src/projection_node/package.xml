@@ -2,14 +2,17 @@
 <package format="2">
   <name>projection_node</name>
   <version>1.0.0</version>
-  <description>DeepLab v3 for ROS</description>
+  <description>projects segmented pcl to a gridmap</description>
 
-  <author email="margarita.grinvald@mavt.ethz.ch">Margarita Grinvald</author>
-  <maintainer email="margarita.grinvald@mavt.ethz.ch">Margarita Grinvald</maintainer>
+  <author email="kantengri3@gmail.com">aparfenov</author>
+  <maintainer email="kantengri3@gmail.com">aparfenov</maintainer>
 
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>elevation_mapping</depend>
+  <depend>grid_map_rviz_plugin</depend>
+  <depend>rviz</depend>
 
   <!-- <depend>rospy</depend> -->
   <!-- <depend>catkin_simple</depend> -->

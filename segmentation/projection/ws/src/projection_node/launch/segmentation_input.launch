@@ -8,7 +8,7 @@
   
   <!-- Launch elevation mapping node. -->
   <node pkg="elevation_mapping" type="elevation_mapping" name="elevation_mapping" output="screen">
-    <rosparam command="load" file="$(find elevation_mapping_demos)/config/robots/waffle_robot.yaml" />
+    <rosparam command="load" file="$(find projection_node)/config/waffle_robot.yaml" />
     <rosparam command="load" file="$(find elevation_mapping)/config/sensor_processors/perfect.yaml" />
     <rosparam command="load" file="$(find elevation_mapping_demos)/config/postprocessing/postprocessor_pipeline.yaml" />
   </node>

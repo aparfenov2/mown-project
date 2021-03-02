@@ -52,5 +52,6 @@ echo OTHERS="${OTHERS[@]}"
 }
 
 bash _run_in_docker.sh --script $0 ${_NAME} \
+    -v $(readlink -f utils_ws):/cdir/utils_ws \
     -v $(readlink -f utils_ws/src/my_utils_common):/cdir/utils_ws/src/my_utils_common \
     "${POSITIONAL[@]}"
