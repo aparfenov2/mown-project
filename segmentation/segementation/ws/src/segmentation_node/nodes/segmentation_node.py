@@ -69,8 +69,9 @@ class MMSegmentationNode:
         config_path = rospy.get_param('~config', 'mobilenetv2_coco_voctrainaug')
         palette = rospy.get_param('~palette', 'cityscapes')
         device = rospy.get_param('~device', 'cuda:0')
+        self.mask_in_bgr = rospy.get_param('~mask_in_bgr', 'false')
 
-        palette = get_palette(palette)
+        self.palette = get_palette(palette)
         # model_dir = tempfile.mkdtemp()
         # tf.gfile.MakeDirs(model_dir)
         # download_path = os.path.join(model_dir, _TARBALL_NAME)
@@ -80,7 +81,7 @@ class MMSegmentationNode:
         # print('Download completed! Loading DeepLab model...')
 
         # self._model = deeplab.DeepLabModel(download_path)
-        self._model = MMDetector(config_path, model_path, palette, device)
+        self._model = MMDetector(config_path, model_path, self.palette, device)
         print('Model loaded successfully!')
 
 
@@ -104,7 +105,11 @@ class MMSegmentationNode:
                 seg_map = result[0].astype(np.uint8)
                 # print(f"seg_map.shape {seg_map.shape}")
                 # rospy.logdebug("Publishing semantic labels.")
-                label_msg = self._cv_bridge.cv2_to_imgmsg(seg_map, 'mono8')
+                if not self.mask_in_bgr:
+                    label_msg = self._cv_bridge.cv2_to_imgmsg(seg_map, 'mono8')
+                else:
+                    seg_map_bgr = self.map_bgr(seg_map)
+                    label_msg = self._cv_bridge.cv2_to_imgmsg(seg_map_bgr, 'bgr8')
                 label_msg.header = msg.header
                 self.label_pub.publish(label_msg)
 
@@ -124,6 +129,15 @@ class MMSegmentationNode:
         # seg_map = cv2.resize(seg_map.astype(np.float32), rgb_image.size, interpolation = cv2.INTER_NEAREST).astype(np.uint16)
 
         return seg_map
+
+    def map_bgr(self, seg):
+        palette = np.array(self.palette)
+        color_seg = np.zeros((seg.shape[0], seg.shape[1], 3), dtype=np.uint8)
+        for label, color in enumerate(palette):
+            color_seg[seg == label, :] = color
+        # convert to BGR
+        color_seg = color_seg[..., ::-1]
+        return color_seg
 
     def visualize(self, rgb_image, seg_map, alpha = 0.6):
         # image = rgb_image.copy()

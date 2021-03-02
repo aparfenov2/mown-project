@@ -17,7 +17,7 @@ done
     . ws/devel/setup.sh
     [ -z "$TELEOP" ] && {
         # roslaunch elevation_mapping_demos turtlesim3_waffle_demo.launch
-        # roslaunch projection_node segmentation_input.launch
+        roslaunch projection_node segmentation_input.launch
         # rosservice call -- /elevation_mapping/get_submap odom -0.5 0.0 0.5 1.2 []
         # rosservice call /elevation_mapping/save_map "file_path: '/cdir/elevation_map.bag'"
         # rostopic echo /elevation_mapping/elevation_map
