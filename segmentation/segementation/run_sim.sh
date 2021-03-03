@@ -1,8 +1,11 @@
 
 [ "$1" == "--inner" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
-    . /cdir/simulator_ws/devel/setup.sh
     set -ex
+    pushd $PWD
+    cd /cdir/simulator_ws && catkin_make
+    popd
+    . /cdir/simulator_ws/devel/setup.sh
     roslaunch tb_gazebo turtletown.launch
     exit 0
 }
