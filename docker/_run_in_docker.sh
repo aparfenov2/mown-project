@@ -20,12 +20,12 @@ case $key in
     shift # past argument
     ;;
     --image)
-    IMAGE="$1"
+    IMAGE="$2"
     shift # past argument
     shift # past argument
     ;;
     --ws)
-    DOCKERWS="$1"
+    DOCKERWS="$2"
     shift # past argument
     shift # past argument
     ;;
