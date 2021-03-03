@@ -2,6 +2,7 @@ set -e
 
 OTHERS=()
 POSITIONAL=("$@")
+BUILD=1
 
 while [[ $# -gt 0 ]]
 do
@@ -39,8 +40,10 @@ echo OTHERS="${OTHERS[@]}"
     . "/opt/ros/$ROS_DISTRO/setup.bash"
     set -ex
     [ -n "$BUILD" ] && {
+        pushd $PWD
         cd /cdir/utils_ws/
         catkin_make
+        popd
     }
     . /cdir/utils_ws/devel/setup.sh
     roslaunch my_utils_common "${OTHERS[@]}"
