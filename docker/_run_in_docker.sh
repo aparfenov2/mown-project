@@ -3,6 +3,7 @@ set -e
 VOLUMES=()
 OTHERS=()
 DOCKERWS="docker"
+BUILD_IMAGE=1
 
 while [[ $# -gt 0 ]]
 do
@@ -63,9 +64,9 @@ echo IMAGE=$IMAGE
 echo OTHERS="${OTHERS[@]}"
 
 [ -n "${BUILD_IMAGE}" ] && {
-    _pwd=$PWD
+    pushd $PWD
     cd $DOCKERWS && bash ./build.sh
-    cd ${_pwd}
+    popd
 }
 
 xhost +
