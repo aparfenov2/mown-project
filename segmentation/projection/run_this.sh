@@ -30,6 +30,22 @@ done
     exit 0
 }
 
+pushd $PWD
+cd ws/src/
+[ -d "elevation_mapping" ] || {
+    git clone git@github.com:ANYbotics/elevation_mapping.git
+}
+[ -d "grid_map" ] || {
+    git clone git@github.com:ANYbotics/grid_map.git
+}
+[ -d "kindr" ] || {
+    git clone git@github.com:ANYbotics/kindr.git
+}
+[ -d "kindr_ros" ] || {
+    git clone git@github.com:ANYbotics/kindr_ros.git
+}
+popd
+
 bash _run_in_docker.sh --script $0 \
     -v $(readlink -f ws/src/projection_node):/cdir/ws/src/projection_node \
     $ALL
