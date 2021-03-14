@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-
-<launch>
-
-  <node pkg="rviz" type="rviz" name="rviz"
-    args="-d $(find projection_node)/rviz/cfg.rviz"/>
-</launch>
