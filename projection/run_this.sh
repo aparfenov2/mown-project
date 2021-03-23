@@ -12,7 +12,7 @@ done
     . "/opt/ros/$ROS_DISTRO/setup.bash"
     set -ex
     pushd $PWD
-    # cd ws && catkin_make
+    cd ws && catkin_make
     popd
     . ws/devel/setup.sh
     [ -z "$TELEOP" ] && {
@@ -47,5 +47,6 @@ cd ws/src/
 popd
 
 bash _run_in_docker.sh --script $0 \
+    -v $(readlink -f ws):/cdir/ws \
     -v $(readlink -f ws/src/projection_node):/cdir/ws/src/projection_node \
     $ALL
