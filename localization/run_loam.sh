@@ -11,7 +11,7 @@ docker run \
 --rm \
 --name loam \
 --net=host \
--v ${A_LOAM_DIR}:/root/catkin_ws/src/A-LOAM/ \
+-v "$(readlink -f ${A_LOAM_DIR})":/root/catkin_ws/src/A-LOAM/ \
 ros:aloam-noetic \
 /bin/bash -c \
 "cd /root/catkin_ws/; \
