@@ -231,14 +231,14 @@ int main(int argc, char **argv)
             timeSurfPointsLessFlat = surfLessFlatBuf.front()->header.stamp.toSec();
             timeLaserCloudFullRes = fullPointsBuf.front()->header.stamp.toSec();
 
-            if (timeCornerPointsSharp != timeLaserCloudFullRes ||
-                timeCornerPointsLessSharp != timeLaserCloudFullRes ||
-                timeSurfPointsFlat != timeLaserCloudFullRes ||
-                timeSurfPointsLessFlat != timeLaserCloudFullRes)
-            {
-                printf("unsync messeage!");
-                ROS_BREAK();
-            }
+            // if (timeCornerPointsSharp != timeLaserCloudFullRes ||
+            //     timeCornerPointsLessSharp != timeLaserCloudFullRes ||
+            //     timeSurfPointsFlat != timeLaserCloudFullRes ||
+            //     timeSurfPointsLessFlat != timeLaserCloudFullRes)
+            // {
+            //     printf("unsync messeage!");
+            //     ROS_BREAK();
+            // }
 
             mBuf.lock();
             cornerPointsSharp->clear();

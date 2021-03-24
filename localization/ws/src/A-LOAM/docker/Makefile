@@ -10,7 +10,7 @@ help:
 	@echo ""
 
 build:
-	@docker build --tag ros:aloam -f ./Dockerfile ..
+	@docker build --tag ros:aloam-noetic -f ./Dockerfile ..
 
 clean:
-	@docker rmi -f ros:aloam
+	@docker rmi -f ros:aloam-noetic

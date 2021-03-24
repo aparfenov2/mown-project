@@ -41,7 +41,8 @@
 #include "aloam_velodyne/common.h"
 #include "aloam_velodyne/tic_toc.h"
 #include <nav_msgs/Odometry.h>
-#include <opencv/cv.h>
+// #include <opencv2/opencv.hpp>
+// #include <opencv/cv.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -128,13 +129,17 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
     TicToc t_prepare;
     std::vector<int> scanStartInd(N_SCANS, 0);
     std::vector<int> scanEndInd(N_SCANS, 0);
-
+    
+    // printf("received cloud\n");
     pcl::PointCloud<pcl::PointXYZ> laserCloudIn;
     pcl::fromROSMsg(*laserCloudMsg, laserCloudIn);
     std::vector<int> indices;
+    // printf("decoded cloud\n");
 
     pcl::removeNaNFromPointCloud(laserCloudIn, laserCloudIn, indices);
+    // printf("removed nans\n");
     removeClosedPointCloud(laserCloudIn, laserCloudIn, MINIMUM_RANGE);
+    // printf("removed closed\n");
 
 
     int cloudSize = laserCloudIn.points.size();
