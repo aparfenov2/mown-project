@@ -1,9 +1,9 @@
 <launch>
 
-  <include file="$(find aloam_velodyne)/launch/aloam_velodyne_HDL_32.launch">
+<!--   <include file="$(find aloam_velodyne)/launch/aloam_velodyne_HDL_32.launch">
     <arg name="rviz"          value="false" />
   </include>
-
+ -->
   <!-- Publish tf 'base_footprint' as pose.-->
   <node pkg="elevation_mapping_demos" type="tf_to_pose_publisher.py" name="waffle_pose_publisher">
     <param name="from_frame" type="string" value="odom" />
