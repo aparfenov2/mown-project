@@ -15,7 +15,7 @@
 
   <!-- Gazebo model spawner -->
   <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
-        args="-unpause -urdf -x 5.5 -y -5.7 -z 1.2 -param robot_description -model mobile_base"/>
+        args="-unpause -urdf -x 5.5 -y -5.7 -z 1.2 -Y 3.14 -param robot_description -model mobile_base"/>
 
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="30.0" />

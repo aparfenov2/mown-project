@@ -100,6 +100,6 @@ RUN apt-get update && apt-get install -y ros-noetic-joy ros-noetic-teleop-twist-
 
 # Additional ROS packages
 # RUN apt-get update && apt-get install -y ros-noetic-teleop-twist-keyboard ros-noetic-hector-models
-RUN apt-get update && apt-get install -y ros-noetic-velodyne-simulator
+# RUN apt-get update && apt-get install -y ros-noetic-velodyne-simulator
 
 # RUN apt-get update && apt-get install -y python3-pip
