@@ -1,0 +1,177 @@
+<?xml version="1.0" ?>
+<robot name="engix" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find engix_description)/urdf/materials.xacro" />
+<xacro:include filename="$(find engix_description)/urdf/engix.trans" />
+<xacro:include filename="$(find engix_description)/urdf/engix.gazebo" />
+  <link name="base_footprint"/>
+
+
+
+<joint name="base_joint" type="fixed">
+
+  <origin xyz="0 0 0.0102" rpy="0 0 0" />
+  <parent link="base_footprint"/>
+  <child link="base_link" />
+</joint>
+<link name="base_link">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.0025382796108358186 -0.004258964769025257 0.20035127231060307"/>
+    <mass value="18.77550264921881"/>
+    <inertia ixx="0.403326" ixy="-0.002814" ixz="-0.002231" iyy="0.251753" iyz="-0.005709" izz="0.321646"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="left_wheel">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.03585495907153588 5.607161351894874e-08 7.24121555087387e-06"/>
+    <mass value="0.9580193019383823"/>
+    <inertia ixx="0.002703" ixy="0.0" ixz="-0.0" iyy="0.001585" iyz="0.0" izz="0.001585"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.148896 0.1355 -0.079162"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/left_wheel.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.148896 0.1355 -0.079162"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/left_wheel.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="right_wheel">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.03585359188757131 -1.4858674346474032e-08 6.622358018945618e-06"/>
+    <mass value="0.9580297510218192"/>
+    <inertia ixx="0.002703" ixy="0.0" ixz="0.0" iyy="0.001585" iyz="0.0" izz="0.001585"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.148104 0.1355 -0.079162"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/right_wheel.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.148104 0.1355 -0.079162"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/right_wheel.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="ZED2">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.018001157946504642 -0.0005814546180888114 0.014361531099989666"/>
+    <mass value="1.195261039361359"/>
+    <inertia ixx="0.000179" ixy="-0.0" ixz="0.0" iyy="0.002923" iyz="0.0" izz="0.002942"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.008 -0.1745 -0.4957"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/ZED2.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="black"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.008 -0.1745 -0.4957"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/ZED2.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="right_caster">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.0006707901011975964 -0.010531204780533182 -0.03289263884489594"/>
+    <mass value="0.11890962334404172"/>
+    <inertia ixx="7.8e-05" ixy="0.0" ixz="0.0" iyy="6.3e-05" iyz="-1.5e-05" izz="3.2e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.086753 -0.15332 -0.072019"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/right_caster.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="blues"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.086753 -0.15332 -0.072019"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/right_caster.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="left_caster">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.0006707901011974993 -0.010531189107599204 -0.03289315182415704"/>
+    <mass value="0.11890962334404165"/>
+    <inertia ixx="7.8e-05" ixy="0.0" ixz="0.0" iyy="6.3e-05" iyz="-1.5e-05" izz="3.2e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.083247 -0.15332 -0.071999"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/left_caster.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="blues"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.083247 -0.15332 -0.071999"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/left_caster.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="left_wheel_joint" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.148896 -0.1355 0.079162"/>
+  <parent link="base_link"/>
+  <child link="left_wheel"/>
+  <axis xyz="-1.0 -0.0 -0.0"/>
+</joint>
+
+<joint name="right_wheel_joint" type="continuous">
+  <origin rpy="0 0 0" xyz="0.148104 -0.1355 0.079162"/>
+  <parent link="base_link"/>
+  <child link="right_wheel"/>
+  <axis xyz="-1.0 -0.0 -0.0"/>
+</joint>
+
+<joint name="zed" type="fixed">
+  <origin rpy="0 0 0" xyz="-0.008 0.1745 0.4957"/>
+  <parent link="base_link"/>
+  <child link="ZED2"/>
+</joint>
+
+<joint name="right_caster_joint" type="continuous">
+  <origin rpy="0 0 0" xyz="0.086753 0.15332 0.072019"/>
+  <parent link="base_link"/>
+  <child link="right_caster"/>
+  <axis xyz="-0.0 0.0 1.0"/>
+</joint>
+
+<joint name="left_caster_joint" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.083247 0.15332 0.071999"/>
+  <parent link="base_link"/>
+  <child link="left_caster"/>
+  <axis xyz="0.0 0.0 -1.0"/>
+</joint>
+
+</robot>

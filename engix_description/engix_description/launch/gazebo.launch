@@ -1,0 +1,38 @@
+<launch>
+
+  <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/>
+<!--
+  <node args="-param robot_description -urdf -model engix" name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"/>
+
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+    </include>
+
+  
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="30.0" />
+  </node> -->
+    <arg name="x" default="0"/>
+    <arg name="y" default="0"/>
+    <arg name="z" default="0.5"/>
+ 
+  <node name="mybot_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
+          args="-urdf -param robot_description -model rosbots -x $(arg x) -y $(arg y) -z $(arg z)" /> 
+
+
+
+
+
+
+
+
+
+
+
+</launch>
