@@ -35,6 +35,7 @@ PTH="ws/src/segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_0
 }
 
 bash _run_in_docker.sh --script $0 --name run_segmentation \
+    -v $(readlink -f ws):/cdir/ws \
     -v $(readlink -f ws/src/segmentation_node):/cdir/ws/src/segmentation_node \
     -v $(readlink -f deeplab/rgbd_dataset_freiburg3_long_office_household.bag):/cdir/ws/src/segmentation_node/bags/rgbd_dataset_freiburg3_long_office_household.bag \
     -v $(readlink -f kitti/kitti.bag):/cdir/ws/src/segmentation_node/bags/kitti.bag \
