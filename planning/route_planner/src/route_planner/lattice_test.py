@@ -7,12 +7,14 @@ Ref:
 - State Space Sampling of Feasible Motions for High-Performance Mobile Robot Navigation in Complex Environments http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.187.8210&rep=rep1&type=pdf
 """
 import itertools
+import heapq
 import os
 import sys
 from matplotlib import pyplot as plt
 import numpy as np
 import math
-from pycubicspline.pycubicspline import *
+from sklearn.neighbors import KDTree
+from pycubicspline import *
 
 
 def calc_2d_spline_interpolation(x, y, num=100):
@@ -152,6 +154,8 @@ def find_nearest_idx(array, value):
     return idx
 
 
+eps = 1e-5
+
 class Trajectory(object):
     def __init__(self, points):
         self.points = list()
@@ -177,14 +181,34 @@ class Trajectory(object):
 
             self.points.extend([start_loc_2, end_loc_2, end_loc])
 
+        self.x_spline, self.y_spline, self.yaw, self.k, self.travel = None, None, None, None, None
         # self.points = points
 
     def get_trajectory(self):
+        if self.x_spline is None:
+            self.calc_trajctory()
+
+        return self.x_spline, self.y_spline
+
+    def calc_trajctory(self):
         x = [p[0] for p in self.points]
         y = [p[1] for p in self.points]
 
-        x_spline, y_spline, yaw, k, travel = calc_2d_spline_interpolation(x, y)
-        return x_spline, y_spline
+        x_spline, y_spline, yaw, k, travel = calc_2d_spline_interpolation(x, y, num=10)
+        self.x_spline, self.y_spline, self.yaw, self.k, self.travel = x_spline, y_spline, yaw, k, travel
+        self.path = np.column_stack((self.x_spline, self.y_spline))
+        # self.path = zip(self.x_spline, self.y_spline)
+
+    def get_travel_score(self):
+        return np.linalg.norm(np.array(self.travel)) + eps
+
+    def get_distance_to_path_score(self, target_path):
+        tree = KDTree(self.path)
+        neighbor_dists, neighbor_indices = tree.query(target_path)
+        return np.sum(neighbor_dists) + eps
+
+    def get_curvature_score(self):
+        return np.sum(np.fabs(self.k)) + eps
 
 
 class LocalTrajectoryGenerator(object):
@@ -211,6 +235,24 @@ class LocalTrajectoryGenerator(object):
         trajectories = self.calc_trajectories(robot_pos, n_subpoints, n_next_subpoints)
 
         self.plot(path, robot_pos, trajectories)
+
+        best_trajectory = self.get_best_one(trajectories, path)
+        self.plot(path, robot_pos, [best_trajectory])
+
+
+    def get_best_one(self, trajectories, target_path):
+        scores = []
+        for trajectory in trajectories:
+            ts = trajectory.get_travel_score()
+            ds = trajectory.get_distance_to_path_score(target_path)
+            cs = trajectory.get_curvature_score()
+
+            heapq.heappush(scores, (ts * ds * cs, trajectory))
+
+        print([score[0] for score in scores])
+
+        return scores[0][1]
+
 
     def plot(self, path, robot_pos, trajectories):
         plt.plot(path[:, 0], path[:, 1], 'x', label='Path')
@@ -343,11 +385,9 @@ class LocalTrajectoryGenerator(object):
 
 
 
-
-
 if __name__ == '__main__':
     import random
-    path = np.array([[float(i) + 0.5 * random.random(), 0.0 + 0.5 * random.random()] for i in range(-1, 10)])
+    path = np.array([[float(i), 0.0] for i in range(-1, 10)])
     rob_pos = np.array([1.5, 1.1, -0.50])
     LocalTrajectoryGenerator().find_loc_trajectory(path, rob_pos)
     # generate_trajectories(np.array([0., 0., np.deg2rad(10)]), np.array([10., 0., np.deg2rad(-10)]), 1.5, 4)
