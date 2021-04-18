@@ -1,0 +1,6 @@
+<launch>
+    <arg name="model" default="default" />
+    <rosparam file="$(find state_tracker2)/params/$(arg model).yaml" command="load" ns='StateTracker2Node'/>
+
+    <node name="StateTracker2Node" pkg="state_tracker2" type="run.py" respawn="true" respawn_delay="5"/>
+</launch>

@@ -384,10 +384,13 @@ class LocalTrajectoryGenerator(object):
         pass
 
 
-
-if __name__ == '__main__':
+def main():
     import random
     path = np.array([[float(i), 0.0] for i in range(-1, 10)])
     rob_pos = np.array([1.5, 1.1, -0.50])
     LocalTrajectoryGenerator().find_loc_trajectory(path, rob_pos)
+
+
+if __name__ == '__main__':
+    main()
     # generate_trajectories(np.array([0., 0., np.deg2rad(10)]), np.array([10., 0., np.deg2rad(-10)]), 1.5, 4)
