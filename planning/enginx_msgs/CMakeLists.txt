@@ -7,11 +7,6 @@ project(enginx_msgs)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-    std_msgs
-    geometry_msgs
-    message_generation
-)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -20,8 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-catkin_python_setup()
-roslaunch_add_file_check(launch)
+# catkin_python_setup()
+# roslaunch_add_file_check(launch)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -49,10 +44,13 @@ roslaunch_add_file_check(launch)
 
 ## Generate messages in the 'msg' folder
 add_message_files(
+  DIRECTORY msg
   FILES
   GlobalTask.msg
   Route.msg
   Localization.msg
+  LocalTrajectoryStamped.msg
+  PointWithSpeed.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -104,12 +102,24 @@ add_message_files(
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES driver
-#  CATKIN_DEPENDS other_catkin_pkg
- #DEPENDS geometry_msgs
+# catkin_package(
+# #  INCLUDE_DIRS include
+# #  LIBRARIES driver
+# #  CATKIN_DEPENDS other_catkin_pkg
+#  #DEPENDS geometry_msgs
+# )
+
+find_package(catkin REQUIRED COMPONENTS
+    std_msgs
+    geometry_msgs
+    message_generation
 )
+
+generate_messages(DEPENDENCIES std_msgs geometry_msgs)
+
+catkin_package(CATKIN_DEPENDS message_runtime std_msgs geometry_msgs)
+
+
 
 ###########
 ## Build ##
@@ -195,4 +205,4 @@ catkin_package(
 # endif()
 
 ## Add folders to be run by python nosetests
-catkin_add_nosetests(test)
+# catkin_add_nosetests(test)

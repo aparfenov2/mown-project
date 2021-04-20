@@ -1,3 +1,5 @@
+import traceback
+
 import rospy
 
 
@@ -15,8 +17,10 @@ class AbstractNode(object):
             try:
                 self.work()
                 self._sleep.sleep()
-            except Exception as e:
-                pass
+            except Exception:
+                rospy.logerr("Got error while RUN:\n{0}".format(
+                    traceback.format_exc()
+                ))
 
     def work(self):
         pass

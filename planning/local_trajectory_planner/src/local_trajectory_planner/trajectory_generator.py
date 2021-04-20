@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import math
 from sklearn.neighbors import KDTree
-from pycubicspline import *
+from .pycubicspline import *
 
 
 def calc_2d_spline_interpolation(x, y, num=100):
@@ -180,7 +180,7 @@ class Trajectory(object):
             end_loc_2 = end_loc + np.dot(R2, de)
 
             self.points.extend([start_loc_2, end_loc_2, end_loc])
-
+        self.path = None
         self.x_spline, self.y_spline, self.yaw, self.k, self.travel = None, None, None, None, None
         # self.points = points
 
@@ -210,6 +210,13 @@ class Trajectory(object):
     def get_curvature_score(self):
         return np.sum(np.fabs(self.k)) + eps
 
+    def get_poses(self):
+        poses = list()
+        for x, y, yaw in zip(self.x_spline, self.y_spline, self.yaw):
+            poses.append((x, y, yaw))
+
+        return poses
+
 
 class LocalTrajectoryGenerator(object):
     def __init__(self):
@@ -234,10 +241,11 @@ class LocalTrajectoryGenerator(object):
 
         trajectories = self.calc_trajectories(robot_pos, n_subpoints, n_next_subpoints)
 
-        self.plot(path, robot_pos, trajectories)
+        # self.plot(path, robot_pos, trajectories)
 
         best_trajectory = self.get_best_one(trajectories, path)
-        self.plot(path, robot_pos, [best_trajectory])
+        return best_trajectory.get_poses()
+        # self.plot(path, robot_pos, [best_trajectory])
 
 
     def get_best_one(self, trajectories, target_path):
@@ -249,7 +257,7 @@ class LocalTrajectoryGenerator(object):
 
             heapq.heappush(scores, (ts * ds * cs, trajectory))
 
-        print([score[0] for score in scores])
+        # print([score[0] for score in scores])
 
         return scores[0][1]
 
