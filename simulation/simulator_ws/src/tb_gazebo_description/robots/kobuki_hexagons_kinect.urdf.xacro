@@ -19,10 +19,16 @@
     <origin xyz="0.00 0.00 0.20" rpy="0 0 0"/>
   </xacro:hokuyo_utm30lx>
  -->  
+<!-- 
   <xacro:include filename="$(find velodyne_description)/urdf/HDL-32E.urdf.xacro"/>
   <xacro:HDL-32E parent="base_link" name="velodyne" topic="/velodyne_points" hz="10" samples="440" gpu="${gpu}">
     <origin xyz="0 0 0.4" rpy="0 0 0" />
   </xacro:HDL-32E>
+ -->
+  <xacro:include filename="$(find ce30c_driver)/urdf/CE30C.urdf.xacro"/>
+  <xacro:CE30-C parent="base_link" name="velodyne" topic="/velodyne_points" hz="10" samples="440" gpu="${gpu}">
+    <origin xyz="0 0 0.4" rpy="0 0 0" />
+  </xacro:CE30-C>
 
   <xacro:kobuki/>
   <xacro:stack_hexagons parent="base_link"/>

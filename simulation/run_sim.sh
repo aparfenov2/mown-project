@@ -19,7 +19,10 @@ cd velodyne_simulator
 git checkout 1.0.9
 popd
 
-bash _run_in_docker.sh --script $0 --name gazebo_sim 
+bash _run_in_docker.sh \
+    --name gazebo_sim \
+    --volume $(readlink -f simulator_ws/src/benewake_ce30c):/cdir/simulator_ws/src/benewake_ce30c \
+    --script $0
     # -v $(readlink -f simulator_ws/src/tb_gazebo):/cdir/simulator_ws/src/tb_gazebo \
     # -v $(readlink -f simulator_ws/src/tb_gazebo_description):/cdir/simulator_ws/src/tb_gazebo_description \
     # -v $(readlink -f simulator_ws/src/tb_gazebo_msgs):/cdir/simulator_ws/src/tb_gazebo_msgs \
