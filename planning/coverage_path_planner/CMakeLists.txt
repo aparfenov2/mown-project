@@ -50,6 +50,7 @@ roslaunch_add_file_check(launch)
 
 ## Generate messages in the 'msg' folder
 add_message_files(
+  DIRECTORY msg
   FILES
   CoveragePathRequest.msg
   CoveragePathResponse.msg
@@ -57,6 +58,7 @@ add_message_files(
 
 ## Generate services in the 'srv' folder
 add_service_files(
+  DIRECTORY srv
   FILES
   CoveragePathSrv.srv
 )
@@ -103,12 +105,21 @@ add_service_files(
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES driver
-#  CATKIN_DEPENDS other_catkin_pkg
- #DEPENDS geometry_msgs
+# catkin_package(
+# #  INCLUDE_DIRS include
+# #  LIBRARIES driver
+# #  CATKIN_DEPENDS other_catkin_pkg
+#  #DEPENDS geometry_msgs
+# )
+
+find_package(catkin REQUIRED COMPONENTS
+    geometry_msgs
+    message_generation
 )
+
+generate_messages(DEPENDENCIES geometry_msgs)
+
+catkin_package(CATKIN_DEPENDS message_runtime geometry_msgs)
 
 ###########
 ## Build ##

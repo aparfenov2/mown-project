@@ -213,5 +213,5 @@ if __name__ == '__main__':
     plt.gca().set_aspect('equal', adjustable='box')
     plt.rcParams['figure.figsize'] = [50, 50]
     plt.show()
-list(ll.coords)
-print(ll)
+    list(ll.coords)
+    print(ll)

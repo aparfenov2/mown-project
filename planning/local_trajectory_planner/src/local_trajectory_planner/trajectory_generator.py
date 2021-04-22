@@ -150,7 +150,11 @@ def generate_trajectories(robot_pos, target_pos, point_dist, point_count):
 
 def find_nearest_idx(array, value):
     array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
+    idx = (np.linalg.norm(array - value, axis=1)).argmin()
+    # print(idx)
+    # print(np.linalg.norm(array - value, axis=1))
+    # print(np.linalg.norm(array - value, axis=0))
+    # raise
     return idx
 
 
@@ -286,6 +290,7 @@ class LocalTrajectoryGenerator(object):
         for comb in itertools.product([rob_pos], n_subpoints, n_next_subpoints):
             t = Trajectory(comb)
             trajectories.append(t)
+            t.calc_trajctory()
         return trajectories
 
 
@@ -300,8 +305,6 @@ class LocalTrajectoryGenerator(object):
 
         n1 = None
         n2 = None
-
-        print(path_len, robot_nearest_point)
 
         if robot_nearest_point == (path_len - 1):
             return point_index, None

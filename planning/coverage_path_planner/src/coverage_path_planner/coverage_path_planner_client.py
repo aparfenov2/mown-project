@@ -1,5 +1,5 @@
 import rospy
-from coverage_path_planner.msgs import CoveragePathRequest, CoveragePathResponse
+from coverage_path_planner.msg import CoveragePathRequest, CoveragePathResponse
 from coverage_path_planner.srv import CoveragePathSrv
 
 

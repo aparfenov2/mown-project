@@ -42,7 +42,6 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
-  <depend>pynmea2</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -39,14 +39,14 @@ class LocalTrajectoryPlanner(AbstractNode):
         message = LocalTrajectoryStamped()
         message.header.stamp = rospy.get_rostime()
         
-        route = list()
+        route = message.route
         for point in local_trajectory:
             route.append(Pose2D(
                 x=point[0],
                 y=point[1],
                 theta=point[2]
             ))
-        return route
+        return message
 
     def __send_local_trajectory(self, local_trajectory):
         route = self.__create_LocalTrajectoryStamped(local_trajectory)
@@ -60,11 +60,13 @@ class LocalTrajectoryPlanner(AbstractNode):
     def __route_callback(self, message):
         self.print_err("ROUTE CALLBACK {0}", message)
         with self.lock:
-            route_len = len(message.route)
-            self.route = np.zeros((route_len, 2))
+            # route_len = len(message.route)
+            # self.route = np.zeros((route_len, 2))
 
-            for i, point in enumerate(message.route):
-                self.route[i, :] = np.array([point.x, point.y])
+            # for i, point in enumerate(message.route):
+            #     self.route[i, :] = np.array([point.x, point.y])
+
+            self.route = np.array([[p.x, p.y] for p in message.route])
 
     def print_err(self, print_format, *args, **kwargs):
         rospy.logerr(print_format.format(*args, **kwargs))

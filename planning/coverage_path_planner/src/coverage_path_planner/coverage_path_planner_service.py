@@ -1,22 +1,25 @@
+import numpy as np
 import rospy
 
 from abstractnode import AbstractNode
-from geometry_msgs.msgs import Point32
-from nav_msgs.msgs import Path
-from coverage_path_planner.msgs import CoveragePathRequest, CoveragePathResponse
+from geometry_msgs.msg import Point32
+from nav_msgs.msg import Path
+from coverage_path_planner.msg import CoveragePathRequest, CoveragePathResponse
 from coverage_path_planner.srv import CoveragePathSrv
 from coverage_path_planner.area_polygon import AreaPolygon
 
 
 class CoveragePathPlannerNode(AbstractNode):
     def initialization(self):
-        s = rospy.Service('coverage_path_request', CoveragePathSrv, self.handle_coverage_path_request)
+        self.s = rospy.Service('coverage_path_request', CoveragePathSrv, self.handle_coverage_path_request)
 
         self.ft = 0.2
 
     def handle_coverage_path_request(self, message):
-        polygon = message.area_polygon
-        source_point = message.source_point
+        message = message.request
+        print(message.polygon)
+        polygon = message.polygon
+        source_point = np.array([message.source_point.x, message.source_point.y])
 
         polygon_list = [(point.x, point.y) for point in polygon.points]
 
@@ -35,6 +38,6 @@ class CoveragePathPlannerNode(AbstractNode):
             ppoint.y = point[1]
             resp.path.append(ppoint)
         
-        resp.response = resp
+        # resp.response = resp
 
         return resp
