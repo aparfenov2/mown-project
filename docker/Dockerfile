@@ -46,10 +46,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # setup entrypoint
-COPY ./ros_entrypoint.sh /
+# COPY ./ros_entrypoint.sh /
 
-ENTRYPOINT ["/ros_entrypoint.sh"]
-CMD ["bash"]
+# ENTRYPOINT ["/ros_entrypoint.sh"]
+# CMD ["bash"]
 
 # ------- ROS base --------
 # install bootstrap tools
@@ -96,20 +96,57 @@ RUN apt-get update && apt-get install -y ros-noetic-joy ros-noetic-teleop-twist-
 
 # RUN apt install -y ros-noetic-turtlebot3-msgs
 # RUN apt install -y ros-noetic-turtlebot3
+# RUN apt install -y ros-noetic-turtlebot3-simulations
 
 
 # Additional ROS packages
 # RUN apt-get update && apt-get install -y ros-noetic-teleop-twist-keyboard ros-noetic-hector-models
-RUN apt-get update && apt-get install -y ros-noetic-velodyne-simulator
+# RUN apt-get update && apt-get install -y ros-noetic-velodyne-simulator
+
+# ANYbotics/elevation_mapping
+RUN apt-get update && apt-get install -y ros-noetic-octomap-msgs
+
 # kitti_to_rosbag
 RUN apt-get update && apt-get install -y libgflags-dev libgoogle-glog-dev
 RUN apt-get update && apt-get install -y libtool libtool-bin
 
-# RUN apt-get update && apt-get install -y python3-pip
+RUN apt-get update && apt-get install -y python3-pip
 
-# ANYbotics/elevation_mapping
-RUN apt-get update && apt-get install -y ros-noetic-octomap-msgs
-RUN apt install -y ros-noetic-turtlebot3-msgs
-RUN apt install -y ros-noetic-turtlebot3
-RUN apt install -y ros-noetic-turtlebot3-simulations
-RUN ln -s /usr/bin/python3 /usr/bin/python
+# pytorch
+RUN pip3 install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
+
+# mmsegmentation
+# RUN pip3 install mmcv-full==latest+torch1.6.0+cu101 -f https://download.openmmlab.com/mmcv/dist/index.html
+RUN pip3 install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html
+RUN git clone https://github.com/open-mmlab/mmsegmentation.git /mmsegmentation
+WORKDIR /mmsegmentation
+RUN pip3 install -r requirements/readthedocs.txt
+# RUN pip3 install -r requirements/runtime.txt
+RUN pip3 install --no-cache-dir -e .
+
+
+# A-LOAM
+ENV CERES_VERSION="1.12.0"
+ENV PCL_VERSION="1.8.0"
+ENV CATKIN_WS=/root/catkin_ws
+
+    # setup processors number used to compile library
+RUN if [ "x$(nproc)" = "x1" ] ; then export USE_PROC=1 ; else export USE_PROC=$(($(nproc)/2)) ; fi && \
+    # Install dependencies
+      apt-get update && apt-get install -y \
+      cmake \
+      git \
+      gdb \
+      libpcl-dev \
+      libceres-dev \
+      libgoogle-glog-dev \
+      libopencv-dev \
+      python3-catkin-tools \
+      ros-${ROS_DISTRO}-cv-bridge \
+      ros-${ROS_DISTRO}-image-transport \
+      ros-${ROS_DISTRO}-message-filters \
+      ros-${ROS_DISTRO}-tf \
+      python3-catkin-lint python3-pip
+
+RUN pip3 install osrf-pycommon
+
