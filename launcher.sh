@@ -8,8 +8,9 @@ while [[ "$#" -gt 0 ]]; do
         --rviz) RVIZ=1 ;;
         --teleop) TELEOP=1 ;;
         --roscore) ROSCORE=1 ;;
+        ---roscore) ROSCORE="" ;;
         --segm) SEGMENTATION=1 ;;
-        --segm_true) SEGMENTATION_BYPASS="" ;;
+        ---segm_bypass) SEGMENTATION_BYPASS="" ;;
         --proj) PROJECTION=1 ;;
         --loca) LOCALIZATION=1 ;;
         --sim_basic) SIM=1; RVIZ=1; TELEOP=1; ;;
