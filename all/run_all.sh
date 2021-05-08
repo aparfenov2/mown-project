@@ -2,6 +2,7 @@
 SEGMENTATION_BYPASS=1
 ROSCORE=1
 ALL_ARGS=("$@")
+CONTAINER_NAME="all"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -12,6 +13,7 @@ while [[ "$#" -gt 0 ]]; do
         --roscore) ROSCORE=1 ;;
         ---roscore) ROSCORE="" ;;
         --segm) SEGMENTATION=1; ;;
+        --name) CONTAINER_NAME="$2"; shift; ;;
         ---segm_bypass) SEGMENTATION_BYPASS=""; ;;
         --proj) PROJECTION=1; ;;
         --loca) LOCALIZATION=1; ;;
@@ -98,6 +100,7 @@ VOLUMES=()
 for f in $(find ws/src -type l); do
     VOLUMES+=("-v $(readlink -f $f):/cdir/$f")
 done
-bash _run_in_docker.sh --script $0 --name all \
+
+bash _run_in_docker.sh --script $0 --name ${CONTAINER_NAME} \
     ${VOLUMES[@]} \
     ${ALL_ARGS[@]}
