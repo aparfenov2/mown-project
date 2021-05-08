@@ -7,6 +7,7 @@
     <arg name="segm" default="false" />
     <arg name="segm_bypass" default="false" />
     <arg name="proj" default="false" />
+    <arg name="mb_mod" default="false" />
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -46,6 +47,15 @@
 <!-- proj -->
     <group if="$(arg proj)">
         <include file="$(find projection_node)/launch/segmentation_input.launch"/>
+    </group>
+
+<!-- move_base_mod -->
+    <group if="$(arg mb_mod)">
+        <include file="$(find move_base_mod)/launch/move_base.launch">
+            <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
+            <arg name="odom_topic" value="odom" />
+            <arg name="simple_goal_topic" value="move_base_simple/goal" />
+        </include>
     </group>
 
 </launch>

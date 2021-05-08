@@ -12,6 +12,7 @@ while [[ "$#" -gt 0 ]]; do
         --roscore) ROSCORE=1 ;;
         ---roscore) ROSCORE="" ;;
         --segm) SEGMENTATION=1; ;;
+        --mb_mod) MOVE_BASE_MOD=1; ;;
         ---segm_bypass) SEGMENTATION_BYPASS=""; ;;
         --proj) PROJECTION=1; ;;
         --loca) LOCALIZATION=1; ;;
@@ -30,6 +31,7 @@ ROSARGS=()
 [ -n "$SEGMENTATION_BYPASS" ] && ROSARGS+=("segm_bypass:=true")
 [ -n "$PROJECTION" ] && ROSARGS+=("proj:=true")
 [ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true")
+[ -n "$MOVE_BASE_MOD" ] && ROSARGS+=("mb_mod:=true")
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
@@ -98,6 +100,12 @@ VOLUMES=()
 for f in $(find ws/src -type l); do
     VOLUMES+=("-v $(readlink -f $f):/cdir/$f")
 done
-bash _run_in_docker.sh --script $0 --name all \
+
+_NAME="all"
+[ -n "$TELEOP" ] && {
+    _NAME="teleop"
+}
+
+bash _run_in_docker.sh --script $0 --name ${_NAME} \
     ${VOLUMES[@]} \
     ${ALL_ARGS[@]}
