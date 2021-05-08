@@ -55,7 +55,7 @@ namespace move_base_mod {
         blp_loader_("nav_core", "nav_core::BaseLocalPlanner"),
         new_global_plan_(false) {
 
-            as_ = new MoveBaseActionServer(ros::NodeHandle(), "move_base", boost::bind( & MoveBase::executeCb, this, _1), false);
+            as_ = new MoveBaseActionServer(ros::NodeHandle(), "move_base_mod", boost::bind( & MoveBase::executeCb, this, _1), false);
 
             ros::NodeHandle private_nh("~");
             ros::NodeHandle nh;
@@ -71,14 +71,14 @@ namespace move_base_mod {
             vel_pub_ = nh.advertise < geometry_msgs::Twist > ("cmd_vel", 1);
             // current_path_pub_ = private_nh.advertise<geometry_msgs::PoseStamped>("current_path", 0 );
 
-            ros::NodeHandle action_nh("move_base_mod");
-            action_goal_pub_ = action_nh.advertise < move_base_mod::TrajectoryControllerGoal > ("goal", 1);
+            // ros::NodeHandle action_nh("move_base_mod");
+            // action_goal_pub_ = action_nh.advertise < move_base_mod::TrajectoryControllerGoal > ("goal", 1);
 
             //we'll provide a mechanism for some people to send goals as PoseStamped messages over a topic
             //they won't get any useful information back about its status, but this is useful for tools
             //like nav_view and rviz
-            ros::NodeHandle simple_nh("move_base_mod_simple");
-            goal_sub_ = simple_nh.subscribe < geometry_msgs::PoseStamped > ("goal", 1, boost::bind( & MoveBase::goalCB, this, _1));
+            // ros::NodeHandle simple_nh("move_base_mod_simple");
+            // goal_sub_ = simple_nh.subscribe < geometry_msgs::PoseStamped > ("goal", 1, boost::bind( & MoveBase::goalCB, this, _1));
 
             //create the ros wrapper for the controller's costmap... and initializer a pointer we'll use with the underlying map
             controller_costmap_ros_ = new costmap_2d::Costmap2DROS("local_costmap", tf_);
@@ -104,19 +104,19 @@ namespace move_base_mod {
             // dsrv_->setCallback(cb);
         }
 
-    void MoveBase::goalCB(const geometry_msgs::PoseStamped::ConstPtr & goal) {
-        ROS_DEBUG_NAMED("move_base", "In ROS goal callback, wrapping the PoseStamped in the action message and re-sending to the server.");
-        move_base_mod::TrajectoryControllerGoal action_goal;
-        geometry_msgs::PoseStamped target_pose = * goal;
+    // void MoveBase::goalCB(const geometry_msgs::PoseStamped::ConstPtr & goal) {
+    //     ROS_DEBUG_NAMED("move_base", "In ROS goal callback, wrapping the PoseStamped in the action message and re-sending to the server.");
+    //     move_base_mod::TrajectoryControllerGoal action_goal;
+    //     geometry_msgs::PoseStamped target_pose = * goal;
 
-        target_pose.header.stamp = ros::Time::now();
-        std::vector < geometry_msgs::PoseStamped > path;
-        // TODO: make path from goal
-        path.push_back(target_pose);
-        action_goal.poses = path;
+    //     target_pose.header.stamp = ros::Time::now();
+    //     std::vector < geometry_msgs::PoseStamped > path;
+    //     // TODO: make path from goal
+    //     path.push_back(target_pose);
+    //     action_goal.poses = path;
 
-        action_goal_pub_.publish(action_goal);
-    }
+    //     action_goal_pub_.publish(action_goal);
+    // }
 
     MoveBase::~MoveBase() {
 

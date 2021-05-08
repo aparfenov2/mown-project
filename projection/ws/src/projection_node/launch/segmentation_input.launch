@@ -1,5 +1,7 @@
 <launch>
 
+    <arg name="output" default="screen" />
+
 <!--   <include file="$(find aloam_velodyne)/launch/aloam_velodyne_HDL_32.launch">
     <arg name="rviz"          value="false" />
   </include>
@@ -11,7 +13,7 @@
   </node>
   
   <!-- Launch elevation mapping node. -->
-  <node pkg="elevation_mapping" type="elevation_mapping" name="elevation_mapping" output="screen">
+  <node pkg="elevation_mapping" type="elevation_mapping" name="elevation_mapping" output="$(arg output)">
     <rosparam command="load" file="$(find projection_node)/config/waffle_robot.yaml" />
     <rosparam command="load" file="$(find elevation_mapping)/config/sensor_processors/perfect.yaml" />
     <rosparam command="load" file="$(find elevation_mapping_demos)/config/postprocessing/postprocessor_pipeline.yaml" />

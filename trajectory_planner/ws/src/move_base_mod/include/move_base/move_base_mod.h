@@ -74,7 +74,7 @@ private:
 
     void resetState();
 
-    void goalCB(const geometry_msgs::PoseStamped::ConstPtr& goal);
+    // void goalCB(const geometry_msgs::PoseStamped::ConstPtr& goal);
 
     void executeCb(const move_base_mod::TrajectoryControllerGoalConstPtr& move_base_goal);
 
@@ -97,8 +97,8 @@ private:
     std::string robot_base_frame_, global_frame_;
 
     double controller_frequency_;
-    ros::Publisher vel_pub_, action_goal_pub_;
-    ros::Subscriber goal_sub_;
+    ros::Publisher vel_pub_;
+    // ros::Subscriber goal_sub_;
     pluginlib::ClassLoader<nav_core::BaseLocalPlanner> blp_loader_;
     bool new_global_plan_;
 };
