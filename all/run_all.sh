@@ -53,6 +53,8 @@ ROSARGS=()
     exit 0
 }
 
+git submodule update --init --recursive
+
 # setup dependencies
 pushd $PWD
 cd ws/src

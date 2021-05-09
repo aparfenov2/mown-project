@@ -5,7 +5,7 @@ Installation:
 Clone the repository
 ! contains submodules
 git submodule update --init --recursive
-
+! this command is also included in all/run_all.sh
 
 Start up:
 -----------------------
