@@ -4,15 +4,15 @@ devel
 logs
 
 # aloam, segm
-src/catkin_simple
+# src/catkin_simple
 src/CMakeLists.txt
 
 # projection
-src/elevation_mapping
-src/grid_map
-src/kindr
-src/kindr_ros
+# src/elevation_mapping
+# src/grid_map
+# src/kindr
+# src/kindr_ros
 
 # sim
-src/velodyne_simulator
+# src/velodyne_simulator
 
