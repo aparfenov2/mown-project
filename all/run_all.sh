@@ -56,19 +56,19 @@ ROSARGS=()
 # setup dependencies
 pushd $PWD
 cd ws/src
-# sim
-[ -d "velodyne_simulator" ] || {
-    git clone https://bitbucket.org/DataspeedInc/velodyne_simulator.git
-}
-pushd $PWD
-cd velodyne_simulator
-git checkout 1.0.9
-popd
+# # sim
+# [ -d "velodyne_simulator" ] || {
+#     git clone https://bitbucket.org/DataspeedInc/velodyne_simulator.git
+# }
+# pushd $PWD
+# cd velodyne_simulator
+# git checkout 1.0.9
+# popd
 
-# segm
-[ -d "catkin_simple" ] || {
-    git clone git@github.com:catkin/catkin_simple.git
-}
+# # segm
+# [ -d "catkin_simple" ] || {
+#     git clone git@github.com:catkin/catkin_simple.git
+# }
 PTH="segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth"
 [ -n "${SEGMENTATION_BYPASS}" ] && {
     [ -f "$PTH" ] || {
@@ -76,25 +76,25 @@ PTH="segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-9
     }
 }
 
-# loca
-[ -d "A-LOAM" ] || {
-    git clone https://github.com/HKUST-Aerial-Robotics/A-LOAM.git
-    # echo make build > A-LOAM/docker/build.sh
-}
+# # loca
+# [ -d "A-LOAM" ] || {
+#     git clone https://github.com/HKUST-Aerial-Robotics/A-LOAM.git
+#     # echo make build > A-LOAM/docker/build.sh
+# }
 
-# proj
-[ -d "elevation_mapping" ] || {
-    git clone git@github.com:ANYbotics/elevation_mapping.git
-}
-[ -d "grid_map" ] || {
-    git clone git@github.com:ANYbotics/grid_map.git
-}
-[ -d "kindr" ] || {
-    git clone git@github.com:ANYbotics/kindr.git
-}
-[ -d "kindr_ros" ] || {
-    git clone git@github.com:ANYbotics/kindr_ros.git
-}
+# # proj
+# [ -d "elevation_mapping" ] || {
+#     git clone git@github.com:ANYbotics/elevation_mapping.git
+# }
+# [ -d "grid_map" ] || {
+#     git clone git@github.com:ANYbotics/grid_map.git
+# }
+# [ -d "kindr" ] || {
+#     git clone git@github.com:ANYbotics/kindr.git
+# }
+# [ -d "kindr_ros" ] || {
+#     git clone git@github.com:ANYbotics/kindr_ros.git
+# }
 
 popd
 
