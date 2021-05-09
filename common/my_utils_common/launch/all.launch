@@ -7,6 +7,7 @@
     <arg name="segm" default="false" />
     <arg name="segm_bypass" default="false" />
     <arg name="proj" default="false" />
+    <arg name="mb_mod" default="false" />
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -37,6 +38,7 @@
     <group if="$(arg loca)">
         <include file="$(find aloam_velodyne)/launch/aloam_velodyne_HDL_32.launch">
             <arg name="rviz" value="false" />
+            <arg name="output" value="log" />
         </include>
 
         <node pkg="tf" type="static_transform_publisher" name="odom_to_camera_init" args="0 0 0 0 0 0 1 odom camera_init 100" />
@@ -45,7 +47,22 @@
 
 <!-- proj -->
     <group if="$(arg proj)">
-        <include file="$(find projection_node)/launch/segmentation_input.launch"/>
+        <include file="$(find projection_node)/launch/segmentation_input.launch">
+            <!-- <arg name="output" value="log" /> -->
+        </include>
+    </group>
+
+<!-- move_base_mod -->
+    <group if="$(arg mb_mod)">
+        <include file="$(find move_base_mod)/launch/move_base.launch">
+            <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
+            <arg name="odom_topic" value="odom" />
+        </include>
+
+        <node name="simple_planner" pkg="simple_planner" type="simple_planner.py" output="screen">
+            <remap from="goal" to="move_base_simple/goal"/>
+        </node>
+
     </group>
 
 </launch>

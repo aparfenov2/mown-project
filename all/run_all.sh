@@ -13,6 +13,7 @@ while [[ "$#" -gt 0 ]]; do
         --roscore) ROSCORE=1 ;;
         ---roscore) ROSCORE="" ;;
         --segm) SEGMENTATION=1; ;;
+        --mb_mod) MOVE_BASE_MOD=1; ;;
         --name) CONTAINER_NAME="$2"; shift; ;;
         ---segm_bypass) SEGMENTATION_BYPASS=""; ;;
         --proj) PROJECTION=1; ;;
@@ -32,6 +33,7 @@ ROSARGS=()
 [ -n "$SEGMENTATION_BYPASS" ] && ROSARGS+=("segm_bypass:=true")
 [ -n "$PROJECTION" ] && ROSARGS+=("proj:=true")
 [ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true")
+[ -n "$MOVE_BASE_MOD" ] && ROSARGS+=("mb_mod:=true")
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
