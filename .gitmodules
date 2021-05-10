@@ -1,18 +1,18 @@
 [submodule "all/ws/src/catkin_simple"]
-	path = all/ws/src/catkin_simple
+	path = 3rd_party/catkin_simple
 	url = git@github.com:catkin/catkin_simple.git
 [submodule "all/ws/src/elevation_mapping"]
-	path = all/ws/src/elevation_mapping
+	path = 3rd_party/elevation_mapping
 	url = git@github.com:ANYbotics/elevation_mapping.git
 [submodule "all/ws/src/grid_map"]
-	path = all/ws/src/grid_map
+	path = 3rd_party/grid_map
 	url = git@github.com:ANYbotics/grid_map.git
 [submodule "all/ws/src/kindr"]
-	path = all/ws/src/kindr
+	path = 3rd_party/kindr
 	url = git@github.com:ANYbotics/kindr.git
 [submodule "all/ws/src/kindr_ros"]
-	path = all/ws/src/kindr_ros
+	path = 3rd_party/kindr_ros
 	url = git@github.com:ANYbotics/kindr_ros.git
 [submodule "all/ws/src/velodyne_simulator"]
-	path = all/ws/src/velodyne_simulator
+	path = 3rd_party/velodyne_simulator
 	url = https://bitbucket.org/DataspeedInc/velodyne_simulator.git
