@@ -1,0 +1,6 @@
+string GO_TO_POSE_TASK=go_to_pose
+string EXPLORE_POLYGON_TASK=polygon_task
+
+string task_type
+geometry_msgs/Pose target_pose
+geometry_msgs/Polygon target_polygon

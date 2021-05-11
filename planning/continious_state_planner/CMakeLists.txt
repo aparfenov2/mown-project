@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(enginx_msgs)
+project(coverage_path_planner)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -7,6 +7,12 @@ project(enginx_msgs)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+    roslaunch
+    std_msgs
+    geometry_msgs
+    message_generation
+    )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -15,8 +21,8 @@ project(enginx_msgs)
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
-# roslaunch_add_file_check(launch)
+catkin_python_setup()
+roslaunch_add_file_check(launch)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -46,21 +52,16 @@ project(enginx_msgs)
 add_message_files(
   DIRECTORY msg
   FILES
-  GlobalTask.msg
-  Route.msg
-  Localization.msg
-  LocalTrajectoryStamped.msg
-  PointWithSpeed.msg
-  RouteTask.msg
-  RouteTaskProgressEvent.msg
+  CoveragePathRequest.msg
+  CoveragePathResponse.msg
 )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  DIRECTORY srv
+  FILES
+  CoveragePathSrv.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -112,16 +113,13 @@ add_message_files(
 # )
 
 find_package(catkin REQUIRED COMPONENTS
-    std_msgs
     geometry_msgs
     message_generation
 )
 
-generate_messages(DEPENDENCIES std_msgs geometry_msgs)
+generate_messages(DEPENDENCIES geometry_msgs)
 
-catkin_package(CATKIN_DEPENDS message_runtime std_msgs geometry_msgs)
-
-
+catkin_package(CATKIN_DEPENDS message_runtime geometry_msgs)
 
 ###########
 ## Build ##

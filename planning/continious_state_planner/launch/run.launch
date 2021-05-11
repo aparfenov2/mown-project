@@ -1,0 +1,3 @@
+<launch>
+    <node name="ContiniousStatePlannerNode" pkg="continious_state_planner" type="main.py" respawn="true" respawn_delay="5" output="screen"/>
+</launch>
