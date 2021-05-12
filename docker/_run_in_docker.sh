@@ -85,4 +85,5 @@ docker run -ti --rm \
     -v ~/.gazebo/models:/root/.gazebo/models \
     ${VOLUMES[@]} \
     -w /cdir \
+    --entrypoint "" \
     $IMAGE bash /tmp/_outer.sh --inner "${OTHERS[@]}"
