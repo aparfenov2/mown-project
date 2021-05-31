@@ -5,6 +5,8 @@ import numpy as np
 from math import sqrt, sin, cos, pi, floor, radians, copysign
 from heapq import heappush, heappop
 import traceback
+
+from numpy.core.einsumfunc import _parse_possible_contraction
 # import gui
 # import common
 
@@ -64,6 +66,28 @@ optimal_path = []
 # --------------------------------------------------------------------------
 # Helper class for curved segments.
 # --------------------------------------------------------------------------
+class LineSegment:
+    @staticmethod
+    def end_pose(start_pose, direction, length):
+        """Returns end pose, given start pose, curvature and length."""
+        x, y, theta = start_pose
+            # Linear movement.
+        x += length * cos(direction)
+        y += length * sin(direction)
+        return (x, y, direction)
+
+    @staticmethod
+    def segment_points(start_pose, direction, length, delta_length):
+        """Return points of segment, at delta_length intervals."""
+        l = 0.0
+        delta_length = copysign(delta_length, length)
+        points = []
+        while abs(l) < abs(length):
+            points.append(LineSegment.end_pose(start_pose, direction, l)[0:2])
+            l += delta_length
+        return points
+
+
 class CurveSegment:
     @staticmethod
     def end_pose(start_pose, curvature, length):
@@ -78,7 +102,7 @@ class CurveSegment:
             # Curve segment of radius 1/curvature.
             tx = cos(theta)
             ty = sin(theta)
-            radius = 1.0/curvature
+            radius = 1.0 / curvature
             xc = x - radius * ty  # Center of circle.
             yc = y + radius * tx
             angle = length / radius
@@ -120,7 +144,8 @@ def states_close(p, q):
     d_angle = abs((p[2]-q[2]+pi) % (2*pi) - pi)
     # For the sake of simplicity, tolerances are hardcoded here:
     # 15 degrees for the heading angle, 2.0 for the position.
-    return d_angle < radians(15.) and distance(p, q) <= 2.0
+    # return d_angle < radians(15.) and distance(p, q) <= 1.0
+    return distance(p, q) <= 2.0
 
 def pose_index(pose):
     """Given a pose, returns a discrete version (a triple index)."""
@@ -136,8 +161,29 @@ def pose_index(pose):
 class AstarPathPlanner(object):
     def __init__(self):
         
-        self.movements = [(1.0/10, 5.0), (0.0, 5.0), (-1.0/10, 5.0),
-                          (1.0/10, -5.0), (0.0, -5.0), (-1.0/10, -5.0)]
+        self.STOP_SEARCH_FRONT_LEN = 5000000
+
+        # movements = []
+
+        # for i in range(11):
+        #     for l in [10.0, 100.0]:
+        #         c = (i - 5) / l
+        #         movements.append((c, 5.0))
+        #         movements.append((c, -5.0))
+        #         movements.append((c, 1.0))
+        #         movements.append((c, -1.0))
+
+        # self.movements = [(1.0/10, 5.0), (0.0, 1.0), (-1.0/10, 5.0),
+        #                   (1.0/10, -5.0), (0.0, -1.0), (-1.0/10, -5.0)]
+
+        movements = []
+
+        for i in [1.0, 5.0]:
+            # for direction in [0, np.pi / 4.0, np.pi / -4.0, np.pi / 2.0, np.pi / -2.0, np.pi * 3.0/ 4.0, np.pi * 3.0/ -4.0, np.pi]:
+            for direction in np.linspace(0.0, 2.0 * np.pi, num=20):
+                movements.append((direction, i))
+
+        self.movements = movements
 
     def astar_statespace(self, start_pose, goal_pose):
         """
@@ -160,7 +206,7 @@ class AstarPathPlanner(object):
 
         while front:
             # Stop search if the front gets too large.
-            if len(front) > 500000:
+            if len(front) > self.STOP_SEARCH_FRONT_LEN:
                 print("Timeout.")
                 break
 
@@ -176,6 +222,7 @@ class AstarPathPlanner(object):
             # CHANGE 02_b: check if pose_index is in generated_states already,
             #   and if so, skip the rest of the loop. (This is the point where
             #   we prevent exponential growth.)
+
             if pose_index in generated_states.keys():
                 continue
 
@@ -198,7 +245,8 @@ class AstarPathPlanner(object):
                 curvature, length = self.movements[i]
 
                 # Determine new pose and check bounds.
-                new_pose = CurveSegment.end_pose(pose, curvature, length)
+                # new_pose = CurveSegment.end_pose(pose, curvature, length)
+                new_pose = LineSegment.end_pose(pose, curvature, length)
                 # if not (0 <= new_pose[0] < extents[0] and \
                 #         0 <= new_pose[1] < extents[1]):
                 #     continue
@@ -215,11 +263,12 @@ class AstarPathPlanner(object):
         if states_close(pose, goal_pose):
             path = []
             path.append(pose[0:2])
-            print(generated_states)
             pose, move = generated_states[pose_index(pose)]
             while pose:
-                points = CurveSegment.segment_points(pose,
-                    movements[move][0], movements[move][1], 2.0)
+                # points = CurveSegment.segment_points(pose,
+                #     self.movements[move][0], self.movements[move][1], 0.50)
+                points = LineSegment.segment_points(pose,
+                    self.movements[move][0], self.movements[move][1], 0.50)
                 path.extend(reversed(points))
                 pose, move = generated_states[pose_index(pose)]
             path.reverse()
@@ -229,11 +278,72 @@ class AstarPathPlanner(object):
         return path # , visited_cells
 
 
-# Main program.
-if __name__ == '__main__':
-    # Link functions to buttons.
+def draw_line_segments(): 
+    movements = []
+
+    for i in [1.0, 5.0]:
+        # for direction in [0, np.pi / 4.0, np.pi / -4.0, np.pi / 2.0, np.pi / -2.0, np.pi * 3.0/ 4.0, np.pi * 3.0/ -4.0, np.pi]:
+        for direction in np.linspace(0.0, 2.0 * np.pi, num=20):
+            movements.append((i, direction))
+
+    for move in movements:
+        i, direction = move
+        x, y = [0], [0]
+        new_pose = LineSegment.end_pose((0.0, 0.0, 0.0), direction, i)
+        x.append(new_pose[0])
+        y.append(new_pose[1])
+
+        plt.plot(x, y)
+        plt.plot(x[-1], y[-1], 'o')  
+
+    plt.legend()
+    plt.show()
+
+
+
+def draw_movements():
+
+
+    movements = []
+
+    for i in range(11):
+        for l in [10.0, 100.0]:
+            c = (i - 5) / l
+            movements.append((c, 5.0))
+            movements.append((c, -5.0))
+            movements.append((c, 1.0))
+            movements.append((c, -1.0))
+    
+    import matplotlib.pyplot as plt   
+    import matplotlib
+
+    matplotlib.use('TkAgg')
+
+    plt.plot([0], [0], 'o')
+
+    for move in movements:
+        curvature, length = move
+        dlenght = length / 10.0
+
+        for i in [1.0, 2.0, 5.0]:
+            # for direction in [0, np.pi / 4.0, np.pi / -4.0, np.pi / 2.0, np.pi / -2.0, np.pi * 3.0/ 4.0, np.pi * 3.0/ -4.0, np.pi]:
+            for direction in np.linspace(0.0, 2.0 * np.pi, num=20):
+                x, y = [0], [0]
+                new_pose = LineSegment.end_pose((0.0, 0.0, 0.0), direction, i)
+                x.append(new_pose[0])
+                y.append(new_pose[1])
+
+                plt.plot(x, y)
+                plt.plot(x[-1], y[-1], 'o')
+
+    
+    plt.legend()
+    plt.show()
+        
+
+def find_path():
     start_pos = (0.0, 0.0, 0.0)
-    goal_pos = (10.0, 5.0, np.pi/3.0)
+    goal_pos = (10.0, 20.0, -0.5)
 
     planner = AstarPathPlanner()
     path = planner.astar_statespace(start_pos, goal_pos)
@@ -248,6 +358,19 @@ if __name__ == '__main__':
 
     plt.legend()
     plt.show()
+
+
+
+# Main program.
+if __name__ == '__main__':
+    # Link functions to buttons.
+    import matplotlib.pyplot as plt   
+    import matplotlib
+    matplotlib.use('TkAgg')
+    find_path()
+    # movements = [(1.0/10, 5.0), (2.0/10, 5.0),(0.0, 5.0), (0.0, 1.0), (-2.0/10, 5.0), (-1.0/10, 5.0),
+    #              (1.0/10, -5.0), (0.0, -5.0), (0.0, -1.0), (-1.0/10, -5.0)]
+    # draw_line_segments()
 
     # callbacks = {"update": update_callback,
     #              "button_1_press": add_obstacle,

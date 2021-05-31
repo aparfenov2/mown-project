@@ -136,6 +136,25 @@ RUN apt-get remove -y wget
 RUN echo 'export QT_DEBUG_PLUGINS=1' >> ~/.bashrc
 RUN echo 'export PATH=${vrep}:$PATH' >> ~/.bashrc
 
+
+# # Turtlebot 3
+# RUN apt-get update && apt-get install -y ros-noetic-joy ros-noetic-teleop-twist-joy \
+#   ros-noetic-teleop-twist-keyboard ros-noetic-laser-proc \
+#   ros-noetic-rgbd-launch ros-noetic-rosserial-arduino \
+#   ros-noetic-rosserial-python ros-noetic-rosserial-client \
+#   ros-noetic-rosserial-msgs ros-noetic-amcl ros-noetic-map-server \
+#   ros-noetic-move-base ros-noetic-urdf ros-noetic-xacro \
+#   ros-noetic-compressed-image-transport ros-noetic-rqt-image-view \
+#   ros-noetic-gmapping ros-noetic-navigation ros-noetic-interactive-markers
+
+
+ARG ROS_PKG=ros_base
+ENV ROS_DISTRO=noetic
+ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
+ENV ROS_PYTHON_VERSION=3
+
+RUN echo 'source ${ROS_ROOT}/setup.bash' >> /root/.bashrc
+
 WORKDIR /catkin_ws
 
 CMD source source devel/setup.bash

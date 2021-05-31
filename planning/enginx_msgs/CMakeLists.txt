@@ -51,6 +51,7 @@ add_message_files(
   Localization.msg
   LocalTrajectoryStamped.msg
   PointWithSpeed.msg
+  ProgressRoutePlanner.msg
   RouteTask.msg
   RouteTaskProgressEvent.msg
 )

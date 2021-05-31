@@ -1,6 +1,15 @@
 <launch>
+    <arg name="use_bridge" default="false">
     <!-- <arg name="model" default="default" />
     <rosparam file="$(find state_tracker2)/params/$(arg model).yaml" command="load" ns='StateTracker2Node'/> -->
 
     <node name="LocalTrajectoryPlanner" pkg="local_trajectory_planner" type="main.py" respawn="true" respawn_delay="5" output="screen"/>
+    <!-- <node name="StateTestNode" pkg="local_trajectory_planner" type="state_simulator.py" respawn="true" respawn_delay="5" output="screen"/> -->
+    
+    <groupe if="$(arg use_bridge)">
+        <node name="LocalTrajectoryPlanner" pkg="local_trajectory_planner" type="bridge.py" respawn="true" respawn_delay="5" output="screen"/>
+    </groupe>
+
+    </include>
+
 </launch>

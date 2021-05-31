@@ -20,6 +20,7 @@ while [[ "$#" -gt 0 ]]; do
         --loca) LOCALIZATION=1; ;;
         --sim_basic) SIM=1; RVIZ=1; TELEOP=1; ;;
         --preset1) SIM=1; RVIZ=1; TELEOP=1; SEGMENTATION=1; PROJECTION=1; LOCALIZATION=1;;
+        --planning) PLANNING=1; ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -34,6 +35,7 @@ ROSARGS=()
 [ -n "$PROJECTION" ] && ROSARGS+=("proj:=true")
 [ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true")
 [ -n "$MOVE_BASE_MOD" ] && ROSARGS+=("mb_mod:=true")
+[ -n "$PLANNING" ] && ROSARGS+=("planning:=true")
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"

@@ -8,6 +8,7 @@
     <arg name="segm_bypass" default="false" />
     <arg name="proj" default="false" />
     <arg name="mb_mod" default="false" />
+    <arg name="planning" default="false" />
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -65,4 +66,8 @@
 
     </group>
 
+<!-- planning system -->
+    <group if="$(arg planning)">
+        <include file="$(find my_utils_common)/launch/planning.launch"/>    
+    </group>
 </launch>
