@@ -71,10 +71,12 @@ cd ws/src
 # [ -d "catkin_simple" ] || {
 #     git clone git@github.com:catkin/catkin_simple.git
 # }
-PTH="segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth"
+# PTH="segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth"
+PTH="ddrnet/model/DDRNet_CS.wts"
 [ -n "${SEGMENTATION_BYPASS}" ] && {
     [ -f "$PTH" ] || {
-        curl -o $PTH  https://download.openmmlab.com/mmsegmentation/v0.5/hrnet/fcn_hr18s_512x1024_40k_cityscapes/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth
+        # curl -o $PTH  https://download.openmmlab.com/mmsegmentation/v0.5/hrnet/fcn_hr18s_512x1024_40k_cityscapes/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth
+        curl -o $PTH  https://kan-rt.ddns.net:8000/DDRNet_CS.wts
     }
 }
 

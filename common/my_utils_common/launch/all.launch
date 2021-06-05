@@ -29,7 +29,11 @@
 
 <!-- segm -->
     <group if="$(arg segm)">
-        <include file="$(find segmentation_node)/launch/kobuki.launch">
+<!--         <include file="$(find segmentation_node)/launch/kobuki.launch">
+            <arg name="bypass" value="$(arg segm_bypass)" />
+        </include>
+ -->
+        <include file="$(find ddrnet)/launch/ddrnet.launch">
             <arg name="bypass" value="$(arg segm_bypass)" />
         </include>
     </group>
