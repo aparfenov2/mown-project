@@ -150,3 +150,6 @@ RUN if [ "x$(nproc)" = "x1" ] ; then export USE_PROC=1 ; else export USE_PROC=$(
 
 RUN pip3 install osrf-pycommon
 
+# mmsegmentation to ONNX
+RUN pip3 install onnx onnxruntime-gpu
+RUN apt update && apt install -y python3-tk
