@@ -1,7 +1,7 @@
 # ------- ROS core --------
 
 # FROM ubuntu:focal
-FROM nvidia/cudagl:11.0.3-devel-ubuntu20.04
+FROM nvidia/cudagl:11.0.3-runtime-ubuntu20.04
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
@@ -150,3 +150,14 @@ RUN if [ "x$(nproc)" = "x1" ] ; then export USE_PROC=1 ; else export USE_PROC=$(
 
 RUN pip3 install osrf-pycommon
 
+# RUN apt-get update && apt-get install -y libnvinfer-dev
+# ARG version="8.0.0-1+cuda11.0"
+# RUN apt-get update && apt-get install -y libnvinfer8=${version} libnvonnxparsers8=${version} libnvparsers8=${version} libnvinfer-plugin8=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python3-libnvinfer=${version}
+# RUN dpkg -l | grep TensorRT
+
+# mmsegmentation to ONNX
+RUN pip3 install onnx onnxruntime
+# RUN pip3 install onnx onnxruntime-gpu
+RUN apt update && apt install -y python3-tk
+
+# RUN apt-get update && apt-get install -y libcudnn8
