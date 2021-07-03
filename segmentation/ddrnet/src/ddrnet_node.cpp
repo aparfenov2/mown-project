@@ -147,6 +147,53 @@ public:
         return filename.substr(0,filename.find_last_of('.')) + ext;
     }
 
+    cv::Mat resizeKeepAspectRatio(const cv::Mat &input, const cv::Size &dstSize, const cv::Scalar &bgcolor)
+    {
+        cv::Mat output;
+
+        double h1 = dstSize.width * (input.rows/(double)input.cols);
+        double w2 = dstSize.height * (input.cols/(double)input.rows);
+        if( h1 <= dstSize.height) {
+            cv::resize( input, output, cv::Size(dstSize.width, h1));
+        } else {
+            cv::resize( input, output, cv::Size(w2, dstSize.height));
+        }
+
+        int top = (dstSize.height-output.rows) / 2;
+        int down = (dstSize.height-output.rows+1) / 2;
+        int left = (dstSize.width - output.cols) / 2;
+        int right = (dstSize.width - output.cols+1) / 2;
+
+        cv::copyMakeBorder(output, output, top, down, left, right, cv::BORDER_CONSTANT, bgcolor );
+
+        return output;
+    }
+
+    cv::Mat resizeKeepAspectRatioBack(const cv::Mat &input, const cv::Size &srcSize, const cv::Scalar &bgcolor)
+    {
+        const cv::Size dstSize = input.size();
+
+        double h1 = dstSize.width * (srcSize.height/(double)srcSize.width);
+        double w2 = dstSize.height * (srcSize.width/(double)srcSize.height);
+        cv::Size outSize;
+        if( h1 <= dstSize.height) {
+            // cv::resize( input, output, cv::Size(dstSize.width, h1));
+            outSize = cv::Size(dstSize.width, h1);
+        } else {
+            // cv::resize( input, output, cv::Size(w2, dstSize.height));
+            outSize = cv::Size(w2, dstSize.height);
+        }
+
+        int top = (dstSize.height-outSize.height) / 2;
+        int down = (dstSize.height-outSize.height+1) / 2;
+        int left = (dstSize.width - outSize.width) / 2;
+        int right = (dstSize.width - outSize.width+1) / 2;
+        // std::cout << left << " " << top << " " << down << " " << right << "\n";
+        cv::Mat output(input, cv::Rect(cv::Point(left, top), cv::Point(input.cols - right, input.rows - down)));
+        cv::resize( output, output, srcSize);
+        return output;
+    }
+
     void imageCallback(const sensor_msgs::ImageConstPtr& input) {
 
         cv_bridge::CvImagePtr cv_ptr;
@@ -166,8 +213,10 @@ public:
         int orig_w = pr_img.cols;
         int orig_h = pr_img.rows;
 
-        cv::resize(pr_img, pr_img, cv::Size(INPUT_W,INPUT_H));
         cv::Mat img = pr_img.clone(); // for img show
+        // cv::resize(pr_img, pr_img, cv::Size(INPUT_W,INPUT_H));
+        pr_img = resizeKeepAspectRatio(pr_img, cv::Size(INPUT_W,INPUT_H), 0 );
+
         pr_img.convertTo(pr_img, CV_32FC3);
 
         if (!pr_img.isContinuous())
@@ -204,9 +253,14 @@ public:
         cv::applyColorMap(im_color, im_color, cv::COLORMAP_HOT);
 
         // cv::Mat fusionImg;
-        cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
+        // cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
 
-        cv::resize(im_color,im_color,cv::Size(orig_w,orig_h));
+        // cv::resize(im_color,im_color,cv::Size(orig_w,orig_h));
+        im_color = resizeKeepAspectRatioBack(im_color, cv::Size(orig_w,orig_h), 0 );
+        // std::cout << im_color.rows << " " << im_color.cols << " " << im_color.channels() << "\n";
+        // std::cout << img.rows << " " << img.cols << " " << img.channels() << "\n";
+        cv::cvtColor(img, img, cv::COLOR_RGB2BGR);
+        cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
 
         cv_bridge::CvImage out_msg;
         out_msg.header   = input->header; // Same timestamp and tf frame as input image
