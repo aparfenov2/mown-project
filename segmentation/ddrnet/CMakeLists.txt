@@ -80,7 +80,7 @@ link_directories(/usr/local/cuda/lib64)
 
 add_executable(${PROJECT_NAME} 
   src/ddrnet_node.cpp
-  src/ddrnet.cpp
+  src/ddrnet_hr.cpp
   )
 target_link_libraries(${PROJECT_NAME} nvinfer)
 target_link_libraries(${PROJECT_NAME} cudart)
@@ -92,7 +92,7 @@ target_link_libraries(${PROJECT_NAME}
 
 add_executable(${PROJECT_NAME}_tool
   src/ddrnet_tool.cpp
-  src/ddrnet.cpp
+  src/ddrnet_hr.cpp
   )
 target_link_libraries(${PROJECT_NAME}_tool nvinfer)
 target_link_libraries(${PROJECT_NAME}_tool cudart)

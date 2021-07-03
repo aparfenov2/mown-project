@@ -154,3 +154,5 @@ RUN pip3 install osrf-pycommon
 ARG version="8.0.0-1+cuda11.0"
 RUN apt-get update && apt-get install -y libnvinfer8=${version} libnvonnxparsers8=${version} libnvparsers8=${version} libnvinfer-plugin8=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python3-libnvinfer=${version}
 RUN dpkg -l | grep TensorRT
+
+RUN apt-get update && apt-get install -y xterm gdb

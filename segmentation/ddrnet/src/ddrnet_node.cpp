@@ -19,29 +19,37 @@
 // }
 // #include "calibrator.h"
 
+#define CHECK(status)                                          \
+    do                                                         \
+    {                                                          \
+        auto ret = (status);                                   \
+        if (ret != 0)                                          \
+        {                                                      \
+            std::cerr << "Cuda failure: " << ret << std::endl; \
+            abort();                                           \
+        }                                                      \
+    } while (0)
 
+
+cv::Mat createLTU(int len);
 //#define USE_INT8  // comment out this if want to use INT8
-#define USE_FP16  // comment out this if want to use FP32
-#define DEVICE 0  // GPU id
+// #define USE_FP16  // comment out this if want to use FP32
+#define USE_FP32
+#define DEVICE 0     // GPU id
+#define BATCH_SIZE 1 //
+
 static const int INPUT_H = 1024;
 static const int INPUT_W = 1024;
-static const int OUT_MAP_H = 128;
-static const int OUT_MAP_W = 128;
-// static const char* INPUT_BLOB_NAME = "input_0";
-// static const char* OUTPUT_BLOB_NAME = "output_0";
-static Logger gLogger;
+static const int NUM_CLASSES = 19;
+static const int OUTPUT_SIZE = INPUT_H * INPUT_W;
+static const char* INPUT_BLOB_NAME = "input_0";
+static const char* OUTPUT_BLOB_NAME = "output_0";
+extern Logger gLogger;
 
 using namespace nvinfer1;
 
-class DDRNetNode;
-
-DDRNetNode* node_instance = NULL;
-
-void _imageCallback(const sensor_msgs::ImageConstPtr& input);
-void doInference(IExecutionContext& context, float* input, float* output);
-void APIToModel(std::string wts_filename, unsigned int maxBatchSize, IHostMemory** modelStream);
-cv::Mat map2cityscape(cv::Mat real_out,cv::Mat real_out_);
-cv::Mat read2mat(float * prob, cv::Mat out);
+void doInference(IExecutionContext &context, cudaStream_t &stream, void **buffers, int batchSize);
+void APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream, std::string wtsPath, int width);
 
 class DDRNetNode {
 public:
@@ -51,12 +59,13 @@ public:
     image_transport::Subscriber sub;
     image_transport::ImageTransport *image_transport;
     IExecutionContext* context;
-    std::vector<float> mean_value{ 0.406, 0.456, 0.485 };  // BGR
-    std::vector<float> std_value{ 0.225, 0.224, 0.229 };
     std::string weights_filename;
+    cudaStream_t stream;
+    float *data;
+    int *prob; // using int. output is index
+    void *buffers[2];
 
     DDRNetNode():pnh("~") {
-        node_instance = this;
         pnh.param("weights_file", weights_filename, std::string("DDRNet.engine"));
         mask_color_pub = pnh.advertise<sensor_msgs::Image>("mask_color", 2);
         image_transport = new image_transport::ImageTransport(nh);
@@ -81,7 +90,7 @@ public:
             std::ifstream wts_file(wts_filename, std::ios::binary);
             if (wts_file.good()) {
                 IHostMemory* modelStream{ nullptr };
-                APIToModel(wts_filename, 1, &modelStream);
+                APIToModel(BATCH_SIZE, &modelStream, wts_filename, 48);
                 assert(modelStream != nullptr);
                 std::ofstream p(engine_filename, std::ios::binary);
                 if (!p) {
@@ -104,15 +113,34 @@ public:
             }
         }
 
-        IRuntime* runtime = createInferRuntime(gLogger);
+        // prepare input data ---------------------------
+        cudaSetDeviceFlags(cudaDeviceMapHost);
+        // float *data;
+        // int *prob; // using int. output is index
+        CHECK(cudaHostAlloc((void **)&data, BATCH_SIZE * 3 * INPUT_H * INPUT_W * sizeof(float), cudaHostAllocMapped));
+        CHECK(cudaHostAlloc((void **)&prob, BATCH_SIZE * OUTPUT_SIZE * sizeof(int), cudaHostAllocMapped));
+
+        IRuntime *runtime = createInferRuntime(gLogger);
         assert(runtime != nullptr);
-        ICudaEngine* engine = runtime->deserializeCudaEngine(trtModelStream, size);
+        ICudaEngine *engine = runtime->deserializeCudaEngine(trtModelStream, size);
         assert(engine != nullptr);
         context = engine->createExecutionContext();
         assert(context != nullptr);
         delete[] trtModelStream;
+        // void *buffers[2];
+        // In order to bind the buffers, we need to know the names of the input and output tensors.
+        // Note that indices are guaranteed to be less than IEngine::getNbBindings()
+        const int inputIndex = engine->getBindingIndex(INPUT_BLOB_NAME);
+        const int outputIndex = engine->getBindingIndex(OUTPUT_BLOB_NAME);
+        assert(inputIndex == 0);
+        assert(outputIndex == 1);
+        // cudaStream_t stream;
+        CHECK(cudaStreamCreate(&stream));
 
-        sub = image_transport->subscribe("camera/image", 1, _imageCallback);
+        cudaHostGetDevicePointer((void **)&buffers[inputIndex], (void *)data, 0);  // buffers[inputIndex]-->data
+        cudaHostGetDevicePointer((void **)&buffers[outputIndex], (void *)prob, 0); // buffers[outputIndex] --> prob
+
+        sub = image_transport->subscribe("camera/image", 1, boost::bind(&DDRNetNode::imageCallback, this, _1));
     }
 
     std::string replace_ext(std::string filename, std::string ext) {
@@ -125,7 +153,7 @@ public:
 
         try
         {    
-            cv_ptr = cv_bridge::toCvCopy(input, sensor_msgs::image_encodings::BGR8);
+            cv_ptr = cv_bridge::toCvCopy(input, sensor_msgs::image_encodings::RGB8);
         }
         catch (cv_bridge::Exception& e)
         {
@@ -134,61 +162,63 @@ public:
         }
 
         cv::Mat pr_img = cv_ptr->image;
+
         int orig_w = pr_img.cols;
         int orig_h = pr_img.rows;
 
         cv::resize(pr_img, pr_img, cv::Size(INPUT_W,INPUT_H));
+        cv::Mat img = pr_img.clone(); // for img show
+        pr_img.convertTo(pr_img, CV_32FC3);
 
-        float* data = new float[3 * pr_img.rows * pr_img.cols];
-        int i = 0;
-        for (int row = 0; row < pr_img.rows; ++row) {
-            uchar* uc_pixel = pr_img.data + row * pr_img.step;
-            for (int col = 0; col < pr_img.cols; ++col) {
-                data[i] = (uc_pixel[2] / 255.0 - mean_value[2]) / std_value[2];
-                data[i + pr_img.rows * pr_img.cols] = (uc_pixel[1] / 255.0 - mean_value[1]) / std_value[1];
-                data[i + 2 * pr_img.rows * pr_img.cols] = (uc_pixel[0] / 255.0 - mean_value[0]) / std_value[0];
-                uc_pixel += 3;
-                ++i;
-            }
+        if (!pr_img.isContinuous())
+        {
+            pr_img = pr_img.clone();
         }
-        float* prob = new float[ 19* OUT_MAP_H* OUT_MAP_W];
+        std::memcpy(data, pr_img.data, BATCH_SIZE * 3 * INPUT_W * INPUT_H * sizeof(float));
+
+        // cudaHostGetDevicePointer((void **)&buffers[inputIndex], (void *)data, 0);  // buffers[inputIndex]-->data
+        // cudaHostGetDevicePointer((void **)&buffers[outputIndex], (void *)prob, 0); // buffers[outputIndex] --> prob
+
         // Run inference
-        auto start = std::chrono::system_clock::now();
-        doInference(*context, data, prob);
-        auto end = std::chrono::system_clock::now();        
+        auto start = std::chrono::high_resolution_clock::now();
+        doInference(*context, stream, buffers, BATCH_SIZE);
+        auto end = std::chrono::high_resolution_clock::now();
         ROS_INFO_STREAM_THROTTLE(5, "ddrnet inference took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" );
 
-        // show mask
-        cv::Mat out;
-        out.create(OUT_MAP_H, OUT_MAP_W, CV_32FC(19));
-        out = read2mat(prob, out);
-//        cv::resize(out, real_out, real_out.size());
-        cv::Mat mask;
-        mask.create(OUT_MAP_H, OUT_MAP_W, CV_8UC3);
-        mask = map2cityscape(out, mask);
-        cv::resize(mask,mask,cv::Size(orig_w,orig_h));
 
-        delete[] prob;
-        delete[] data;
+        cv::Mat outimg(INPUT_H, INPUT_W, CV_8UC1);
+        for (int row = 0; row < INPUT_H; ++row)
+        {
+            uchar *uc_pixel = outimg.data + row * outimg.step;
+            for (int col = 0; col < INPUT_W; ++col)
+            {
+                uc_pixel[col] = (uchar)prob[row * INPUT_W + col];
+            }
+        }
+        cv::Mat im_color;
+        cv::cvtColor(outimg, im_color, cv::COLOR_GRAY2RGB);
+        cv::Mat lut = createLTU(NUM_CLASSES);
+        cv::LUT(im_color, lut, im_color);
+        // false color
+        cv::cvtColor(im_color, im_color, cv::COLOR_RGB2GRAY);
+        cv::applyColorMap(im_color, im_color, cv::COLORMAP_HOT);
+
+        // cv::Mat fusionImg;
+        cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
+
+        cv::resize(im_color,im_color,cv::Size(orig_w,orig_h));
 
         cv_bridge::CvImage out_msg;
         out_msg.header   = input->header; // Same timestamp and tf frame as input image
         out_msg.encoding = sensor_msgs::image_encodings::BGR8; // Or whatever
-        out_msg.image    = mask;
+        out_msg.image    = im_color;
 
         mask_color_pub.publish(out_msg.toImageMsg());
     }
 };
 
-void _imageCallback(const sensor_msgs::ImageConstPtr& input) {
-    if (node_instance) {
-        node_instance->imageCallback(input);
-    }
-}
-
 int main(int argc, char **argv) {
     ros::init(argc, argv, "ddrseg_node");
     DDRNetNode node;
     ros::spin();
-    node_instance = NULL;
 }

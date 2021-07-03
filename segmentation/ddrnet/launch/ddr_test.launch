@@ -11,6 +11,7 @@
 <node pkg="rosbag" type="play" name="player" output="screen" args="--clock --loop /cdir/kitti.bag"/>
 
 
+<!-- <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen" launch-prefix="xterm -e gdb -/-args"> -->
 <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
     <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
     <!-- <remap from="camera/image" to="/camera/rgb/image_raw" /> -->
