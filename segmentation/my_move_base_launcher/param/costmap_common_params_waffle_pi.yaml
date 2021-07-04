@@ -1,0 +1,33 @@
+plugins:
+ - {name: obstacle, type: "costmap_2d::ObstacleLayer"}
+ - {name: inflation, type: "costmap_2d::InflationLayer"}
+
+obstacle:
+  observation_sources: scan
+  # segm: 
+  #   sensor_frame: base_scan
+  #   data_type: PointCloud2
+  #   topic: pcl_proc/filtered
+  #   marking: true
+  #   clearing: true
+  #   min_obstacle_height: -10
+  #   obstacle_range: 25
+  #   raytrace_range: 25
+
+  scan: 
+    sensor_frame: base_link
+    data_type: LaserScan
+    topic: pcl_proc/scan
+    marking: true
+    clearing: true
+
+  track_unknown_space: true
+  obstacle_range: 3.0
+  raytrace_range: 3.5
+
+footprint: [[-0.164, -0.124], [-0.164, 0.124], [0.0616, 0.140], [0.0616, -0.140]]
+#robot_radius: 0.17
+
+inflation:
+  inflation_radius: 0.4
+  cost_scaling_factor: 5.0

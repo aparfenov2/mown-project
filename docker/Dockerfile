@@ -155,4 +155,11 @@ ARG version="8.0.0-1+cuda11.0"
 RUN apt-get update && apt-get install -y libnvinfer8=${version} libnvonnxparsers8=${version} libnvparsers8=${version} libnvinfer-plugin8=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python3-libnvinfer=${version}
 RUN dpkg -l | grep TensorRT
 
+# debug support
 RUN apt-get update && apt-get install -y xterm gdb
+
+# color-picker
+# RUN sudo ln -s $(which python3) /usr/bin/python
+# RUN pip3 install scipy
+
+RUN apt-get update && apt-get install -y ros-noetic-pointcloud-to-laserscan
