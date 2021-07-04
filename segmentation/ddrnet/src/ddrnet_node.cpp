@@ -54,6 +54,7 @@ void APIToModel(unsigned int maxBatchSize, IHostMemory **modelStream, std::strin
 class DDRNetNode {
 public:
     ros::Publisher mask_color_pub;
+    ros::Publisher overlay_pub;
     ros::NodeHandle nh;
     ros::NodeHandle pnh;
     image_transport::Subscriber sub;
@@ -68,6 +69,7 @@ public:
     DDRNetNode():pnh("~") {
         pnh.param("weights_file", weights_filename, std::string("DDRNet.engine"));
         mask_color_pub = pnh.advertise<sensor_msgs::Image>("mask_color", 2);
+        overlay_pub = pnh.advertise<sensor_msgs::Image>("overlay", 2);
         image_transport = new image_transport::ImageTransport(nh);
 
         cudaSetDevice(DEVICE);
@@ -259,15 +261,27 @@ public:
         im_color = resizeKeepAspectRatioBack(im_color, cv::Size(orig_w,orig_h), 0 );
         // std::cout << im_color.rows << " " << im_color.cols << " " << im_color.channels() << "\n";
         // std::cout << img.rows << " " << img.cols << " " << img.channels() << "\n";
+
+
+        {
+            cv_bridge::CvImage out_msg;
+            out_msg.header   = input->header; // Same timestamp and tf frame as input image
+            out_msg.encoding = sensor_msgs::image_encodings::BGR8; // Or whatever
+            out_msg.image    = im_color;
+            mask_color_pub.publish(out_msg.toImageMsg());
+        }
+
+
         cv::cvtColor(img, img, cv::COLOR_RGB2BGR);
         cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
 
-        cv_bridge::CvImage out_msg;
-        out_msg.header   = input->header; // Same timestamp and tf frame as input image
-        out_msg.encoding = sensor_msgs::image_encodings::BGR8; // Or whatever
-        out_msg.image    = im_color;
-
-        mask_color_pub.publish(out_msg.toImageMsg());
+        {
+            cv_bridge::CvImage out_msg;
+            out_msg.header   = input->header; // Same timestamp and tf frame as input image
+            out_msg.encoding = sensor_msgs::image_encodings::BGR8; // Or whatever
+            out_msg.image    = im_color;
+            overlay_pub.publish(out_msg.toImageMsg());
+        }
     }
 };
 
