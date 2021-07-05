@@ -8,10 +8,13 @@
     <arg name="segm_bypass" default="false" />
     <arg name="proj" default="false" />
     <arg name="mb_mod" default="false" />
+    <arg name="world" default="turtletown" />
 
 <!-- sim -->
     <group if="$(arg sim)">
-        <include file="$(find tb_gazebo)/launch/turtletown.launch"/>
+        <include file="$(find tb_gazebo)/launch/turtletown.launch">
+            <arg name="world" value="$(arg world)"/>
+        </include>
     </group>
 
 <!-- rviz -->

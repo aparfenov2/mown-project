@@ -3,18 +3,21 @@ SEGMENTATION_BYPASS=1
 ROSCORE=1
 ALL_ARGS=("$@")
 CONTAINER_NAME="all"
+WORLD="turtletown"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --inner) INNER=1 ;;
         --sim) SIM=1;  ;;
+        --grass_world) WORLD="baylands";  ;;
+        --world) WORLD="$2"; shift; ;;
         --rviz) RVIZ=1; ;;
         --teleop) TELEOP=1; ;;
         --roscore) ROSCORE=1 ;;
         ---roscore) ROSCORE="" ;;
         --segm) SEGMENTATION=1; ;;
         --mb_mod) MOVE_BASE_MOD=1; ;;
-                --name) CONTAINER_NAME="$2"; shift; ;;
+        --name) CONTAINER_NAME="$2"; shift; ;;
         ---segm_bypass) SEGMENTATION_BYPASS=""; ;;
         --proj) PROJECTION=1; ;;
         --loca) LOCALIZATION=1; ;;
@@ -27,6 +30,7 @@ done
 
 ROSARGS=()
 [ -n "$SIM" ] && ROSARGS+=("sim:=true") && CONTAINER_NAME="sim"
+[ -n "$WORLD" ] && ROSARGS+=("world:=$WORLD")
 [ -n "$RVIZ" ] && ROSARGS+=("rviz:=true") && CONTAINER_NAME="rviz"
 [ -n "$TELEOP" ] && ROSARGS+=("teleop:=true") && CONTAINER_NAME="teleop"
 [ -n "$SEGMENTATION" ] && ROSARGS+=("segm:=true") && CONTAINER_NAME="segm"
@@ -49,6 +53,8 @@ ROSARGS=()
     popd
 
     . /cdir/ws/devel/setup.bash
+    export GAZEBO_MODEL_PATH="/cdir/ws/src/gazebo_models"
+    # echo GAZEBO_MODEL_PATH="${GAZEBO_MODEL_PATH}"
     roslaunch my_utils_common all.launch ${ROSARGS[@]}
     exit 0
 }
