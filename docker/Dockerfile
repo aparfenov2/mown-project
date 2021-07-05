@@ -1,7 +1,7 @@
 # ------- ROS core --------
 
 # FROM ubuntu:focal
-FROM nvidia/cudagl:11.0.3-runtime-ubuntu20.04
+FROM nvidia/cudagl:11.0.3-devel-ubuntu20.04
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
@@ -112,17 +112,17 @@ RUN apt-get update && apt-get install -y libtool libtool-bin
 
 RUN apt-get update && apt-get install -y python3-pip
 
-# pytorch
-RUN pip3 install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
+# # pytorch
+# RUN pip3 install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
 
-# mmsegmentation
-# RUN pip3 install mmcv-full==latest+torch1.6.0+cu101 -f https://download.openmmlab.com/mmcv/dist/index.html
-RUN pip3 install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html
-RUN git clone https://github.com/open-mmlab/mmsegmentation.git /mmsegmentation
-WORKDIR /mmsegmentation
-RUN pip3 install -r requirements/readthedocs.txt
-# RUN pip3 install -r requirements/runtime.txt
-RUN pip3 install --no-cache-dir -e .
+# # mmsegmentation
+# # RUN pip3 install mmcv-full==latest+torch1.6.0+cu101 -f https://download.openmmlab.com/mmcv/dist/index.html
+# RUN pip3 install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html
+# RUN git clone https://github.com/open-mmlab/mmsegmentation.git /mmsegmentation
+# WORKDIR /mmsegmentation
+# RUN pip3 install -r requirements/readthedocs.txt
+# # RUN pip3 install -r requirements/runtime.txt
+# RUN pip3 install --no-cache-dir -e .
 
 
 # A-LOAM
@@ -150,3 +150,16 @@ RUN if [ "x$(nproc)" = "x1" ] ; then export USE_PROC=1 ; else export USE_PROC=$(
 
 RUN pip3 install osrf-pycommon
 
+# ddrnet
+ARG version="8.0.0-1+cuda11.0"
+RUN apt-get update && apt-get install -y libnvinfer8=${version} libnvonnxparsers8=${version} libnvparsers8=${version} libnvinfer-plugin8=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python3-libnvinfer=${version}
+RUN dpkg -l | grep TensorRT
+
+# debug support
+RUN apt-get update && apt-get install -y xterm gdb
+
+# color-picker
+# RUN sudo ln -s $(which python3) /usr/bin/python
+# RUN pip3 install scipy
+
+RUN apt-get update && apt-get install -y ros-noetic-pointcloud-to-laserscan

@@ -14,7 +14,7 @@ while [[ "$#" -gt 0 ]]; do
         ---roscore) ROSCORE="" ;;
         --segm) SEGMENTATION=1; ;;
         --mb_mod) MOVE_BASE_MOD=1; ;;
-        --name) CONTAINER_NAME="$2"; shift; ;;
+                --name) CONTAINER_NAME="$2"; shift; ;;
         ---segm_bypass) SEGMENTATION_BYPASS=""; ;;
         --proj) PROJECTION=1; ;;
         --loca) LOCALIZATION=1; ;;
@@ -26,14 +26,14 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 ROSARGS=()
-[ -n "$SIM" ] && ROSARGS+=("sim:=true")
-[ -n "$RVIZ" ] && ROSARGS+=("rviz:=true")
-[ -n "$TELEOP" ] && ROSARGS+=("teleop:=true")
-[ -n "$SEGMENTATION" ] && ROSARGS+=("segm:=true")
+[ -n "$SIM" ] && ROSARGS+=("sim:=true") && CONTAINER_NAME="sim"
+[ -n "$RVIZ" ] && ROSARGS+=("rviz:=true") && CONTAINER_NAME="rviz"
+[ -n "$TELEOP" ] && ROSARGS+=("teleop:=true") && CONTAINER_NAME="teleop"
+[ -n "$SEGMENTATION" ] && ROSARGS+=("segm:=true") && CONTAINER_NAME="segm"
 [ -n "$SEGMENTATION_BYPASS" ] && ROSARGS+=("segm_bypass:=true")
-[ -n "$PROJECTION" ] && ROSARGS+=("proj:=true")
-[ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true")
-[ -n "$MOVE_BASE_MOD" ] && ROSARGS+=("mb_mod:=true")
+[ -n "$PROJECTION" ] && ROSARGS+=("proj:=true") && CONTAINER_NAME="proj"
+[ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true") && CONTAINER_NAME="loca"
+[ -n "$MOVE_BASE_MOD" ] && ROSARGS+=("mb_mod:=true") && CONTAINER_NAME="mb_mod"
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
@@ -71,10 +71,12 @@ cd ws/src
 # [ -d "catkin_simple" ] || {
 #     git clone git@github.com:catkin/catkin_simple.git
 # }
-PTH="segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth"
+# PTH="segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth"
+PTH="ddrnet/model/DDRNet_CS.wts"
 [ -n "${SEGMENTATION_BYPASS}" ] && {
     [ -f "$PTH" ] || {
-        curl -o $PTH  https://download.openmmlab.com/mmsegmentation/v0.5/hrnet/fcn_hr18s_512x1024_40k_cityscapes/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth
+        # curl -o $PTH  https://download.openmmlab.com/mmsegmentation/v0.5/hrnet/fcn_hr18s_512x1024_40k_cityscapes/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth
+        curl -o $PTH  https://kan-rt.ddns.net:8000/DDRNet_CS.wts
     }
 }
 

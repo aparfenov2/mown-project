@@ -1,0 +1,76 @@
+<launch>
+
+<arg name="kitti" default="true"/>
+
+<arg name="bagfile" default="_2021-06-06-20-54-38.bag" unless="$(arg kitti)" />
+<arg name="bagfile" default="kitti.bag" if="$(arg kitti)" />
+
+<arg name="image_rect_topic" default="/zed2/zed_node/left/image_rect_color" unless="$(arg kitti)" />
+<arg name="image_rect_topic" default="/cam03/image_raw" if="$(arg kitti)" />
+
+<!--   <node name="segmentation_node" pkg="segmentation_node" type="segmentation_node.py" output="screen">
+    <param name="rgb_input" value="/camera/rgb/image_raw" />    
+    <param name="checkpoint" value="$(find segmentation_node)/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth" />
+    <param name="config" value="$(find segmentation_node)/configs/hrnet/fcn_hr18s_512x1024_40k_cityscapes.py" />
+    <param name="mask_in_bgr" value="true" />
+  </node>
+ -->  
+
+<!-- <node pkg="rosbag" type="play" name="player" output="screen" args="-/-clock -/-loop /cdir/kitti.bag"/> -->
+<node pkg="rosbag" type="play" name="player" output="screen" args="--clock --loop /cdir/$(arg bagfile)"/>
+
+<!-- <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen" launch-prefix="xterm -e gdb -/-args"> -->
+<node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
+    <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
+    <!-- <remap from="camera/image" to="/camera/rgb/image_raw" /> -->
+    <!-- <remap from="camera/image" to="/cam03/image_raw" /> -->
+    <remap from="camera/image" to="$(arg image_rect_topic)" />
+</node>
+
+
+
+<!-- <node pkg="nodelet" type="nodelet" name="mjepg_client"
+      args="standalone mjpeg_client/MjpegClient" output="screen">
+      <remap from="image" to="/camera/rgb/image_raw"/>
+      <param name="server" value="192.168.0.12"/>
+      <param name="port" value="4747" type="str"/>
+      <param name="path" value="/video?640x480"/>
+      <param name="timeout" value="5."/>
+      <param name="frame_id" value="mjpeg_camera"/>
+</node>
+ --><!-- -->
+<!-- viewer -->
+<node pkg="image_view" type="image_view" name="image_view" output="screen">
+      <remap from="image" to="/segmentation_node/mask_color"/>
+</node>
+
+<!-- <node pkg="image_view" type="image_view" name="image_view1" output="screen">
+      <remap from="image" to="/cam03/image_raw"/>
+</node>
+ -->
+<!-- <node pkg="nodelet" type="nodelet" name="pcl_proc"  args="manager" output="screen"/> -->
+
+<!-- register depth image -->
+<!-- <node pkg="nodelet" type="nodelet" name="point_cloud2_register"
+        args="load depth_image_proc/register pcl_proc"
+  respawn="false" output="screen" >
+    <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
+    <remap from="/depth/camera_info" to="/camera/depth/camera_info" />
+    <remap from="/depth/image_rect" to="/camera/depth/image_raw" />
+</node>
+ -->
+<!-- registered depth to pcl rgb -->
+<!-- <node pkg="nodelet" type="nodelet" name="point_cloud2_pcl"
+        args="load depth_image_proc/point_cloud_xyzrgb pcl_proc"
+  respawn="false" output="screen" >
+
+    <remap from="/rgb/image_rect_color" to="$(arg image_rect_topic)" />
+    <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
+
+    
+    <remap from="depth_registered/points" to="/pcl_proc/points2" />
+</node>
+ -->
+    <!-- <remap from="depth_registered/image_rect" to="/stereo/disparity" /> -->
+
+</launch>

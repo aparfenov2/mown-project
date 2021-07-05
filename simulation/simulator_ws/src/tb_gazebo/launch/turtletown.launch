@@ -1,5 +1,7 @@
 <launch>
 
+  <arg name="publish_tf"   default="0" />
+
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="use_sim_time" value="true"/>
     <arg name="paused"       value="false"/>
@@ -9,7 +11,7 @@
   </include>
 
 
-  <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro'"/>
+  <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/>
   <param name="robot_description" command="$(arg urdf_file)"/>
 
 
