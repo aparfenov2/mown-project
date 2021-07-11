@@ -1,0 +1,26 @@
+<launch>
+  
+  <!--arg name="publish_tf"   default="0" /-->
+  <!--arg name="world"   default="baylands" /-->
+  
+  
+  <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/>
+  <!--include file="$(find engix_description)/launch/controller.launch"/-->
+  <!--rosparam command="load" file="$(find engix_description)/launch/controller.yaml"/-->
+
+  <node args="-param robot_description -urdf -model engix" name="spawn_urdf" pkg="gazebo_ros" type="spawn_model">
+    
+  </node>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+    <!--arg name="world_name"   value="$(find engix_description)/world/$(arg world).world"/-->
+  </include>
+
+
+
+
+</launch>
