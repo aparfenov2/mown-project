@@ -68,9 +68,16 @@ void GazeboRosKobuki::updateJointState()
  */
 void GazeboRosKobuki::updateOdometry(common::Time& step_time)
 {
+  ros::Time current_time = ros::Time::now();
+  static ros::Time last_ros_time = ros::Time::now();
+  if (current_time == last_ros_time) {
+    return;
+  }
+  last_ros_time = current_time;
   std::string odom_frame = gazebo_ros_->resolveTF("odom");
   std::string base_frame = gazebo_ros_->resolveTF("base_footprint");
-  odom_.header.stamp = joint_state_.header.stamp;
+  // odom_.header.stamp = joint_state_.header.stamp;
+  odom_.header.stamp = current_time;
   odom_.header.frame_id = odom_frame;
   odom_.child_frame_id = base_frame;
 
