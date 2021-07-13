@@ -41,6 +41,8 @@ ROSARGS=()
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
+    export PYTHONPYCACHEPREFIX="/cdir/pycache/"
+
     set -ex
     pushd $PWD
     cd /cdir/ws 
