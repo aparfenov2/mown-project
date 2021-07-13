@@ -12,9 +12,11 @@
   </include>
 
 
-  <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/>
-  <param name="robot_description" command="$(arg urdf_file)"/>
+  <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/>
 
+<!--   <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/>
+  <param name="robot_description" command="$(arg urdf_file)"/>
+ -->
 
   <!-- Gazebo model spawner -->
     <group if="$(eval world == 'empty')">
