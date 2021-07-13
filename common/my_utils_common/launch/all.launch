@@ -103,25 +103,85 @@
  -->
 
   <!-- move_base -->
-    <group if="$(arg mb)">
-      <arg name="model" default="waffle_pi" doc="model type [burger, waffle, waffle_pi]"/>
-      <arg name="cmd_vel_topic" default="/mobile_base/commands/velocity" />
-      <arg name="odom_topic" default="odom" />
-      <arg name="move_forward_only" default="false"/>
-
-      <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
-        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
-        <rosparam file="$(find my_utils_common)/param/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
-        <rosparam file="$(find my_utils_common)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
-        <rosparam file="$(find my_utils_common)/param/local_costmap_params.yaml" command="load" />
-        <rosparam file="$(find my_utils_common)/param/global_costmap_params.yaml" command="load" />
-        <!-- <rosparam file="$(find my_utils_common)/param/move_base_params.yaml" command="load" /> -->
-        <rosparam file="$(find my_utils_common)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
-        <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
-        <remap from="odom" to="$(arg odom_topic)"/>
-        <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
-      </node>
-    </group>
-
+<group if="$(arg mb)">
+    <node args="manager" name="pcl_proc" output="screen" pkg="nodelet" type="nodelet"/>
+    <node args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc" clear_params="true" name="point_cloud2_laserscan" output="screen" pkg="nodelet" required="true" respawn="false" type="nodelet">
+        <param name="min_height" type="double" value="0.1"/>
+        <param name="max_height" type="double" value="2.0"/>
+        <param name="target_frame" type="str" value="base_link"/>
+        <remap from="cloud_in" to="/velodyne_points"/>
+        <remap from="scan" to="/pcl_proc/scan"/>
+    </node>
+    <!-- Arguments -->
+    <arg default="waffle_pi" doc="model type [burger, waffle, waffle_pi]" name="model"/>
+    <arg default="/mobile_base/commands/velocity" name="cmd_vel_topic"/>
+    <arg default="odom" name="odom_topic"/>
+    <arg default="false" name="move_forward_only"/>
+    <arg default="-2.5 -2.5 0 0 0 0" name="coverage_area_offset"/>
+    <arg default="10" name="coverage_area_size_x"/>
+    <arg default="10" name="coverage_area_size_y"/>
+    <arg default="0.5" name="target_x_vel"/>
+    <arg default="0.4" name="target_yaw_vel"/>
+    <arg default="0.3" name="robot_radius"/>
+    <arg default="0.3" name="tool_radius"/>
+    <arg default="$(find my_utils_common)/maps/grid.yaml" name="map"/>
+    <node clear_params="true" name="move_base_flex" output="screen" pkg="mbf_costmap_nav" respawn="false" type="mbf_costmap_nav">
+        <!-- <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">-->
+        <param name="tf_timeout" value="1.5"/>
+        <rosparam command="load" file="$(find my_utils_common)/param/costmap_common_params_$(arg model).yaml" ns="global_costmap"/>
+        <rosparam command="load" file="$(find my_utils_common)/param/costmap_common_params_$(arg model).yaml" ns="local_costmap"/>
+        <rosparam command="load" file="$(find my_utils_common)/param/local_costmap_params.yaml"/>
+        <rosparam command="load" file="$(find my_utils_common)/param/global_costmap_params.yaml"/>
+        <rosparam command="load" file="$(find my_utils_common)/param/move_base_flex_params.yaml"/>
+        <param name="SpiralSTC/robot_radius" value="$(arg robot_radius)"/>
+        <param name="SpiralSTC/tool_radius" value="$(arg tool_radius)"/>
+        <param name="global_costmap/robot_radius" value="$(arg robot_radius)"/>
+        <remap from="odom" to="/odom"/>
+        <remap from="scan" to="/scan"/>
+        <remap from="/move_base_flex/SpiralSTC/plan" to="/move_base/SpiralSTC/plan"/>
+        <!-- <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>-->
+        <remap from="/move_base_flex/tracking_pid/interpolator" to="/move_base/TrackingPidLocalPlanner/interpolator"/>
+    </node>
+    <node name="move_base" pkg="mbf_costmap_nav" type="move_base_legacy_relay.py">
+        <param name="base_global_planner" value="SpiralSTC"/>
+        <!-- <param name="base_local_planner" value="DWAPlannerROS" />-->
+        <!-- <remap from="/move_base/goal" to="/move_base_simple/goal"/>-->
+    </node>
+    <!--We need a map to fully cover-->
+    <node args="$(arg map)" name="grid_server" pkg="map_server" type="map_server">
+        <param name="frame_id" value="map"/>
+    </node>
+    <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
+    <!-- Launch coverage progress tracking -->
+    <node args="$(arg coverage_area_offset) map coverage_map 100" name="map_to_coveragemap" pkg="tf" type="static_transform_publisher"/>
+    <node name="coverage_progress" pkg="full_coverage_path_planner" type="coverage_progress">
+        <param name="~target_area/x" value="$(arg coverage_area_size_x)"/>
+        <param name="~target_area/y" value="$(arg coverage_area_size_y)"/>
+        <param name="~coverage_radius" value="$(arg tool_radius)"/>
+        <remap from="reset" to="coverage_progress/reset"/>
+        <param name="~map_frame" value="/coverage_map"/>
+    </node>
+    <!--Tracking_pid cannot just accept a nav_msgs/Path, it can only go to a PoseStamped,
+       so the path_interpolator drags a PoseStamped over a Path at a given speed-->
+    <node name="interpolator" pkg="tracking_pid" type="path_interpolator">
+        <param name="target_x_vel" value="$(arg target_x_vel)"/>
+        <param name="target_yaw_vel" value="$(arg target_yaw_vel)"/>
+        <remap from="path" to="/move_base/SpiralSTC/plan"/>
+    </node>
+    <!--Tracking_pid tries to get the robot as close to it's goal point as possible-->
+    <node name="controller" output="screen" pkg="tracking_pid" type="controller">
+        <remap from="move_base/cmd_vel" to="$(arg cmd_vel_topic)"/>
+        <remap from="local_trajectory" to="trajectory"/>
+        <param name="controller_debug_enabled" value="True"/>
+        <param name="track_base_link" value="true"/>
+        <param name="l" value="0.5"/>
+        <param name="Ki_long" value="0.0"/>
+        <param name="Kp_long" value="2.0"/>
+        <param name="Kd_long" value="0.5"/>
+        <param name="Ki_lat" value="0.0"/>
+        <param name="Kp_lat" value="4.0"/>
+        <param name="Kd_lat" value="0.3"/>
+    </node>
+</group>
 
 </launch>
