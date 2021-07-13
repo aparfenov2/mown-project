@@ -17,6 +17,11 @@
 
 
   <!-- Gazebo model spawner -->
+    <group if="$(eval world == 'empty')">
+      <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
+            args="-unpause -urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base"/>
+    </group>
+
     <group if="$(eval world == 'turtletown')">
       <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
             args="-unpause -urdf -x 5.5 -y -5.7 -z 1.2 -Y 3.14 -param robot_description -model mobile_base"/>
