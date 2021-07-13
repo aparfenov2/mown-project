@@ -21,6 +21,10 @@
       <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
             args="-unpause -urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base"/>
     </group>
+    <group if="$(eval world == 'yosemite')">
+      <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
+            args="-unpause -urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base"/>
+    </group>
 
     <group if="$(eval world == 'turtletown')">
       <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
