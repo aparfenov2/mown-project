@@ -4,21 +4,11 @@
 <xacro:include filename="$(find engix_description)/urdf/materials.xacro" />
 <xacro:include filename="$(find engix_description)/urdf/engix.trans" />
 <xacro:include filename="$(find engix_description)/urdf/engix.gazebo" />
-  <link name="base_footprint"/>
-
-
-
-<joint name="base_joint" type="fixed">
-
-  <origin xyz="0 0 0.0102" rpy="0 0 0" />
-  <parent link="base_footprint"/>
-  <child link="base_link" />
-</joint>
 <link name="base_link">
   <inertial>
-    <origin rpy="0 0 0" xyz="0.0025382796108358186 -0.004258964769025257 0.20035127231060307"/>
-    <mass value="18.77550264921881"/>
-    <inertia ixx="0.403326" ixy="-0.002814" ixz="-0.002231" iyy="0.251753" iyz="-0.005709" izz="0.321646"/>
+    <origin rpy="0 0 0" xyz="0.0005263550102558459 -0.0008435206011111315 0.2088531479687758"/>
+    <mass value="19.33842087101984"/>
+    <inertia ixx="0.298693" ixy="0.003154" ixz="-0.020052" iyy="0.45471" iyz="0.003425" izz="0.326894"/>
   </inertial>
   <visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -35,143 +25,388 @@
   </collision>
 </link>
 
-<link name="left_wheel">
+<link name="lwheel_1">
   <inertial>
-    <origin rpy="0 0 0" xyz="-0.03585495907153588 5.607161351894874e-08 7.24121555087387e-06"/>
+    <origin rpy="0 0 0" xyz="9.457707256244063e-09 0.03585438960934953 7.241215550846114e-06"/>
     <mass value="0.9580193019383823"/>
-    <inertia ixx="0.002703" ixy="0.0" ixz="-0.0" iyy="0.001585" iyz="0.0" izz="0.001585"/>
+    <inertia ixx="0.001585" ixy="-0.0" ixz="0.0" iyy="0.002703" iyz="0.0" izz="0.001585"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="0.148896 0.1355 -0.079162"/>
+    <origin rpy="0 0 0" xyz="0.133355 -0.150817 -0.079162"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/left_wheel.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/lwheel_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver_default"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="0.148896 0.1355 -0.079162"/>
+    <origin rpy="0 0 0" xyz="0.133355 -0.150817 -0.079162"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/left_wheel.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/lwheel_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
 
-<link name="right_wheel">
+<link name="rwheel_1">
   <inertial>
-    <origin rpy="0 0 0" xyz="0.03585359188757131 -1.4858674346474032e-08 6.622358018945618e-06"/>
+    <origin rpy="0 0 0" xyz="-6.147258196920191e-08 -0.035854161349757635 6.622358018903984e-06"/>
     <mass value="0.9580297510218192"/>
-    <inertia ixx="0.002703" ixy="0.0" ixz="0.0" iyy="0.001585" iyz="0.0" izz="0.001585"/>
+    <inertia ixx="0.001585" ixy="-0.0" ixz="0.0" iyy="0.002703" iyz="-0.0" izz="0.001585"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="-0.148104 0.1355 -0.079162"/>
+    <origin rpy="0 0 0" xyz="0.133355 0.146183 -0.079162"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/right_wheel.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/rwheel_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver_default"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="-0.148104 0.1355 -0.079162"/>
+    <origin rpy="0 0 0" xyz="0.133355 0.146183 -0.079162"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/right_wheel.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/rwheel_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
 
-<link name="ZED2">
+<link name="ZED2_1">
   <inertial>
-    <origin rpy="0 0 0" xyz="0.018001157946504642 -0.0005814546180888114 0.014361531099989666"/>
+    <origin rpy="0 0 0" xyz="-0.000581501231995768 -0.018000727408692088 0.014361531099989666"/>
     <mass value="1.195261039361359"/>
-    <inertia ixx="0.000179" ixy="-0.0" ixz="0.0" iyy="0.002923" iyz="0.0" izz="0.002942"/>
+    <inertia ixx="0.002923" ixy="0.0" ixz="0.0" iyy="0.000179" iyz="-0.0" izz="0.002942"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="0.008 -0.1745 -0.4957"/>
+    <origin rpy="0 0 0" xyz="-0.176645 -0.00992 -0.4957"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/ZED2.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/ZED2_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="black"/>
+    <material name="plate"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="0.008 -0.1745 -0.4957"/>
+    <origin rpy="0 0 0" xyz="-0.176645 -0.00992 -0.4957"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/ZED2.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/ZED2_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
 
-<link name="right_caster">
+<link name="dc_dc_1">
   <inertial>
-    <origin rpy="0 0 0" xyz="0.0006707901011975964 -0.010531204780533182 -0.03289263884489594"/>
-    <mass value="0.11890962334404172"/>
-    <inertia ixx="7.8e-05" ixy="0.0" ixz="0.0" iyy="6.3e-05" iyz="-1.5e-05" izz="3.2e-05"/>
+    <origin rpy="0 0 0" xyz="-0.046651616474644206 0.016238979027111536 -0.04632552446736696"/>
+    <mass value="0.518313971080152"/>
+    <inertia ixx="0.000557" ixy="-1.6e-05" ixz="8e-05" iyy="0.00183" iyz="2.5e-05" izz="0.00141"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="-0.086753 -0.15332 -0.072019"/>
+    <origin rpy="0 0 0" xyz="-0.027645 0.10808 -0.2157"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/right_caster.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/dc_dc_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="blues"/>
+    <material name="aluminum_satin"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="-0.086753 -0.15332 -0.072019"/>
+    <origin rpy="0 0 0" xyz="-0.027645 0.10808 -0.2157"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/right_caster.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/dc_dc_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
 
-<link name="left_caster">
+<link name="battery_1">
   <inertial>
-    <origin rpy="0 0 0" xyz="0.0006707901011974993 -0.010531189107599204 -0.03289315182415704"/>
-    <mass value="0.11890962334404165"/>
-    <inertia ixx="7.8e-05" ixy="0.0" ixz="0.0" iyy="6.3e-05" iyz="-1.5e-05" izz="3.2e-05"/>
+    <origin rpy="0 0 0" xyz="-3.679761519433805e-07 -0.014999967744423545 0.04000000067270583"/>
+    <mass value="15.997252151608594"/>
+    <inertia ixx="0.016973" ixy="-0.002227" ixz="0.0" iyy="0.14451" iyz="0.0" izz="0.144549"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="0.083247 -0.15332 -0.071999"/>
+    <origin rpy="0 0 0" xyz="-0.011102 -0.015765 -0.1077"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/left_caster.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/battery_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="blues"/>
+    <material name="silver_default"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="0.083247 -0.15332 -0.071999"/>
+    <origin rpy="0 0 0" xyz="-0.011102 -0.015765 -0.1077"/>
     <geometry>
-      <mesh filename="package://engix_description/meshes/left_caster.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://engix_description/meshes/battery_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
 
-<joint name="left_wheel_joint" type="continuous">
-  <origin rpy="0 0 0" xyz="-0.148896 -0.1355 0.079162"/>
+<link name="jetson_nano_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.02155296749521362 0.017997742630733643 -0.033483760221581144"/>
+    <mass value="0.6108601973933899"/>
+    <inertia ixx="0.000569" ixy="-0.0" ixz="-2e-06" iyy="0.00115" iyz="5e-06" izz="0.000794"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.02108 -0.10192 -0.21904"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/jetson_nano_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="paint_metallic_silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.02108 -0.10192 -0.21904"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/jetson_nano_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="lan_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.016145587504214687 0.013968039747456681 -0.030801865689642383"/>
+    <mass value="3.5643139184346726"/>
+    <inertia ixx="0.003249" ixy="-2e-06" ixz="-2.4e-05" iyy="0.010873" iyz="8e-06" izz="0.008095"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.07857 -0.10192 -0.2157"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/lan_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.07857 -0.10192 -0.2157"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/lan_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="gps_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.02876936503646009 0.0002886535867022977 0.013167397084734855"/>
+    <mass value="1.243058035704335"/>
+    <inertia ixx="0.001107" ixy="2e-06" ixz="-2e-06" iyy="0.001111" iyz="3e-06" izz="0.001946"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.112558 0.00808 -0.4957"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/gps_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.112558 0.00808 -0.4957"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/gps_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="usb_hub_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.01905288728759609 0.0007634997220654879 0.009321451666140235"/>
+    <mass value="1.4885537265302118"/>
+    <inertia ixx="0.003391" ixy="-4e-06" ixz="-3e-06" iyy="0.000548" iyz="-0.0" izz="0.003854"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.077355 -0.00192 -0.3177"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/usb_hub_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.077355 -0.00192 -0.3177"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/usb_hub_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="lidar_tof_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.022601193791078528 0.0369098575008472 0.024728884462763667"/>
+    <mass value="0.16629989164051073"/>
+    <inertia ixx="0.000113" ixy="-0.0" ixz="1e-06" iyy="5.9e-05" iyz="0.0" izz="0.000113"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.157645 0.04512 -0.3677"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/lidar_tof_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.157645 0.04512 -0.3677"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/lidar_tof_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="caster_right_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.004690059190597118 -0.00031884478947080686 -0.01885204625585646"/>
+    <mass value="0.05740836735618817"/>
+    <inertia ixx="2.5e-05" ixy="0.0" ixz="-6e-06" iyy="2.3e-05" iyz="0.0" izz="1.2e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.155465 0.084832 -0.072019"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/caster_right_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.155465 0.084832 -0.072019"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/caster_right_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="caster_left_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.004690059190596646 -0.00031884478947068196 -0.01885204625585646"/>
+    <mass value="0.057408367356188116"/>
+    <inertia ixx="2.5e-05" ixy="0.0" ixz="-6e-06" iyy="2.3e-05" iyz="0.0" izz="1.2e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.155465 -0.085168 -0.071999"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/caster_left_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.155465 -0.085168 -0.071999"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/caster_left_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="caster_wheel_left_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="1.9061138764597807e-07 0.0014995854065302239 1.7385093787486428e-07"/>
+    <mass value="0.06150125598785353"/>
+    <inertia ixx="1.6e-05" ixy="-0.0" ixz="-0.0" iyy="2.9e-05" iyz="-0.0" izz="1.6e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.139465 -0.082668 -0.025999"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/caster_wheel_left_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.139465 -0.082668 -0.025999"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/caster_wheel_left_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="caster_wheel_right_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="1.905032832039133e-07 0.0014995854065301545 1.78805265319687e-07"/>
+    <mass value="0.06150125598785355"/>
+    <inertia ixx="1.6e-05" ixy="0.0" ixz="0.0" iyy="2.9e-05" iyz="-0.0" izz="1.6e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.139465 0.087332 -0.026019"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/caster_wheel_right_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.139465 0.087332 -0.026019"/>
+    <geometry>
+      <mesh filename="package://engix_description/meshes/caster_wheel_right_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="left_wheel" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.133355 0.150817 0.079162"/>
   <parent link="base_link"/>
-  <child link="left_wheel"/>
-  <axis xyz="-1.0 -0.0 -0.0"/>
+  <child link="lwheel_1"/>
+  <axis xyz="0.0 1.0 -0.0"/>
 </joint>
 
-<joint name="right_wheel_joint" type="continuous">
-  <origin rpy="0 0 0" xyz="0.148104 -0.1355 0.079162"/>
+<joint name="right_wheel" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.133355 -0.146183 0.079162"/>
   <parent link="base_link"/>
-  <child link="right_wheel"/>
-  <axis xyz="-1.0 -0.0 -0.0"/>
+  <child link="rwheel_1"/>
+  <axis xyz="0.0 1.0 -0.0"/>
 </joint>
 
-<joint name="zed" type="fixed">
-  <origin rpy="0 0 0" xyz="-0.008 0.1745 0.4957"/>
+<joint name="ZED2" type="fixed">
+  <origin rpy="0 0 0" xyz="0.176645 0.00992 0.4957"/>
   <parent link="base_link"/>
-  <child link="ZED2"/>
+  <child link="ZED2_1"/>
 </joint>
 
-<joint name="right_caster_joint" type="continuous">
-  <origin rpy="0 0 0" xyz="0.086753 0.15332 0.072019"/>
+<joint name="dc_dc" type="fixed">
+  <origin rpy="0 0 0" xyz="0.027645 -0.10808 0.2157"/>
   <parent link="base_link"/>
-  <child link="right_caster"/>
-  <axis xyz="-0.0 0.0 1.0"/>
+  <child link="dc_dc_1"/>
 </joint>
 
-<joint name="left_caster_joint" type="continuous">
-  <origin rpy="0 0 0" xyz="-0.083247 0.15332 0.071999"/>
+<joint name="battery" type="fixed">
+  <origin rpy="0 0 0" xyz="0.011102 0.015765 0.1077"/>
   <parent link="base_link"/>
-  <child link="left_caster"/>
+  <child link="battery_1"/>
+</joint>
+
+<joint name="jetson_nano" type="fixed">
+  <origin rpy="0 0 0" xyz="-0.02108 0.10192 0.21904"/>
+  <parent link="base_link"/>
+  <child link="jetson_nano_1"/>
+</joint>
+
+<joint name="lan" type="fixed">
+  <origin rpy="0 0 0" xyz="0.07857 0.10192 0.2157"/>
+  <parent link="base_link"/>
+  <child link="lan_1"/>
+</joint>
+
+<joint name="gps" type="fixed">
+  <origin rpy="0 0 0" xyz="0.112558 -0.00808 0.4957"/>
+  <parent link="base_link"/>
+  <child link="gps_1"/>
+</joint>
+
+<joint name="usb_hub" type="fixed">
+  <origin rpy="0 0 0" xyz="-0.077355 0.00192 0.3177"/>
+  <parent link="base_link"/>
+  <child link="usb_hub_1"/>
+</joint>
+
+<joint name="lidar_tof" type="fixed">
+  <origin rpy="0 0 0" xyz="0.157645 -0.04512 0.3677"/>
+  <parent link="base_link"/>
+  <child link="lidar_tof_1"/>
+</joint>
+
+<joint name="caster_right" type="continuous">
+  <origin rpy="0 0 0" xyz="0.155465 -0.084832 0.072019"/>
+  <parent link="base_link"/>
+  <child link="caster_right_1"/>
   <axis xyz="0.0 0.0 -1.0"/>
+</joint>
+
+<joint name="caster_left" type="continuous">
+  <origin rpy="0 0 0" xyz="0.155465 0.085168 0.071999"/>
+  <parent link="base_link"/>
+  <child link="caster_left_1"/>
+  <axis xyz="0.0 0.0 -1.0"/>
+</joint>
+
+<joint name="caster_wheel_left" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.016 -0.0025 -0.046"/>
+  <parent link="caster_left_1"/>
+  <child link="caster_wheel_left_1"/>
+  <axis xyz="-0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="caster_wheel_right" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.016 -0.0025 -0.046"/>
+  <parent link="caster_right_1"/>
+  <child link="caster_wheel_right_1"/>
+  <axis xyz="-0.0 -1.0 0.0"/>
 </joint>
 
 </robot>

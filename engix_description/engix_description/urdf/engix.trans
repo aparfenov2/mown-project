@@ -3,7 +3,7 @@
 
 <transmission name="left_wheel_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="left_wheel_joint">
+  <joint name="left_wheel">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
   <actuator name="left_wheel_actr">
@@ -14,7 +14,7 @@
 
 <transmission name="right_wheel_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="right_wheel_joint">
+  <joint name="right_wheel">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
   <actuator name="right_wheel_actr">
@@ -23,23 +23,45 @@
   </actuator>
 </transmission>
 
-<transmission name="right_caster_tran">
+<transmission name="caster_right_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="right_caster_joint">
+  <joint name="caster_right">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="right_caster_actr">
+  <actuator name="caster_right_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="left_caster_tran">
+<transmission name="caster_left_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="left_caster_joint">
+  <joint name="caster_left">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="left_caster_actr">
+  <actuator name="caster_left_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="caster_wheel_left_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="caster_wheel_left">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="caster_wheel_left_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="caster_wheel_right_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="caster_wheel_right">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="caster_wheel_right_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
