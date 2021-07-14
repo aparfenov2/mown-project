@@ -5,11 +5,11 @@
     <arg default="false" name="sim"/>
     <arg default="false" name="segm"/>
     <arg default="false" name="segm_bypass"/>
-    <arg default="false" name="mb_mod"/>
+    <arg default="false" name="mb"/>
     <arg default="false" name="paused"/>
     <arg default="turtletown" name="world"/>
-    <!-- <arg default="/mobile_base/commands/velocity" name="cmd_vel_topic"/>-->
-    <arg default="/cmd_vel" name="cmd_vel_topic"/>
+    <arg default="/mobile_base/commands/velocity" name="cmd_vel_topic"/>
+    <!-- <arg default="/cmd_vel" name="cmd_vel_topic"/> -->
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -21,8 +21,8 @@
             <arg name="gui" value="true"/>
             <arg name="world_name" value="$(find my_utils_common)/worlds/$(arg world).world"/>
         </include>
-        <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/>
-        <!--   <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/><param name="robot_description" command="$(arg urdf_file)"/>-->
+        <!-- <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/> -->
+           <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/><param name="robot_description" command="$(arg urdf_file)"/>
         <!-- Gazebo model spawner -->
         <group if="$(eval world == 'empty')">
             <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
@@ -135,7 +135,6 @@
     </node>
     <!-- Arguments -->
     <arg default="waffle_pi" doc="model type [burger, waffle, waffle_pi]" name="model"/>
-    <arg default="/mobile_base/commands/velocity" name="cmd_vel_topic"/>
     <arg default="odom" name="odom_topic"/>
     <arg default="false" name="move_forward_only"/>
     <arg default="-2.5 -2.5 0 0 0 0" name="coverage_area_offset"/>
