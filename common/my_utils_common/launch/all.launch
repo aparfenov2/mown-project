@@ -6,6 +6,7 @@
     <arg default="false" name="segm"/>
     <arg default="false" name="segm_bypass"/>
     <arg default="false" name="mb"/>
+    <arg default="false" name="paused"/>
     <arg default="turtletown" name="world"/>
     <!-- <arg default="/mobile_base/commands/velocity" name="cmd_vel_topic"/>-->
     <arg default="/cmd_vel" name="cmd_vel_topic"/>
@@ -16,7 +17,7 @@
         <arg default="1" name="publish_tf"/>
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
             <arg name="use_sim_time" value="true"/>
-            <arg name="paused" value="false"/>
+            <arg name="paused" value="$(arg paused)"/>
             <arg name="debug" value="false"/>
             <arg name="gui" value="true"/>
             <arg name="world_name" value="$(find my_utils_common)/worlds/$(arg world).world"/>
@@ -25,16 +26,16 @@
         <!--   <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/><param name="robot_description" command="$(arg urdf_file)"/>-->
         <!-- Gazebo model spawner -->
         <group if="$(eval world == 'empty')">
-            <node args="-unpause -urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+            <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'yosemite')">
-            <node args="-unpause -urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+            <node args="-urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'turtletown')">
-            <node args="-unpause -urdf -x 5.5 -y -5.7 -z 1.2 -Y 3.14 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+            <node args="-urdf -x 5.5 -y -5.7 -z 1.2 -Y 3.14 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'baylands')">
-            <node args="-unpause -urdf -x 4.04 -y -10.6 -z -0.29 -Y 0.41 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+            <node args="-urdf -x 0 -y 0 -z 0.3638 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
 <!-- 
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
