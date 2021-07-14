@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /DepthCloud1/Auto Size1
+        - /TF1
         - /TF1/Frames1
       Splitter Ratio: 0.6858407258987427
     Tree Height: 474
@@ -26,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: cam
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -214,83 +215,19 @@ Visualization Manager:
       Frames:
         All Enabled: false
         base_footprint:
-          Value: false
+          Value: true
         base_link:
           Value: true
-        camera_depth_frame:
-          Value: false
-        camera_depth_optical_frame:
-          Value: false
-        camera_link:
-          Value: false
-        camera_rgb_frame:
-          Value: false
-        camera_rgb_optical_frame:
-          Value: false
-        caster_back_link:
-          Value: false
-        caster_front_link:
-          Value: false
-        cliff_sensor_front_link:
-          Value: false
-        cliff_sensor_left_link:
-          Value: false
-        cliff_sensor_right_link:
-          Value: false
         coverage_map:
           Value: true
-        gyro_link:
-          Value: false
+        lwheel_1:
+          Value: true
         map:
           Value: true
         odom:
           Value: false
-        plate_bottom_link:
-          Value: false
-        plate_middle_link:
-          Value: false
-        plate_top_link:
-          Value: false
-        pole_bottom_0_link:
-          Value: false
-        pole_bottom_1_link:
-          Value: false
-        pole_bottom_2_link:
-          Value: false
-        pole_bottom_3_link:
-          Value: false
-        pole_bottom_4_link:
-          Value: false
-        pole_bottom_5_link:
-          Value: false
-        pole_kinect_0_link:
-          Value: false
-        pole_kinect_1_link:
-          Value: false
-        pole_middle_0_link:
-          Value: false
-        pole_middle_1_link:
-          Value: false
-        pole_middle_2_link:
-          Value: false
-        pole_middle_3_link:
-          Value: false
-        pole_top_0_link:
-          Value: false
-        pole_top_1_link:
-          Value: false
-        pole_top_2_link:
-          Value: false
-        pole_top_3_link:
-          Value: false
-        velodyne:
-          Value: false
-        velodyne_base_link:
-          Value: false
-        wheel_left_link:
-          Value: false
-        wheel_right_link:
-          Value: false
+        rwheel_1:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -299,73 +236,13 @@ Visualization Manager:
       Show Names: true
       Tree:
         odom:
-          base_footprint:
-            base_link:
-              camera_rgb_frame:
-                camera_depth_frame:
-                  camera_depth_optical_frame:
-                    {}
-                camera_link:
-                  {}
-                camera_rgb_optical_frame:
-                  {}
-              caster_back_link:
-                {}
-              caster_front_link:
-                {}
-              cliff_sensor_front_link:
-                {}
-              cliff_sensor_left_link:
-                {}
-              cliff_sensor_right_link:
-                {}
-              gyro_link:
-                {}
-              plate_bottom_link:
-                {}
-              plate_middle_link:
-                {}
-              plate_top_link:
-                {}
-              pole_bottom_0_link:
-                {}
-              pole_bottom_1_link:
-                {}
-              pole_bottom_2_link:
-                {}
-              pole_bottom_3_link:
-                {}
-              pole_bottom_4_link:
-                {}
-              pole_bottom_5_link:
-                {}
-              pole_kinect_0_link:
-                {}
-              pole_kinect_1_link:
-                {}
-              pole_middle_0_link:
-                {}
-              pole_middle_1_link:
-                {}
-              pole_middle_2_link:
-                {}
-              pole_middle_3_link:
-                {}
-              pole_top_0_link:
-                {}
-              pole_top_1_link:
-                {}
-              pole_top_2_link:
-                {}
-              pole_top_3_link:
-                {}
-              velodyne_base_link:
-                velodyne:
-                  {}
-              wheel_left_link:
-                {}
-              wheel_right_link:
-                {}
+          base_link:
+            base_footprint:
+              {}
+            lwheel_1:
+              {}
+            rwheel_1:
+              {}
           map:
             coverage_map:
               {}

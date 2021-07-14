@@ -98,7 +98,7 @@
     <!--     <group if="$(arg loca)"><include file="$(find aloam_velodyne)/launch/aloam_velodyne_HDL_32.launch"><arg name="rviz" value="false" /><arg name="output" value="log" /></include><node pkg="tf" type="static_transform_publisher" name="odom_to_camera_init" args="0 0 0 0 0 0 1 odom camera_init 100" /><node pkg="tf" type="static_transform_publisher" name="aft_mapped_to_base_footprint" args="0 0 0 0 0 0 1 aft_mapped base_footprint 100" /></group>-->
     <!-- move_base -->
     <group if="$(arg mb)">
-        <node args="manager" name="pcl_proc" output="screen" pkg="nodelet" type="nodelet"/>
+<!--         <node args="manager" name="pcl_proc" output="screen" pkg="nodelet" type="nodelet"/>
         <node args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc" clear_params="true" name="point_cloud2_laserscan" output="screen" pkg="nodelet" required="true" respawn="false" type="nodelet">
             <param name="min_height" type="double" value="0.1"/>
             <param name="max_height" type="double" value="2.0"/>
@@ -106,6 +106,9 @@
             <remap from="cloud_in" to="$(arg points_topic)"/>
             <remap from="scan" to="/pcl_proc/scan"/>
         </node>
+ -->
+        <node name="tf_base_footprint" pkg="my_utils_common" type="tf_base_footprint.py"/>
+
         <!-- Arguments -->
         <arg default="waffle_pi" doc="model type [burger, waffle, waffle_pi]" name="model"/>
         <arg default="odom" name="odom_topic"/>
@@ -147,6 +150,7 @@
         <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
         <!-- Launch coverage progress tracking -->
         <node args="$(arg coverage_area_offset) map coverage_map 100" name="map_to_coveragemap" pkg="tf" type="static_transform_publisher"/>
+<!-- 
         <node name="coverage_progress" pkg="full_coverage_path_planner" type="coverage_progress">
             <param name="~target_area/x" value="$(arg coverage_area_size_x)"/>
             <param name="~target_area/y" value="$(arg coverage_area_size_y)"/>
@@ -154,6 +158,7 @@
             <remap from="reset" to="coverage_progress/reset"/>
             <param name="~map_frame" value="/coverage_map"/>
         </node>
+ -->
         <!--Tracking_pid cannot just accept a nav_msgs/Path, it can only go to a PoseStamped,
        so the path_interpolator drags a PoseStamped over a Path at a given speed-->
         <node name="interpolator" pkg="tracking_pid" type="path_interpolator">
@@ -174,6 +179,10 @@
             <param name="Ki_lat" value="0.0"/>
             <param name="Kp_lat" value="4.0"/>
             <param name="Kd_lat" value="0.3"/>
+
+            <param name="base_link_frame" value="base_footprint"/>
+            <param name="map_frame" value="map"/>
+            
         </node>
     </group>
 </launch>
