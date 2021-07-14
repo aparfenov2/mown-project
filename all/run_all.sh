@@ -10,6 +10,7 @@ while [[ "$#" -gt 0 ]]; do
         --sim) SIM=1;  ;;
         --grass_world) WORLD="baylands";  ;;
         --world) WORLD="$2"; shift; ;;
+        --paused) PAUSED=1; ;;
         --rviz) RVIZ=1; ;;
         --teleop) TELEOP=1; ;;
         --segm) SEGMENTATION=1; ;;
@@ -27,6 +28,7 @@ done
 ROSARGS=()
 [ -n "$SIM" ] && ROSARGS+=("sim:=true") && CONTAINER_NAME="sim"
 [ -n "$WORLD" ] && ROSARGS+=("world:=$WORLD")
+[ -n "$PAUSED" ] && ROSARGS+=("paused:=true")
 [ -n "$RVIZ" ] && ROSARGS+=("rviz:=true") && CONTAINER_NAME="rviz"
 [ -n "$TELEOP" ] && ROSARGS+=("teleop:=true") && CONTAINER_NAME="teleop"
 [ -n "$SEGMENTATION" ] && ROSARGS+=("segm:=true") && CONTAINER_NAME="segm"
@@ -37,6 +39,8 @@ ROSARGS=()
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
+    export PYTHONPYCACHEPREFIX="/cdir/pycache/"
+
     set -ex
     pushd $PWD
     cd /cdir/ws 
