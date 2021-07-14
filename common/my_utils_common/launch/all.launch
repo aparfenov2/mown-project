@@ -9,6 +9,8 @@
     <arg default="turtletown" name="world"/>
     <!-- <arg default="/mobile_base/commands/velocity" name="cmd_vel_topic"/>-->
     <arg default="/cmd_vel" name="cmd_vel_topic"/>
+    <!-- <arg default="/velodyne_points" name="points_topic"/> -->
+    <arg default="/velodyne_points" name="points_topic"/>
     <!-- sim -->
     <group if="$(arg sim)">
         <arg default="1" name="publish_tf"/>
@@ -34,10 +36,12 @@
         <group if="$(eval world == 'baylands')">
             <node args="-unpause -urdf -x 4.04 -y -10.6 -z -0.29 -Y 0.41 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
+<!-- 
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
             <param name="publish_frequency" type="double" value="30.0"/>
         </node>
-        <node args="/mobile_base/sensors/imu_data /mobile_base/sensors/imu_data_raw" name="imu_relay" pkg="topic_tools" type="relay"/>
+ -->
+        <!-- <node args="/mobile_base/sensors/imu_data /mobile_base/sensors/imu_data_raw" name="imu_relay" pkg="topic_tools" type="relay"/> -->
     </group>
     <!-- rviz -->
     <group if="$(arg rviz)">
@@ -98,7 +102,7 @@
             <param name="min_height" type="double" value="0.1"/>
             <param name="max_height" type="double" value="2.0"/>
             <param name="target_frame" type="str" value="base_link"/>
-            <remap from="cloud_in" to="/velodyne_points"/>
+            <remap from="cloud_in" to="$(arg points_topic)"/>
             <remap from="scan" to="/pcl_proc/scan"/>
         </node>
         <!-- Arguments -->
