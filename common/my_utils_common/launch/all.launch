@@ -1,15 +1,15 @@
 <launch>
-    <arg default="false" name="rviz"/>
-    <arg default="false" name="loca"/>
-    <arg default="false" name="teleop"/>
-    <arg default="false" name="sim"/>
-    <arg default="false" name="segm"/>
-    <arg default="false" name="segm_bypass"/>
-    <arg default="false" name="mb"/>
-    <arg default="false" name="paused"/>
-    <arg default="turtletown" name="world"/>
-    <arg default="/mobile_base/commands/velocity" name="cmd_vel_topic"/>
-    <!-- <arg default="/cmd_vel" name="cmd_vel_topic"/> -->
+    <arg name="rviz"   default="false" />
+    <arg name="loca"   default="false" />
+    <arg name="teleop" default="false" />
+    <arg name="sim"    default="false" />
+    <arg name="segm"   default="false" />
+    <arg name="segm_bypass" default="false" />
+    <arg name="mb"     default="false" />
+    <arg name="paused" default="false" />
+    <arg name="world"  default="turtletown" />
+    <arg name="cmd_vel_topic" default="/mobile_base/commands/velocity" />
+    <!-- <arg name="cmd_vel_topic" default="/cmd_vel" /> -->
 
 <!-- sim -->
     <group if="$(arg sim)">
