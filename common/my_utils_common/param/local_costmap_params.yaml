@@ -1,13 +1,17 @@
-local_costmap:
-  global_frame: odom
-  robot_base_frame: base_footprint
+global_frame: odom
+robot_base_frame: base_footprint
 
-  update_frequency: 10.0
-  publish_frequency: 10.0
-  transform_tolerance: 0.5  
+update_frequency: 10.0
+publish_frequency: 10.0
+transform_tolerance: 0.5  
 
-  rolling_window: true
-  width: 1
-  height: 1
-  resolution: 0.005
+rolling_window: true
+width: 1
+height: 1
+resolution: 0.005
   
+plugins:
+ - {name: static, type: "costmap_2d::StaticLayer"}
+
+footprint: [[-0.164, -0.124], [-0.164, 0.124], [0.0616, 0.140], [0.0616, -0.140]]
+#robot_radius: 0.17
