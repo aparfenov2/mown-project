@@ -25,3 +25,6 @@
 [submodule "3rd_party/full_coverage_path_planner"]
 	path = 3rd_party/full_coverage_path_planner
 	url = git@github.com:nobleo/full_coverage_path_planner.git
+[submodule "3rd_party/frontier_exploration"]
+	path = 3rd_party/frontier_exploration
+	url = git@github.com:paulbovbel/frontier_exploration.git

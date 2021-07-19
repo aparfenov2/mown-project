@@ -145,17 +145,15 @@
     <arg default="0.3" name="robot_radius"/>
     <arg default="0.3" name="tool_radius"/>
 
-    <arg default="$(find my_utils_common)/maps/grid.yaml" name="map"/>
+    <!-- <arg default="$(find my_utils_common)/maps/grid.yaml" name="map"/> -->
     <!-- <node clear_params="true" name="move_base_flex" output="screen" pkg="mbf_costmap_nav" respawn="false" type="mbf_costmap_nav"> -->
      <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
         <!-- <param name="tf_timeout" value="1.5"/> -->
         <param name="base_global_planner" value="full_coverage_path_planner/SpiralSTC"/>
         <!-- <param name="base_local_planner" value="pure_pursuit_local_planner/PurePursuitPlanner"/>         -->
 
-        <rosparam command="load" file="$(find my_utils_common)/param/costmap_common_params_$(arg model).yaml" ns="global_costmap"/>
-        <rosparam command="load" file="$(find my_utils_common)/param/costmap_common_params_$(arg model).yaml" ns="local_costmap"/>
-        <rosparam command="load" file="$(find my_utils_common)/param/local_costmap_params.yaml"/>
-        <rosparam command="load" file="$(find my_utils_common)/param/global_costmap_params.yaml"/>
+        <rosparam command="load" file="$(find my_utils_common)/param/local_costmap_params.yaml" ns="local_costmap"/>
+        <rosparam command="load" file="$(find my_utils_common)/param/global_costmap_params.yaml" ns="global_costmap"/>
         <!-- <rosparam command="load" file="$(find my_utils_common)/param/move_base_flex_params.yaml"/> -->
         <param name="SpiralSTC/robot_radius" value="$(arg robot_radius)"/>
         <param name="SpiralSTC/tool_radius" value="$(arg tool_radius)"/>
@@ -174,9 +172,10 @@
         <!-- <remap from="/move_base/goal" to="/move_base_simple/goal"/>-->
     <!-- </node> -->
     <!--We need a map to fully cover-->
-    <node args="$(arg map)" name="grid_server" pkg="map_server" type="map_server">
+<!--     <node args="$(arg map)" name="grid_server" pkg="map_server" type="map_server">
         <param name="frame_id" value="map"/>
     </node>
+ -->
     <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
     <!-- Launch coverage progress tracking -->
 <!--     <node args="$(arg coverage_area_offset) map coverage_map 100" name="map_to_coveragemap" pkg="tf" type="static_transform_publisher"/>
@@ -207,6 +206,12 @@
         <param name="Ki_lat" value="0.0"/>
         <param name="Kp_lat" value="4.0"/>
         <param name="Kd_lat" value="0.3"/>
+    </node>
+
+    <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
+    <node pkg="my_utils_common" type="polygon_layer_helper.py" name="exploration_server_node" output="screen"/>
+    <node pkg="my_utils_common" type="map_server.py" name="grid_server" output="screen">
+        <remap from="/map" to="/move_base/global_costmap/costmap"/>
     </node>
 
 </group>
