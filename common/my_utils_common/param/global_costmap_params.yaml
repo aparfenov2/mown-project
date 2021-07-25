@@ -5,20 +5,16 @@ update_frequency: 10.0
 publish_frequency: 10.0
 transform_tolerance: 0.5
 
-rolling_window: true
+rolling_window: false
 width: 10
 height: 10
-# origin_x: -5 
-# origin_y: -5
+origin_x: -5 
+origin_y: -5
 resolution: 0.1
 
 plugins:
- - {name: polygon_layer, type: "polygon_layer::PolygonLayer"}
  - {name: obstacle, type: "costmap_2d::ObstacleLayer"}
  - {name: inflation, type: "costmap_2d::InflationLayer"}
-
-polygon_layer:
-    resize_to_polygon: true
 
 obstacle:
   observation_sources: scan

@@ -11,7 +11,8 @@ height: 1
 resolution: 0.005
   
 plugins:
- - {name: static, type: "costmap_2d::StaticLayer"}
-
+ # - {name: static, type: "costmap_2d::StaticLayer"}
+ - {name: obstacle, type: "costmap_2d::ObstacleLayer"}
+ 
 footprint: [[-0.164, -0.124], [-0.164, 0.124], [0.0616, 0.140], [0.0616, -0.140]]
 #robot_radius: 0.17

@@ -553,7 +553,7 @@ Visualization Manager:
       Marker Topic: /exploration_polygon_marker
       Name: ploygon_mrk
       Namespaces:
-        explore_points: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -564,6 +564,16 @@ Visualization Manager:
       Queue Size: 10
       Topic: /move_base/global_costmap/polygon_layer/current_polygon
       Unreliable: false
+      Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: ploygon_map
+      Topic: /costmap_node/costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
       Value: true
   Enabled: true
   Global Options:
@@ -593,7 +603,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 7.4142656326293945
+      Distance: 9.433427810668945
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -609,9 +619,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.1097946166992188
+      Pitch: 0.4247961640357971
       Target Frame: <Fixed Frame>
-      Yaw: 3.0185632705688477
+      Yaw: 2.2285618782043457
     Saved: ~
 Window Geometry:
   Displays:
