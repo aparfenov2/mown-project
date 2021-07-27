@@ -60,9 +60,9 @@
             <arg name="odom_topic" value="odom" />
         </include>
 
-        <node name="simple_planner" pkg="simple_planner" type="simple_planner.py" output="screen">
+        <!-- <node name="simple_planner" pkg="simple_planner" type="simple_planner.py" output="screen">
             <remap from="goal" to="move_base_simple/goal"/>
-        </node>
+        </node> -->
 
     </group>
 

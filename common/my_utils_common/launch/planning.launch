@@ -1,7 +1,6 @@
 <launch>
     <include file="$(find coverage_path_planner)/launch/run.launch"/>
     <include file="$(find route_planner)/launch/run.launch"/>
-    <include file="$(find local_trajectory_planner)/launch/run.launch"/>
-        <arg name="use_bridge" value="true">
+    <include file="$(find local_trajectory_planner)/launch/controller_run.launch">
     </include>
 </launch>
