@@ -4,24 +4,24 @@ import rospy
 import numpy as np
 
 from abstractnode import AbstractNode
-from continious_state_planner import AstarPathPlanner
+from continious_state_planner import AstarPathPlanner, GridGenerator, AStar
 from coverage_path_planner import CoveragePathClient
-from enginx_msgs.msg import Localization, PointWithSpeed, Route, RouteTask, ProgressRoutePlanner
+from enginx_msgs.msg import Localization, PointWithSpeed, Route, RouteTaskPolygon, RouteTaskToPoint, ProgressRoutePlanner
 from geometry_msgs.msg import Point32, PoseStamped
-from nav_msgs.msg import Path
+from nav_msgs.msg import Path, OccupancyGrid
 from tf.transformations import euler_from_quaternion
 
 
 class RoutePlannerNode(AbstractNode):
     IDLE = 'idle'
-    COVER = RouteTask.EXPLORE_POLYGON_TASK
-    PATH = RouteTask.GO_TO_POSE_TASK
+    COVER = "cover"
+    PATH = "to_point"
 
-    MAX_SPEED = 5.0
+    MAX_SPEED = 0.10
 
     def initialization(self):
-        self.__astar_planner = AstarPathPlanner()
-        self.__coverage_path_client = CoveragePathClient()
+        self.__astar_planner = AstarWrapper()
+        # self.__coverage_path_client = CoveragePathClient()
 
         self.__task = None 
         self.__path = None
@@ -30,16 +30,20 @@ class RoutePlannerNode(AbstractNode):
         self.__states_dict = {
             self.IDLE: self.__idle_process,
             self.PATH: self.__pose_task_process,
-            self.COVER: self.__polygon_task_progress
+            # self.COVER: self.__polygon_task_progress
         }
         self.__state = self.IDLE
+
+        self.obstacles = set()
+        self.resolution = 1.0
  
         self.__route_publisher = rospy.Publisher('/route', Route, queue_size=10)
         self.__progress_route_publisher = rospy.Publisher('/route_progress', ProgressRoutePlanner, queue_size=10)
 
-        rospy.Subscriber('/route_task', RouteTask, self.__task_callback)
+        rospy.Subscriber('/route_task_polygon', RouteTaskPolygon, self.__task_polygon_callback)
+        rospy.Subscriber('/route_task_to_point', RouteTaskToPoint, self.__task_to_point_callback)
         rospy.Subscriber('/localization', Localization, self.__localization_callback)
-        print('HERE')
+        rospy.Subscriber('/occupancy_grid_map', OccupancyGrid, self.__occupancy_grid_map_callback)
     
     def work(self):
         self.__states_dict[self.__state]()        
@@ -63,10 +67,25 @@ class RoutePlannerNode(AbstractNode):
         route.path = [PointWithSpeed(x=point.x, y=point.y, speed=self.MAX_SPEED) for point in path]
         return route
 
-    def __task_callback(self, message):
+    def __task_polygon_callback(self, message):
         self.__task = message
-        self.__check_state(message.task_type)
-        self.__state = message.task_type
+        self.__state = self.COVER
+
+    def __task_to_point_callback(self, message):
+        self.__task = message
+        self.__state = self.PATH
+
+    def __occupancy_grid_map_callback(self, message):
+        width = message.info.width
+        height = message.info.height
+        resolution = message.info.resolution
+
+        self.__astar_planner.set_scale(resolution)
+
+        for x in range(width):
+            for y in range(height):
+                if message.data[x + width * y] == 1:
+                    pass
 
     def __localization_callback(self, message):
         self.__position = message
@@ -91,7 +110,7 @@ class RoutePlannerNode(AbstractNode):
 
         robot_pose = self.__localization2tuple(self.__position)
 
-        path = self.__astar_planner.astar_statespace(robot_pose, target_pose)
+        path = self.__astar_planner.search(robot_pose, target_pose, obstacles=self.obstacles)
 
         route = Route()
 
@@ -104,9 +123,9 @@ class RoutePlannerNode(AbstractNode):
 
         self.__route_publisher.publish(route)
 
-        if self.__distance(target_pose, robot_pose) < 1.0:
-            self.__send_task_done()
-            self.__switch_to_idle()
+        # if self.__distance(target_pose, robot_pose) < 1.0:
+        self.__send_task_done()
+        self.__switch_to_idle()
 
     def __pose2tuple(self, pose):
         q = pose.orientation
@@ -165,3 +184,36 @@ class RoutePlannerNode(AbstractNode):
         last_point = np.array([last_point.x, last_point.y])
 
         return np.linalg.norm(pos - last_point) < 1.0
+
+
+class AstarWrapper(object):
+    def __init__(self, scale=0.1):
+        self.scale = scale
+
+    def set_scale(self, scale):
+        self.scale = scale
+
+    def search(self, source_point, goal_point, obstacles):
+        grid_source = self.convert_to_grid(source_point)
+        grid_goal = self.convert_to_grid(goal_point)
+        # print("From: {}, To: {}".format(
+        #     grid_source,
+        #     grid_goal
+        # ))
+
+        astar = AStar(grid_source, grid_goal, "euclidean", obstacles=obstacles)
+        path, visited = astar.searching()
+        
+        result = []
+        for point in path:
+            result.append(self.convert_to_coordinate(point))
+
+        # print("GOT result, {} points".format(len(result)))
+        result = reversed(result)
+        return result
+
+    def convert_to_grid(self, point):
+        return tuple([ int(p / self.scale) for p in point[:2]])
+
+    def convert_to_coordinate(self, point):
+        return [ float(p * self.scale) for p in point]

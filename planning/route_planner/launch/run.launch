@@ -1,8 +1,8 @@
 <launch>
     <node name="RoutePlannerNode" pkg="route_planner" type="main.py" respawn="true" respawn_delay="5" output="screen"/>
 
-        
+<!--         
     <include file="$(find coverage_path_planner)/launch/run.launch">
 
-    </include>
+    </include> -->
 </launch>
