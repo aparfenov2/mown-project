@@ -148,5 +148,24 @@ RUN if [ "x$(nproc)" = "x1" ] ; then export USE_PROC=1 ; else export USE_PROC=$(
       ros-${ROS_DISTRO}-tf \
       python3-catkin-lint python3-pip
 
+WORKDIR /tmp
+
+COPY requirements.txt ./
+
+# Install requirements
+RUN python3 -m pip install --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-cache-dir -r requirements.txt
+RUN rm requirements.txt
+
+RUN python3 python3 -m pip install python3-tk
+RUN python3 -m pip install -U catkin_tools
+
+ENV ROS_DISTRO=noetic
+ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
+
+RUN echo 'source ${ROS_ROOT}/setup.bash' >> /root/.bashrc
+
+WORKDIR /catkin_ws
+
 RUN pip3 install osrf-pycommon
 
