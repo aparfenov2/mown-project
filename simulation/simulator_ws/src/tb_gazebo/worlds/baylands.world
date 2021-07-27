@@ -35,7 +35,7 @@
     </spherical_coordinates>
 
     <include>
-      <uri>model://yosemite</uri>
+      <uri>model://baylands</uri>
     </include>
 
     <gui fullscreen='0'>

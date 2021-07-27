@@ -3,11 +3,15 @@ SEGMENTATION_BYPASS=1
 ROSCORE=1
 ALL_ARGS=("$@")
 CONTAINER_NAME="all"
+WORLD="turtletown"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --inner) INNER=1 ;;
         --sim) SIM=1;  ;;
+        --grass_world) WORLD="baylands";  ;;
+        --world) WORLD="$2"; shift; ;;
+        --paused) PAUSED=1; ;;
         --rviz) RVIZ=1; ;;
         --teleop) TELEOP=1; ;;
         --roscore) ROSCORE=1 ;;
@@ -27,18 +31,22 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 ROSARGS=()
-[ -n "$SIM" ] && ROSARGS+=("sim:=true")
-[ -n "$RVIZ" ] && ROSARGS+=("rviz:=true")
-[ -n "$TELEOP" ] && ROSARGS+=("teleop:=true")
-[ -n "$SEGMENTATION" ] && ROSARGS+=("segm:=true")
+[ -n "$SIM" ] && ROSARGS+=("sim:=true") && CONTAINER_NAME="sim"
+[ -n "$WORLD" ] && ROSARGS+=("world:=$WORLD")
+[ -n "$PAUSED" ] && ROSARGS+=("paused:=true")
+[ -n "$RVIZ" ] && ROSARGS+=("rviz:=true") && CONTAINER_NAME="rviz"
+[ -n "$TELEOP" ] && ROSARGS+=("teleop:=true") && CONTAINER_NAME="teleop"
+[ -n "$SEGMENTATION" ] && ROSARGS+=("segm:=true") && CONTAINER_NAME="segm"
 [ -n "$SEGMENTATION_BYPASS" ] && ROSARGS+=("segm_bypass:=true")
-[ -n "$PROJECTION" ] && ROSARGS+=("proj:=true")
-[ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true")
-[ -n "$MOVE_BASE_MOD" ] && ROSARGS+=("mb_mod:=true")
+[ -n "$PROJECTION" ] && ROSARGS+=("proj:=true") && CONTAINER_NAME="proj"
+[ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true") && CONTAINER_NAME="loca"
+[ -n "$MOVE_BASE_MOD" ] && ROSARGS+=("mb_mod:=true") && CONTAINER_NAME="mb_mod"
 [ -n "$PLANNING" ] && ROSARGS+=("planning:=true")
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
+    export PYTHONPYCACHEPREFIX="/cdir/pycache/"
+
     set -ex
     pushd $PWD
     cd /cdir/ws 
@@ -51,6 +59,8 @@ ROSARGS=()
     popd
 
     . /cdir/ws/devel/setup.bash
+    export GAZEBO_MODEL_PATH="/cdir/ws/src/gazebo_models"
+    # echo GAZEBO_MODEL_PATH="${GAZEBO_MODEL_PATH}"
     roslaunch my_utils_common all.launch ${ROSARGS[@]}
     exit 0
 }
@@ -73,10 +83,12 @@ cd ws/src
 # [ -d "catkin_simple" ] || {
 #     git clone git@github.com:catkin/catkin_simple.git
 # }
-PTH="segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth"
+# PTH="segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth"
+PTH="ddrnet/model/DDRNet_CS.wts"
 [ -n "${SEGMENTATION_BYPASS}" ] && {
     [ -f "$PTH" ] || {
-        curl -o $PTH  https://download.openmmlab.com/mmsegmentation/v0.5/hrnet/fcn_hr18s_512x1024_40k_cityscapes/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth
+        # curl -o $PTH  https://download.openmmlab.com/mmsegmentation/v0.5/hrnet/fcn_hr18s_512x1024_40k_cityscapes/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth
+        curl -o $PTH  https://kan-rt.ddns.net:8000/DDRNet_CS.wts
     }
 }
 
