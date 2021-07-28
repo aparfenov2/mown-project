@@ -164,6 +164,7 @@
  -->        <!-- <remap from="/move_base_flex/SpiralSTC/plan" to="/move_base/SpiralSTC/plan"/> -->
          <!-- <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/> -->
          <remap from="cmd_vel" to="/fake_robot/cmd_vel"/>
+         <remap from="move_base_simple/goal" to="/fake_move_base/goal"/>
         <!-- <remap from="/move_base_flex/tracking_pid/interpolator" to="/move_base/TrackingPidLocalPlanner/interpolator"/> -->
     </node>
 <!--     <node name="move_base" pkg="mbf_costmap_nav" type="move_base_legacy_relay.py">
@@ -210,12 +211,14 @@
 
     <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
     <node pkg="my_utils_common" type="polygon_layer_helper.py" name="exploration_server_node" output="screen"/>
+    <node pkg="my_utils_common" type="mb_service_client.py" name="mb_service_client" output="screen"/>
 
     <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" clear_params="true">
         <rosparam file="$(find my_utils_common)/param/costmap_2d_params.yaml" command="load" ns="costmap" />
     </node>
     <node pkg="my_utils_common" type="map_server.py" name="grid_server" output="screen">
         <remap from="/map" to="/costmap_node/costmap/costmap"/>
+        <remap from="/map_updates" to="/costmap_node/costmap/costmap_updates"/>
     </node>
 
 </group>

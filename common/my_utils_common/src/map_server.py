@@ -3,24 +3,22 @@
 import rospy
 from nav_msgs.srv import GetMap, GetMapResponse
 from nav_msgs.msg import OccupancyGrid
+from occupancy_grid_python import OccupancyGridManager
+import ros_numpy
 
 class MapServer:
     def __init__(self):
-        self.map = None
-
-    def grid_callback(self, data):
-        self.map = data
+        rospy.init_node('map_server')
+        self.ogm = OccupancyGridManager('/map', subscribe_to_updates=True)  # default False
+        rospy.Service('static_map', GetMap, self.handle_get_map)
+        rospy.loginfo("Ready to publish occupancy grid as service")
 
     def handle_get_map(self, req):
-        assert self.map is not None
         rospy.loginfo('handle_get_map: map returned')
-        return GetMapResponse(self.map)
+        msg = ros_numpy.msgify(OccupancyGrid, self.ogm._grid_data, self.ogm._occ_grid_metadata)
+        return GetMapResponse(msg)
 
     def main(self):
-        rospy.init_node('map_server')
-        rospy.Service('static_map', GetMap, self.handle_get_map)
-        rospy.Subscriber("/map", OccupancyGrid, self.grid_callback)
-        rospy.loginfo("Ready to add two ints.")
         rospy.spin()
 
 if __name__ == "__main__":
