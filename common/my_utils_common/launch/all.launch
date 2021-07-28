@@ -5,6 +5,7 @@
     <arg default="false" name="sim"/>
     <arg default="false" name="segm"/>
     <arg default="false" name="segm_bypass"/>
+    <arg default="false" name="planning"/>
     <arg default="false" name="mb_mod"/>
     <arg default="false" name="paused"/>
     <arg default="turtletown" name="world"/>
@@ -87,10 +88,14 @@
             <arg name="odom_topic" value="odom" />
         </include>
 
-        <node name="simple_planner" pkg="simple_planner" type="simple_planner.py" output="screen">
+        <!-- <node name="simple_planner" pkg="simple_planner" type="simple_planner.py" output="screen">
             <remap from="goal" to="move_base_simple/goal"/>
-        </node>
+        </node> -->
 
     </group>
 
+<!-- planning system -->
+    <group if="$(arg planning)">
+        <include file="$(find my_utils_common)/launch/planning.launch"/>    
+    </group>
 </launch>
