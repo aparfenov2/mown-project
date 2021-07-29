@@ -16,7 +16,8 @@ class OdometryToLocalizationNode(AbstractNode):
         self.localization_publisher = rospy.Publisher('/localization', Localization, queue_size=10)
 
         # rospy.Subscriber('/laser_odom_to_init', Odometry, self.__odometry_callback) 
-        rospy.Subscriber('/ground_truth/state', Odometry, self.__odometry_callback)
+        odometry_topic = rospy.get_param('/planning/odometry', '/ground_truth/state')
+        rospy.Subscriber(odometry_topic, Odometry, self.__odometry_callback)
 
     def __odometry_callback(self, message: Odometry):
 
