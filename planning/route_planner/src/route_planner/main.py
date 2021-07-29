@@ -37,13 +37,13 @@ class RoutePlannerNode(AbstractNode):
         self.obstacles = set()
         self.resolution = 1.0
  
-        self.__route_publisher = rospy.Publisher('/route', Route, queue_size=10)
-        self.__progress_route_publisher = rospy.Publisher('/route_progress', ProgressRoutePlanner, queue_size=10)
+        self.__route_publisher = rospy.Publisher('/planner/route', Route, queue_size=10)
+        self.__progress_route_publisher = rospy.Publisher('/planner/route_progress', ProgressRoutePlanner, queue_size=10)
 
-        rospy.Subscriber('/route_task_polygon', RouteTaskPolygon, self.__task_polygon_callback)
-        rospy.Subscriber('/route_task_to_point', RouteTaskToPoint, self.__task_to_point_callback)
-        rospy.Subscriber('/localization', Localization, self.__localization_callback)
-        rospy.Subscriber('/occupancy_grid_map', OccupancyGrid, self.__occupancy_grid_map_callback)
+        rospy.Subscriber('/planner/route_task_polygon', RouteTaskPolygon, self.__task_polygon_callback)
+        rospy.Subscriber('/planner/route_task_to_point', RouteTaskToPoint, self.__task_to_point_callback)
+        rospy.Subscriber('/planner/localization', Localization, self.__localization_callback)
+        rospy.Subscriber('/planner/occupancy_grid_map', OccupancyGrid, self.__occupancy_grid_map_callback)
     
     def work(self):
         self.__states_dict[self.__state]()        
