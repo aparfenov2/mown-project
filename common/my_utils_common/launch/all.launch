@@ -5,6 +5,7 @@
     <arg name="sim"    default="false" />
     <arg name="segm"   default="false" />
     <arg name="segm_bypass" default="false" />
+    <arg name="planning" default="false" />
     <arg name="mb"     default="false" />
     <arg name="paused" default="false" />
     <arg name="world"  default="turtletown" />
@@ -223,4 +224,8 @@
 
 </group>
 
+<!-- planning system -->
+    <group if="$(arg planning)">
+        <include file="$(find my_utils_common)/launch/planning.launch"/>    
+    </group>
 </launch>

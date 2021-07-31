@@ -247,6 +247,9 @@ class LocalTrajectoryGenerator(object):
 
         # self.plot(path, robot_pos, trajectories)
 
+        if (len(trajectories) == 0):
+            return []
+
         best_trajectory = self.get_best_one(trajectories, path)
         return best_trajectory.get_poses()
         # self.plot(path, robot_pos, [best_trajectory])

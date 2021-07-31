@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(enginx_msgs)
+project(move_controller)
+
+set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_CXX_FLAGS "-std=c++14")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g")
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -7,6 +11,28 @@ project(enginx_msgs)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+    roslaunch
+    rospy
+    roscpp
+    geometry_msgs
+    nav_msgs
+)
+
+find_package(PCL REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(Ceres REQUIRED)
+
+include_directories(
+  include
+	${catkin_INCLUDE_DIRS} 
+	${PCL_INCLUDE_DIRS}
+  ${CERES_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+)
+# add_executable(test_ceres src/test_ceres.cpp)
+# target_link_libraries(test_ceres Ceres::ceres)
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -15,8 +41,8 @@ project(enginx_msgs)
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
-# roslaunch_add_file_check(launch)
+catkin_python_setup()
+roslaunch_add_file_check(launch)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -43,19 +69,11 @@ project(enginx_msgs)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  DIRECTORY msg
-  FILES
-  GlobalTask.msg
-  Route.msg
-  Localization.msg
-  LocalTrajectoryStamped.msg
-  PointWithSpeed.msg
-  ProgressRoutePlanner.msg
-  RouteTaskPolygon.msg
-  RouteTaskToPoint.msg
-  RouteTaskProgressEvent.msg
-)
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -111,18 +129,14 @@ add_message_files(
 # #  LIBRARIES driver
 # #  CATKIN_DEPENDS other_catkin_pkg
 #  #DEPENDS geometry_msgs
+#   # INCLUDE_DIRS include
 # )
 
-find_package(catkin REQUIRED COMPONENTS
-    std_msgs
-    geometry_msgs
-    message_generation
+catkin_package(
+  # CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs
+  # DEPENDS EIGEN3 PCL 
+  # INCLUDE_DIRS include
 )
-
-generate_messages(DEPENDENCIES std_msgs geometry_msgs)
-
-catkin_package(CATKIN_DEPENDS message_runtime std_msgs geometry_msgs)
-
 
 
 ###########
@@ -136,6 +150,21 @@ catkin_package(CATKIN_DEPENDS message_runtime std_msgs geometry_msgs)
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/driver.cpp
+# )
+
+
+
+# add_executable(test_ceres src/test_ceres.cpp)
+# # target_link_libraries(test_ceres ${CERES_INCLUDE_DIRS})
+
+# target_include_directories(test_ceres
+#   PRIVATE
+#     ${CERES_INCLUDE_DIRS}
+# )
+
+# target_link_libraries(test_ceres
+#   PRIVATE
+#     ${CERES_LIBRARIES}
 # )
 
 ## Add cmake target dependencies of the library
