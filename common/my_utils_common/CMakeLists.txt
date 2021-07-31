@@ -8,6 +8,7 @@ catkin_python_setup()
 
 catkin_install_python(PROGRAMS 
     src/mb_service_client.py
+    src/polygon_msg_adapter.py
     src/polygon_layer_helper.py
     src/map_server.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
