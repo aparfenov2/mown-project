@@ -8,8 +8,8 @@
     <arg name="mb"     default="false" />
     <arg name="paused" default="false" />
     <arg name="world"  default="turtletown" />
-    <arg name="cmd_vel_topic" default="/mobile_base/commands/velocity" />
-    <!-- <arg name="cmd_vel_topic" default="/cmd_vel" /> -->
+    <!-- <arg name="cmd_vel_topic" default="/mobile_base/commands/velocity" /> -->
+    <arg name="cmd_vel_topic" default="/cmd_vel" />
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -21,8 +21,16 @@
             <arg name="gui" value="true"/>
             <arg name="world_name" value="$(find my_utils_common)/worlds/$(arg world).world"/>
         </include>
+        <arg name="robot_namespace" default="/"/>
+        <arg name="urdf_extras" default="$(optenv ENGIX_URDF_EXTRAS)"/>
+    
+      <param name="robot_description" command="$(find xacro)/xacro '$(find engix_description)/urdf/engix.urdf'
+    robot_namespace:=$(arg robot_namespace)
+    urdf_extras:=$(arg urdf_extras)
+    " />
+
         <!-- <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/> -->
-           <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/><param name="robot_description" command="$(arg urdf_file)"/>
+           <!-- <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/><param name="robot_description" command="$(arg urdf_file)"/> -->
         <!-- Gazebo model spawner -->
         <group if="$(eval world == 'empty')">
             <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
