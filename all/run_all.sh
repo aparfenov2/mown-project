@@ -56,6 +56,7 @@ ROSARGS=()
     export GAZEBO_MODEL_PATH="/cdir/ws/src/gazebo_models"
     # echo GAZEBO_MODEL_PATH="${GAZEBO_MODEL_PATH}"
     roslaunch my_utils_common all.launch ${ROSARGS[@]}
+    # roslaunch engix_gazebo engix_playpen.launch
     exit 0
 }
 

@@ -9,7 +9,10 @@
     <arg name="paused" default="false" />
     <arg name="world"  default="turtletown" />
     <!-- <arg name="cmd_vel_topic" default="/mobile_base/commands/velocity" /> -->
-    <arg name="cmd_vel_topic" default="/cmd_vel" />
+    <arg name="cmd_vel_topic" default="/engix_velocity_controller/cmd_vel" />
+    <!-- <arg default="odom" name="odom_topic"/> -->
+    <arg name="odom_topic" default="/engix_velocity_controller/odom" />
+    <!-- <arg name="cmd_vel_topic" default="/cmd_vel" /> -->
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -21,13 +24,18 @@
             <arg name="gui" value="true"/>
             <arg name="world_name" value="$(find my_utils_common)/worlds/$(arg world).world"/>
         </include>
+
         <arg name="robot_namespace" default="/"/>
-        <arg name="urdf_extras" default="$(optenv ENGIX_URDF_EXTRAS)"/>
-    
-      <param name="robot_description" command="$(find xacro)/xacro '$(find engix_description)/urdf/engix.urdf'
-    robot_namespace:=$(arg robot_namespace)
-    urdf_extras:=$(arg urdf_extras)
-    " />
+      <include file="$(find engix_description)/launch/description.launch" />
+
+  <!-- Load controller configuration -->
+  <rosparam command="load" file="$(find engix_control)/config/controller.yaml" />
+
+  <!-- Spawn controllers -->
+  <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
+        args="engix_joint_publisher engix_velocity_controller">
+  </node>
+
 
         <!-- <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/> -->
            <!-- <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/><param name="robot_description" command="$(arg urdf_file)"/> -->
@@ -142,8 +150,6 @@
         <remap from="scan" to="/pcl_proc/scan"/>
     </node>
     <!-- Arguments -->
-    <arg default="waffle_pi" doc="model type [burger, waffle, waffle_pi]" name="model"/>
-    <arg default="odom" name="odom_topic"/>
     <arg default="false" name="move_forward_only"/>
     <arg default="-2.5 -2.5 0 0 0 0" name="coverage_area_offset"/>
     <arg default="10" name="coverage_area_size_x"/>
@@ -219,7 +225,9 @@
 
     <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
     <node pkg="my_utils_common" type="polygon_layer_helper.py" name="exploration_server_node" output="screen"/>
-    <node pkg="my_utils_common" type="mb_service_client.py" name="mb_service_client" output="screen"/>
+    <node pkg="my_utils_common" type="mb_service_client.py" name="mb_service_client" output="screen">
+        <remap from="/odom" to="$(arg odom_topic)"/>
+    </node>
 
     <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" clear_params="true">
         <rosparam file="$(find my_utils_common)/param/costmap_2d_params.yaml" command="load" ns="costmap" />
