@@ -157,7 +157,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade pip && \
     python3 -m pip install --no-cache-dir -r requirements.txt
 RUN rm requirements.txt
 
-RUN python3 python3 -m pip install python3-tk
+RUN apt-get install -y python3-tk
 RUN python3 -m pip install -U catkin_tools
 
 ENV ROS_DISTRO=noetic
