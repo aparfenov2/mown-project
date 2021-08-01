@@ -1,16 +1,16 @@
 <launch>
-    <arg default="false" name="rviz"/>
-    <arg default="false" name="loca"/>
-    <arg default="false" name="teleop"/>
-    <arg default="false" name="sim"/>
-    <arg default="false" name="segm"/>
-    <arg default="false" name="segm_bypass"/>
-    <arg default="false" name="planning"/>
-    <arg default="false" name="mb_mod"/>
-    <arg default="false" name="paused"/>
-    <arg default="turtletown" name="world"/>
-    <!-- <arg default="/mobile_base/commands/velocity" name="cmd_vel_topic"/>-->
-    <arg default="/cmd_vel" name="cmd_vel_topic"/>
+    <arg name="rviz"   default="false" />
+    <arg name="loca"   default="false" />
+    <arg name="teleop" default="false" />
+    <arg name="sim"    default="false" />
+    <arg name="segm"   default="false" />
+    <arg name="segm_bypass" default="false" />
+    <arg name="planning" default="false" />
+    <arg name="mb"     default="false" />
+    <arg name="paused" default="false" />
+    <arg name="world"  default="turtletown" />
+    <arg name="cmd_vel_topic" default="/mobile_base/commands/velocity" />
+    <!-- <arg name="cmd_vel_topic" default="/cmd_vel" /> -->
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -22,8 +22,8 @@
             <arg name="gui" value="true"/>
             <arg name="world_name" value="$(find my_utils_common)/worlds/$(arg world).world"/>
         </include>
-        <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/>
-        <!--   <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/><param name="robot_description" command="$(arg urdf_file)"/>-->
+        <!-- <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/> -->
+           <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/><param name="robot_description" command="$(arg urdf_file)"/>
         <!-- Gazebo model spawner -->
         <group if="$(eval world == 'empty')">
             <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
@@ -40,7 +40,7 @@
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
             <param name="publish_frequency" type="double" value="30.0"/>
         </node>
-        <node args="/mobile_base/sensors/imu_data /mobile_base/sensors/imu_data_raw" name="imu_relay" pkg="topic_tools" type="relay"/>
+        <!-- <node args="/mobile_base/sensors/imu_data /mobile_base/sensors/imu_data_raw" name="imu_relay" pkg="topic_tools" type="relay"/> -->
     </group>
     <!-- rviz -->
     <group if="$(arg rviz)">
@@ -54,17 +54,66 @@
     </group>
     <!-- segm -->
     <group if="$(arg segm)">
-<!--         <include file="$(find segmentation_node)/launch/kobuki.launch">
-            <arg name="bypass" value="$(arg segm_bypass)" />
-        </include>
- -->
-        <include file="$(find ddrnet)/launch/ddrnet.launch">
-            <arg name="bypass" value="$(arg segm_bypass)" />
-        </include>
+        <group unless="$(arg bypass)">
+            <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
+                <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
+                <remap from="camera/image" to="/camera/rgb/image_raw" />
+            </node>
+        </group>
+
+        <node pkg="nodelet" type="nodelet" name="pcl_proc"  args="manager" output="screen"/>
+
+        <!-- register depth image -->
+        <node pkg="nodelet" type="nodelet" name="point_cloud2_register"
+                args="load depth_image_proc/register pcl_proc"
+          respawn="false" output="screen" >
+            <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
+            <remap from="/depth/camera_info" to="/camera/depth/camera_info" />
+            <remap from="/depth/image_rect" to="/camera/depth/image_raw" />
+        </node>
+
+        <!-- registered depth to pcl rgb -->
+        <node pkg="nodelet" type="nodelet" name="point_cloud2_pcl"
+                args="load depth_image_proc/point_cloud_xyzrgb pcl_proc"
+          respawn="false" output="screen" >
+
+            <remap from="/rgb/image_rect_color" to="$(arg image_rect_topic)" />
+            <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
+            
+            <remap from="depth_registered/points" to="/pcl_proc/points2" />
+        </node>
+
+        <node name="color_filter" pkg="simpcl" type="color_filter" output="screen">
+            <remap from="points_in" to="/pcl_proc/points2"/>
+            <remap from="points_out" to="/pcl_proc/filtered"/>
+            
+            <param name="use_hsi" type="int" value="0"/>
+            
+            <param name="r_min" type="double" value="255"/>
+            <param name="r_max" type="double" value="255"/>
+
+            <param name="g_min" type="double" value="232"/>
+            <param name="g_max" type="double" value="255"/>
+
+            <param name="b_min" type="double" value="0"/>
+            <param name="b_max" type="double" value="20"/>
+        </node>
+
+        <node pkg="nodelet" type="nodelet" name="point_cloud2_laserscan"
+                args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc"
+          respawn="false" output="screen" required="true" clear_params="true">
+            <param name="min_height" type="double" value="0.1"/>
+            <param name="max_height" type="double" value="2.0"/>
+            <param name="target_frame" type="str" value="base_link"/>
+            
+            <remap from="cloud_in" to="/pcl_proc/filtered" />
+            <remap from="scan" to="/pcl_proc/scan" />            
+        </node>
+
     </group>
 
 <!-- loca -->
-    <group if="$(arg loca)">
+<!--     <group if="$(arg loca)">
         <include file="$(find aloam_velodyne)/launch/aloam_velodyne_HDL_32.launch">
             <arg name="rviz" value="false" />
             <arg name="output" value="log" />
@@ -73,29 +122,114 @@
         <node pkg="tf" type="static_transform_publisher" name="odom_to_camera_init" args="0 0 0 0 0 0 1 odom camera_init 100" />
         <node pkg="tf" type="static_transform_publisher" name="aft_mapped_to_base_footprint" args="0 0 0 0 0 0 1 aft_mapped base_footprint 100" />
     </group>
+ -->
 
-<!-- proj -->
-    <group if="$(arg proj)">
-        <include file="$(find projection_node)/launch/segmentation_input.launch">
-            <!-- <arg name="output" value="log" /> -->
-        </include>
-    </group>
+  <!-- move_base -->
+<group if="$(arg mb)">
+    <node args="manager" name="pcl_proc" output="screen" pkg="nodelet" type="nodelet"/>
+    <node args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc" clear_params="true" name="point_cloud2_laserscan" output="screen" pkg="nodelet" required="true" respawn="false" type="nodelet">
+        <param name="min_height" type="double" value="0.1"/>
+        <param name="max_height" type="double" value="2.0"/>
+        <param name="target_frame" type="str" value="base_link"/>
+        <remap from="cloud_in" to="/velodyne_points"/>
+        <remap from="scan" to="/pcl_proc/scan"/>
+    </node>
+    <!-- Arguments -->
+    <arg default="waffle_pi" doc="model type [burger, waffle, waffle_pi]" name="model"/>
+    <arg default="odom" name="odom_topic"/>
+    <arg default="false" name="move_forward_only"/>
+    <arg default="-2.5 -2.5 0 0 0 0" name="coverage_area_offset"/>
+    <arg default="10" name="coverage_area_size_x"/>
+    <arg default="10" name="coverage_area_size_y"/>
+    <arg default="0.5" name="target_x_vel"/>
+    <arg default="0.4" name="target_yaw_vel"/>
+    <arg default="0.3" name="robot_radius"/>
+    <arg default="0.3" name="tool_radius"/>
 
-<!-- move_base_mod -->
-    <group if="$(arg mb_mod)">
-        <include file="$(find move_base_mod)/launch/move_base.launch">
-            <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
-            <arg name="odom_topic" value="odom" />
-        </include>
+    <!-- <arg default="$(find my_utils_common)/maps/grid.yaml" name="map"/> -->
+    <!-- <node clear_params="true" name="move_base_flex" output="screen" pkg="mbf_costmap_nav" respawn="false" type="mbf_costmap_nav"> -->
+     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+        <!-- <param name="tf_timeout" value="1.5"/> -->
+        <param name="base_global_planner" value="full_coverage_path_planner/SpiralSTC"/>
+        <!-- <param name="base_local_planner" value="pure_pursuit_local_planner/PurePursuitPlanner"/>         -->
 
-        <!-- <node name="simple_planner" pkg="simple_planner" type="simple_planner.py" output="screen">
-            <remap from="goal" to="move_base_simple/goal"/>
-        </node> -->
+        <rosparam command="load" file="$(find my_utils_common)/param/local_costmap_params.yaml" ns="local_costmap"/>
+        <rosparam command="load" file="$(find my_utils_common)/param/global_costmap_params.yaml" ns="global_costmap"/>
+        <!-- <rosparam command="load" file="$(find my_utils_common)/param/move_base_flex_params.yaml"/> -->
+        <param name="SpiralSTC/robot_radius" value="$(arg robot_radius)"/>
+        <param name="SpiralSTC/tool_radius" value="$(arg tool_radius)"/>
+        <param name="global_costmap/robot_radius" value="$(arg robot_radius)"/>
+<!--
+        <remap from="odom" to="/odom"/>
+        <remap from="scan" to="/scan"/>
+ -->        <!-- <remap from="/move_base_flex/SpiralSTC/plan" to="/move_base/SpiralSTC/plan"/> -->
+         <!-- <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/> -->
+         <remap from="cmd_vel" to="/fake_robot/cmd_vel"/>
+         <remap from="move_base_simple/goal" to="/fake_move_base/goal"/>
+        <!-- <remap from="/move_base_flex/tracking_pid/interpolator" to="/move_base/TrackingPidLocalPlanner/interpolator"/> -->
+    </node>
+<!--     <node name="move_base" pkg="mbf_costmap_nav" type="move_base_legacy_relay.py">
+        <param name="base_global_planner" value="SpiralSTC"/>
+ -->        <!-- <param name="base_local_planner" value="DWAPlannerROS" />-->
+        <!-- <remap from="/move_base/goal" to="/move_base_simple/goal"/>-->
+    <!-- </node> -->
+    <!--We need a map to fully cover-->
+<!--     <node args="$(arg map)" name="grid_server" pkg="map_server" type="map_server">
+        <param name="frame_id" value="map"/>
+    </node>
+ -->
+    <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
+    <!-- Launch coverage progress tracking -->
+<!--     <node args="$(arg coverage_area_offset) map coverage_map 100" name="map_to_coveragemap" pkg="tf" type="static_transform_publisher"/>
+    <node name="coverage_progress" pkg="full_coverage_path_planner" type="coverage_progress">
+        <param name="~target_area/x" value="$(arg coverage_area_size_x)"/>
+        <param name="~target_area/y" value="$(arg coverage_area_size_y)"/>
+        <param name="~coverage_radius" value="$(arg tool_radius)"/>
+        <remap from="reset" to="coverage_progress/reset"/>
+        <param name="~map_frame" value="/coverage_map"/>
+    </node>
+ -->    <!--Tracking_pid cannot just accept a nav_msgs/Path, it can only go to a PoseStamped,
+       so the path_interpolator drags a PoseStamped over a Path at a given speed-->
 
-    </group>
+    <node name="interpolator" pkg="tracking_pid" type="path_interpolator">
+        <param name="target_x_vel" value="$(arg target_x_vel)"/>
+        <param name="target_yaw_vel" value="$(arg target_yaw_vel)"/>
+        <remap from="path" to="/move_base/SpiralSTC/plan"/>
+    </node>
+    <node name="controller" output="screen" pkg="tracking_pid" type="controller">
+        <remap from="move_base/cmd_vel" to="$(arg cmd_vel_topic)"/>
+        <remap from="local_trajectory" to="trajectory"/>
+        <param name="controller_debug_enabled" value="True"/>
+        <param name="track_base_link" value="true"/>
+        <param name="l" value="0.5"/>
+        <param name="Ki_long" value="0.0"/>
+        <param name="Kp_long" value="2.0"/>
+        <param name="Kd_long" value="0.5"/>
+        <param name="Ki_lat" value="0.0"/>
+        <param name="Kp_lat" value="4.0"/>
+        <param name="Kd_lat" value="0.3"/>
+    </node>
+
+    <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
+    <node pkg="my_utils_common" type="polygon_layer_helper.py" name="exploration_server_node" output="screen"/>
+    <node pkg="my_utils_common" type="mb_service_client.py" name="mb_service_client" output="screen"/>
+
+    <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" clear_params="true">
+        <rosparam file="$(find my_utils_common)/param/costmap_2d_params.yaml" command="load" ns="costmap" />
+    </node>
+    <node pkg="my_utils_common" type="map_server.py" name="grid_server" output="screen">
+        <remap from="/map" to="/costmap_node/costmap/costmap"/>
+        <remap from="/map_updates" to="/costmap_node/costmap/costmap_updates"/>
+    </node>
+
+</group>
 
 <!-- planning system -->
     <group if="$(arg planning)">
+        <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
+        <node pkg="my_utils_common" type="polygon_msg_adapter.py" name="exploration_server_node" output="screen">
+            <remap from="route_task_polygon" to="/planner/route_task_polygon"/>
+        </node>
         <include file="$(find my_utils_common)/launch/planning.launch"/>    
     </group>
 </launch>

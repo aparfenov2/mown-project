@@ -181,4 +181,5 @@ RUN apt-get update && apt-get install -y xterm gdb
 # RUN sudo ln -s $(which python3) /usr/bin/python
 # RUN pip3 install scipy
 
-RUN apt-get update && apt-get install -y ros-noetic-pointcloud-to-laserscan
+RUN apt-get update && apt-get install -y ros-noetic-pointcloud-to-laserscan ros-noetic-ros-numpy
+# RUN apt-get update && apt-get install -y ros-noetic-move-base-flex
