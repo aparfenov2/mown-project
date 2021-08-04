@@ -28,6 +28,9 @@
         <group if="$(eval world == 'empty')">
             <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
+        <group if="$(eval world == 'playpen')">
+            <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+        </group>
         <group if="$(eval world == 'yosemite')">
             <node args="-urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
