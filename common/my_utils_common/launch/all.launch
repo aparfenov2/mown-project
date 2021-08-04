@@ -26,21 +26,24 @@
         </include>
 
         <arg name="robot_namespace" default="/"/>
-      <include file="$(find engix_description)/launch/description.launch" />
+        <include file="$(find engix_description)/launch/description.launch" />
 
-  <!-- Load controller configuration -->
-  <rosparam command="load" file="$(find engix_control)/config/controller.yaml" />
+        <!-- Load controller configuration -->
+        <rosparam command="load" file="$(find engix_control)/config/controller.yaml" />
 
-  <!-- Spawn controllers -->
-  <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
-        args="engix_joint_publisher engix_velocity_controller">
-  </node>
+        <!-- Spawn controllers -->
+        <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
+              args="engix_joint_publisher engix_velocity_controller">
+        </node>
 
 
         <!-- <param command="$(find xacro)/xacro $(find engix_description)/urdf/engix.xacro" name="robot_description"/> -->
            <!-- <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/><param name="robot_description" command="$(arg urdf_file)"/> -->
         <!-- Gazebo model spawner -->
         <group if="$(eval world == 'empty')">
+            <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+        </group>
+        <group if="$(eval world == 'playpen')">
             <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'yosemite')">
