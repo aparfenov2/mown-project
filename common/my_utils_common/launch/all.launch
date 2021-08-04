@@ -240,6 +240,12 @@
         <remap from="/map_updates" to="/costmap_node/costmap/costmap_updates"/>
     </node>
 
+    <!-- provides odom frame -->
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
+      <rosparam command="load" file="$(find engix_control)/config/localization.yaml" />
+        <!-- <remap from="/imu/data" to="/mobile_base/sensors/imu_data"/> -->
+    </node>
+
 </group>
 
 </launch>

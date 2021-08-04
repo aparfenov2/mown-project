@@ -164,3 +164,6 @@ RUN apt-get update && apt-get install -y xterm gdb
 
 RUN apt-get update && apt-get install -y ros-noetic-pointcloud-to-laserscan ros-noetic-ros-numpy
 # RUN apt-get update && apt-get install -y ros-noetic-move-base-flex
+
+# EKF
+RUN apt-get update && apt-get install -y ros-noetic-robot-localization
