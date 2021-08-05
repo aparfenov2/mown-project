@@ -43,19 +43,6 @@ project(enginx_msgs)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  DIRECTORY msg
-  FILES
-  GlobalTask.msg
-  Route.msg
-  Localization.msg
-  LocalTrajectoryStamped.msg
-  PointWithSpeed.msg
-  ProgressRoutePlanner.msg
-  RouteTaskPolygon.msg
-  RouteTaskToPoint.msg
-  RouteTaskProgressEvent.msg
-)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -117,6 +104,20 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     geometry_msgs
     message_generation
+)
+
+add_message_files(
+  DIRECTORY msg
+  FILES
+  GlobalTask.msg
+  Route.msg
+  Localization.msg
+  LocalTrajectoryStamped.msg
+  PointWithSpeed.msg
+  ProgressRoutePlanner.msg
+  RouteTaskPolygon.msg
+  RouteTaskToPoint.msg
+  RouteTaskProgressEvent.msg
 )
 
 generate_messages(DEPENDENCIES std_msgs geometry_msgs)
