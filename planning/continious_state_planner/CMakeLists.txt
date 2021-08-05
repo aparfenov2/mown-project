@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 catkin_python_setup()
-roslaunch_add_file_check(launch)
+# roslaunch_add_file_check(launch)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -112,10 +112,10 @@ add_service_files(
 #  #DEPENDS geometry_msgs
 # )
 
-find_package(catkin REQUIRED COMPONENTS
-    geometry_msgs
-    message_generation
-)
+# find_package(catkin REQUIRED COMPONENTS
+#     geometry_msgs
+#     message_generation
+# )
 
 generate_messages(DEPENDENCIES geometry_msgs)
 
