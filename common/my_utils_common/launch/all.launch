@@ -227,9 +227,9 @@
 <!-- planning system -->
     <group if="$(arg planning)">
         <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
-        <node pkg="my_utils_common" type="polygon_msg_adapter.py" name="exploration_server_node" output="screen">
+        <!-- <node pkg="my_utils_common" type="polygon_msg_adapter.py" name="exploration_server_node" output="screen">
             <remap from="route_task_polygon" to="/planner/route_task_polygon"/>
-        </node>
+        </node> -->
         <include file="$(find my_utils_common)/launch/planning.launch"/>    
     </group>
 </launch>
