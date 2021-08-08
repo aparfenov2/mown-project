@@ -37,7 +37,7 @@ class AreaPolygon:
             
         # Determine origin (i.e. closest vertex to current position)
         self.origin = self.get_furthest_point(self.P.exterior.coords, initial_pos)[0]
-        print('Origin: ({}, {})'.format(self.origin[0], self.origin[1]))
+        print('Origin: ({}, {}), coords: {}'.format(self.origin[0], self.origin[1], coordinates))
         self.ft = ft
 
 
@@ -52,8 +52,10 @@ class AreaPolygon:
         
         dy = float(coords[max_index][1] - coords[max_index + 1][1])
         dx = float(coords[max_index][0] - coords[max_index + 1][0])
+
+        print(dy, dx, coords[max_index], coords[max_index + 1], coords)
         
-        return Rtf(np.degrees(atan(dy/dx)))
+        return Rtf(np.degrees(np.math.atan2(dy, dx)))
 
     def rotate_points(self, points):
         """Applies rtf to polygon coordinates"""
@@ -198,7 +200,7 @@ def plot_line(ax, ob):
 if __name__ == '__main__':
     ext = [(0, 0), (4, 4), (5, 6), (0, 8), (-4, 4)]
     holes = [] #[[(0, 3), (2, 3), (1, 6), (-3, 5)]]
-    polygon = AreaPolygon(ext, (-5, 10), interior=holes, ft=0.2, angle=-75.0)
+    polygon = AreaPolygon(ext, (0, 4), interior=holes, ft=0.2, angle=0.0)
     print(polygon.rtf.angle)
     ll = polygon.get_area_coverage()
     
