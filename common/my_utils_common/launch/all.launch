@@ -63,7 +63,7 @@
     </group>
     <!-- rviz -->
     <group if="$(arg rviz)">
-        <node args="-d $(find my_utils_common)/rviz/cfg.rviz" name="rviz" pkg="rviz" type="rviz"/>
+        <node args="-d $(find my_utils_common)/rviz/cfg.rviz" name="rviz" pkg="rviz" type="rviz" respawn="true"/>
     </group>
     <!-- teleop -->
     <group if="$(arg teleop)">
@@ -255,6 +255,12 @@
         <node pkg="my_utils_common" type="polygon_msg_adapter.py" name="exploration_server_node" output="screen">
             <remap from="route_task_polygon" to="/planner/route_task_polygon"/>
         </node>
+
+        <include file="$(find move_base_mod)/launch/move_base.launch">
+            <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
+            <arg name="odom_topic" value="odom" />
+        </include>
+
         <include file="$(find my_utils_common)/launch/planning.launch"/>    
     </group>
 </launch>
