@@ -11,25 +11,25 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from abstractnode import AbstractNode
 
 from geometry_msgs.msg import PoseStamped, Pose, Quaternion, TwistStamped, Twist, Vector3
-from move_base_mod.msg import TrajectoryControllerAction, TrajectoryControllerGoal
+# from move_base_mod.msg import TrajectoryControllerAction, TrajectoryControllerGoal
 from nav_msgs.msg import Odometry
 
 from enginx_msgs.msg import LocalTrajectoryStamped, Localization, Route
 
 
 def convert_orientation(theta):
-    return angles_difference(0.0, theta)
+    return np.math.atan2(np.sin(theta), np.cos(theta))
 
 
 def angles_difference(a1, a2):
-    a = a2 - a1
+    # a = a2 - a1
 
-    if a > np.pi:
-        a -= 2*np.pi
-    elif a < -np.pi:
-        a += 2*np.pi
+    # if a > np.pi:
+    #     a -= 2*np.pi
+    # elif a < -np.pi:
+    #     a += 2*np.pi
     
-    return a
+    return convert_orientation(a2-a1)
 
 
 def compute_theta(p1, p2):
@@ -43,8 +43,9 @@ class ControllerNode(AbstractNode):
         self.__last_loc = None
         self.__last_trajectory = None
 
-        self.mpc = Controller2(10, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0)
+        self.mpc = Controller2(20, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0)
         self.speed_control = SpeedController(0.2)
+        self.steering_pid = SteeringPIDController(0.5, 0.0, 1.0, 0.2, 10.0)
 
         self.control_publisher = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=10)
         self.last_linear_speed = 0
@@ -54,9 +55,9 @@ class ControllerNode(AbstractNode):
         self.last_idx = -1
 
         # rospy.Subscriber('/local_trajectory_plan', LocalTrajectoryStamped, self.__route_callback)
-        rospy.Subscriber('/route', Route, self.__route_task_callback)
+        rospy.Subscriber('/planner/route', Route, self.__route_task_callback)
         # rospy.Subscriber('/laser_odom_to_init', Odometry, self.__odometry_callback)
-        rospy.Subscriber('/localization', Localization, self.__odometry_callback)
+        rospy.Subscriber('/planner/localization', Localization, self.__odometry_callback)
 
     def local_trajectory_callback(self, message: LocalTrajectoryStamped):
         with self.__lock:
@@ -86,7 +87,6 @@ class ControllerNode(AbstractNode):
 
     def __route_task_callback(self, message):
         with self.__lock:
-            print('Got message')
             point_list = list()
 
             for point in message.route:
@@ -127,9 +127,9 @@ class ControllerNode(AbstractNode):
 
             target_point = self.__get_target_point(current_pos)
 
-            print("Cur: {0}, target: {1}".format(
-                current_pos, target_point
-            ))
+            # print("Cur: {0}, target: {1}".format(
+            #     current_pos, target_point
+            # ))
             linear_velocity = self.__linear_velocity_control(current_pos, target_point)
             angular_velocity = self.__angular_velocity_control(current_pos, target_point)
 
@@ -149,27 +149,35 @@ class ControllerNode(AbstractNode):
 
     def mpc_control(self, initial_pos, target_point, yaw, target_speed):
         path = np.array([p[:2] for p in self.__last_trajectory])
-        res = self.mpc.calc_control(initial_pos, path, yaw, self.speed)
+        # res = self.mpc.calc_control(initial_pos, path, yaw, self.speed)
+        # res = self.mpc.calc_control(initial_pos, target_point, yaw, self.speed, target_speed)
         speed = self.speed_control.control_speed(initial_pos, yaw, self.speed, target_point, target_speed)
 
         # print('Optim control: {}'.format(res))
 
         theta = compute_theta(initial_pos, target_point)
-        # print("Target theta: {0}, current yaw: {1}, diff:{2}".format(
-        #     theta, 
-        #     convert_orientation(yaw),
-        #     angles_difference(convert_orientation(yaw), theta)))
+        dw = angles_difference(convert_orientation(yaw), theta)
+        w = self.steering_pid.calc_steering(dw)
 
-        if res is None:
-            dw = angles_difference(convert_orientation(yaw), theta)
-            v, w = 0, dw
-            rospy.logerr('No optimal control')
-        else:
-            v, w = res
+        print("Target theta: {0}, current yaw: {1}, diff:{2}, cur_pos: {3}, target_pos: {4}".format(
+            theta, 
+            yaw,
+            dw,
+            initial_pos,
+            target_point))
+
+        # if res is None:
+        #     v, w = 0, dw * 0.1
+        #     rospy.logerr('No optimal control')
+        # else:
+        #     v, w = res
+
+        # if abs(dw) > 0.1:
+        #     v = 0.0
 
         v = speed
 
-        print("COntrol: {0}, {1}".format(v, w))
+        # print("Control: {0}, {1}".format(v, w))
 
         linear_vel = Vector3(x=v, y=0.0, z=0.0)
         angular_vel = Vector3(x=0.0, y=0.0, z=w)
@@ -235,11 +243,11 @@ class Controller:
         self.speed_coef = speed_coef
         self.dyaw_coef = dyaw_coef
 
-        self.x0 = [0.0] * (2 * self.horizon)
+        self.x0 = np.array([0.0] * (2 * self.horizon))
         self.bounds = list()
         for _ in range(self.horizon):
-            self.bounds += [[-0.0, 0.50]]
-            self.bounds += [[-0.50, 0.50]]
+            self.bounds += [[0.0, 0.50]]
+            self.bounds += [[-0.10, 0.10]]
 
     def step(self, pos, yaw, linear_speed, angular_speed, dt):
         # a = (last_speed - linear_speed)
@@ -249,7 +257,7 @@ class Controller:
         yaw = yaw + angular_speed * dt
         return [x, y], yaw
 
-    def cost_function(self, u, initial_pos, target_point, yaw, linear_speed, angular_speed, target_speed):
+    def cost_function(self, u, initial_pos, target_point, yaw, linear_speed, target_speed):
         cur_pos = [initial_pos[0], initial_pos[1]]
         cur_yaw = yaw
         # cur_ls, cur_as = u
@@ -274,7 +282,7 @@ class Controller:
 
             cost += (cur_pos[0] - target_point[0]) ** 2 + (cur_pos[1] - target_point[1]) ** 2
             # cost += du
-            cost += (v - target_speed) ** 2
+            # cost += (v - target_speed) ** 2
             
             if self.distance_btw(cur_pos, target_point) < self.distance_threshold:
                 break
@@ -308,18 +316,25 @@ class Controller:
     def angle_btw_points(self, p1, p2):
         return np.math.atan2(p2[1] - p1[1], p2[0] - p1[0])
 
-    def calc_control(self, initial_pos, target_point, yaw, linear_speed, angular_speed, target_speed):
+    def calc_control(self, initial_pos, target_point, yaw, linear_speed, target_speed):
         # self.x0[0] = linear_speed
         # self.x0[1] = angular_speed
+
+        self.x0 = np.delete(self.x0, 0)
+        self.x0 = np.delete(self.x0, 0)
+        self.x0 = np.append(self.x0, self.x0[-2])
+        self.x0 = np.append(self.x0, self.x0[-2])
+
         solution = optimize.minimize(self.cost_function, 
                                      x0=self.x0,  
                                      bounds=self.bounds, 
-                                     args=(initial_pos, target_point, yaw, linear_speed, angular_speed, target_speed),
+                                     args=(initial_pos, target_point, yaw, linear_speed, target_speed),
                                      method='SLSQP',
                                      tol = 1e-8)#,
                                     #  options = {'disp': True})
         if solution.success:
             # print(solution.x)
+            self.x0 = solution.x
             return solution.x[:2]
 
         return None
@@ -336,8 +351,8 @@ class Controller2:
         self.speed_coef = speed_coef
         self.dyaw_coef = dyaw_coef
 
-        self.x0 = [0.0] * self.horizon
-        self.bounds = [[-0.50, 0.50] for _ in range(self.horizon)]
+        self.x0 = np.array([0.10] * self.horizon)
+        self.bounds = [[-0.10, 0.10] for _ in range(self.horizon)]
 
     def step(self, pos, yaw, linear_speed, angular_speed, dt):
         # a = (last_speed - linear_speed)
@@ -368,6 +383,9 @@ class Controller2:
         cur_pos = np.array(cur_pos)
 
         idx = (np.linalg.norm(target_points - cur_pos, axis=1)).argmin()
+        ntp = target_points[idx:]
+        idx = (np.linalg.norm(ntp - cur_pos) - 0.5).argmin()
+
         return idx
 
     def convert_orientation(self, theta):
@@ -384,13 +402,26 @@ class Controller2:
 
         cost = 0.0
 
+        if linear_speed == 0.0:
+            linear_speed = 0.1
+
         for i in range(self.horizon):
             w = u[i]
             cur_pos, cur_yaw = self.step(cur_pos, cur_yaw, linear_speed, w, self.dt)
             target_yaw, target_point = self.find_theta(target_points, cur_pos)
-            cur_yaw = self.convert_orientation(cur_yaw)
+            cur_yaw = convert_orientation(cur_yaw)
 
-            cost += (self.angles_difference(cur_yaw, target_yaw)) ** 2
+            # print("Target pos: {0}, target yaw: {1}, cur_pos: {2}, cur_yaw: {3}, cost: {4}".format(
+            #     target_point, target_yaw, cur_pos, cur_yaw, abs(self.angles_difference(cur_yaw, target_yaw))
+            # ))
+
+            ttheta = compute_theta(cur_pos, target_point)
+            # cost += abs(self.angles_difference(cur_yaw, ttheta))
+            # print('Cost btw poits: {0}, cur_yaw: {1}, target yaw: {2}'.format(
+            #         self.angles_difference(cur_yaw, target_yaw),
+            #         cur_yaw,
+            #         target_yaw
+            #     ))
             cost += (cur_pos[0] - target_point[0]) ** 2 + (cur_pos[1] - target_point[1]) ** 2 
             if lw is None:
                 lw = w
@@ -409,15 +440,23 @@ class Controller2:
     def calc_control(self, initial_pos, target_points, yaw, linear_speed):
         # self.x0[0] = linear_speed
         # self.x0[1] = angular_speed
+
+        self.x0 = np.delete(self.x0, 0)
+        self.x0 = np.delete(self.x0, 0)
+        self.x0 = np.append(self.x0, self.x0[-2])
+        self.x0 = np.append(self.x0, self.x0[-2])
+
         solution = optimize.minimize(self.cost_function, 
                                      x0=self.x0,  
                                      bounds=self.bounds, 
                                      args=(initial_pos, target_points, yaw, linear_speed),
                                      method='SLSQP',
                                      tol = 1e-8,
-                                     options = {'eps':0.1})
+                                     options = {'eps': 0.01, 'disp': True})
         if solution.success:
             # print(solution.x)
+            self.x0[1:] = self.x0[0: -1]
+            self.x0[0] = solution.x[0]
             return 0.0, solution.x[0]
 
         return None
@@ -431,12 +470,21 @@ class SpeedController(object):
     def control_speed(self, initial_pos, yaw, current_speed, target_point, target_speed):
         theta = compute_theta(initial_pos, target_point)
 
-        if abs(angles_difference(convert_orientation(yaw), theta)) > self.theta_threshold:
-            print("BIGG DIFF BTWN ANGLES")
+        if abs(angles_difference(yaw, theta)) > self.theta_threshold:
+            print("BIGG DIFF BTWN ANGLES: {0}, yaw: {1}, theta: {2}".format(
+                angles_difference(yaw, theta), yaw, theta
+            ))
             return 0.0
 
-        if abs(current_speed - target_speed) >  self.speed_threshold:
-            coeffs = np.polyfit([0.0, 0.5, 1.0], [current_speed, 0.8 * target_speed, target_speed], 3)
+        if abs(current_speed - target_speed) > self.speed_threshold:
+            print("DIFF BTWN ANGLES: {0}, yaw: {1}, theta: {2}".format(
+                angles_difference(yaw, theta), yaw, theta
+            ))
+            coeffs = np.polyfit([0.0, 0.5, 1.0], 
+                                [current_speed, 
+                                 0.5 * current_speed * (target_speed - current_speed), 
+                                 target_speed], 
+                                1)
             f = np.poly1d(coeffs)
             f2 = f(0.2)
             s = max(0.1, f2)
@@ -444,6 +492,34 @@ class SpeedController(object):
             return s
 
         return target_speed
+
+
+class SteeringPIDController(object):
+    def __init__(self, p, i, d, max_speed, max_integrator):
+        self.p = p
+        self.i = i
+        self.d = d
+
+        self.last_error = 0
+        self.integrate_error = 0
+
+        self.max_speed = max_speed
+        self.max_integrator = max_integrator
+
+    def calc_steering(self, error):
+        d_error = error - self.last_error
+        self.integrate_error += error
+        self.last_error = error
+
+        self.integrate_error = self.bound(self.integrate_error, self.max_integrator)
+
+        steer = self.p * error + self.i * self.integrate_error + self.d * d_error
+
+        steer = self.bound(steer, self.max_speed)
+        return steer
+
+    def bound(self, val, bound_val):
+        return min(bound_val, max(-bound_val, val))
 
 def main():
     node = ControllerNode('ControllerNode', 10)
