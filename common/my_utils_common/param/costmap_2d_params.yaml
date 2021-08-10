@@ -3,27 +3,35 @@ robot_base_frame: base_footprint
 update_frequency: 5.0
 publish_frequency: 1.0
 
-plugins:
- - {name: polygon_layer, type: "polygon_layer::PolygonLayer"}
- # - {name: static, type: "costmap_2d::StaticLayer"}
- # - {name: obstacle, type: "costmap_2d::ObstacleLayer"}
-#set if you want the voxel map published
-# publish_voxel_map: false
-
-polygon_layer:
-    resize_to_polygon: false
-
-#set to true if you want to initialize the costmap from a static map
-# static_map: false
-
-#begin - COMMENT these lines if you set static_map to true
 rolling_window: false
 width: 10
 height: 10
 origin_x: -5 
 origin_y: -5
 resolution: 0.1
-#end - COMMENT these lines if you set static_map to true
+
+plugins:
+ - {name: polygon_layer, type: "polygon_layer::PolygonLayer"}
+ # - {name: static, type: "costmap_2d::StaticLayer"}
+ - {name: obstacle, type: "costmap_2d::ObstacleLayer"}
+#set if you want the voxel map published
+# publish_voxel_map: false
+
+polygon_layer:
+    resize_to_polygon: false
+
+obstacle:
+  observation_sources: scan
+  scan: 
+    sensor_frame: base_link
+    data_type: LaserScan
+    topic: pcl_proc/scan
+    marking: true
+    clearing: true
+
+  track_unknown_space: true
+  obstacle_range: 3.0
+  raytrace_range: 3.5
 
 #START VOXEL STUFF
 # map_type: voxel
