@@ -2,8 +2,6 @@ from shapely.geometry import Point, Polygon, LinearRing, LineString
 from shapely.geometry import MultiLineString, MultiPoint, GeometryCollection
 from shapely.geos import TopologicalError
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.collections import LineCollection
 from logging import error
 from math import atan
 
@@ -198,6 +196,9 @@ def plot_line(ax, ob):
 # exterior is a LinearRing object, and interiors is a list of zero or more LinearRing objects
 # Any LinearRing object will have coords, which you can slice to see a list of the coordinates with coords[:]
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    from matplotlib.collections import LineCollection
+    
     ext = [(0, 0), (4, 4), (5, 6), (0, 8), (-4, 4)]
     holes = [] #[[(0, 3), (2, 3), (1, 6), (-3, 5)]]
     polygon = AreaPolygon(ext, (0, 4), interior=holes, ft=0.2, angle=0.0)
