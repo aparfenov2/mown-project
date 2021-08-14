@@ -1,8 +1,9 @@
 #!/bin/bash
-SEGMENTATION_BYPASS=1
+SEGMENTATION_BYPASS=
 ALL_ARGS=("$@")
 CONTAINER_NAME="all"
 WORLD="turtletown"
+ROBOT="ya_model"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -12,11 +13,15 @@ while [[ "$#" -gt 0 ]]; do
         --world) WORLD="$2"; shift; ;;
         --paused) PAUSED=1; ;;
         --rviz) RVIZ=1; ;;
+        --robot) ROBOT="$2"; shift; ;;
+        --robot_ya) ROBOT="ya_model"; ;;
+        --robot_turtle) ROBOT="turtlebot"; ;;
         --teleop) TELEOP=1; ;;
         --segm) SEGMENTATION=1; ;;
+        --segm_bypass) SEGMENTATION_BYPASS=1; ;;
         --mb) MOVE_BASE=1; ;;
         --name) CONTAINER_NAME="$2"; shift; ;;
-        ---segm_bypass) SEGMENTATION_BYPASS=""; ;;
+        --segm_bypass) SEGMENTATION_BYPASS="1"; ;;
         --loca) LOCALIZATION=1; ;;
         # --sim_basic) SIM=1; RVIZ=1; TELEOP=1; ;;
         # --preset1) SIM=1; RVIZ=1; TELEOP=1; SEGMENTATION=1; PROJECTION=1; LOCALIZATION=1;;
@@ -34,10 +39,11 @@ ROSARGS=()
 [ -n "$TELEOP" ] && ROSARGS+=("teleop:=true") && CONTAINER_NAME="teleop"
 [ -n "$SEGMENTATION" ] && ROSARGS+=("segm:=true") && CONTAINER_NAME="segm"
 [ -n "$SEGMENTATION_BYPASS" ] && ROSARGS+=("segm_bypass:=true")
+[ -n "$ROBOT" ] && ROSARGS+=("robot:=$ROBOT")
 [ -n "$PROJECTION" ] && ROSARGS+=("proj:=true") && CONTAINER_NAME="proj"
 [ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true") && CONTAINER_NAME="loca"
 [ -n "$MOVE_BASE" ] && ROSARGS+=("mb:=true") && CONTAINER_NAME="mb"
-[ -n "$PLANNING" ] && ROSARGS+=("planning:=true")
+[ -n "$PLANNING" ] && ROSARGS+=("planning:=true") && CONTAINER_NAME="planning"
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
