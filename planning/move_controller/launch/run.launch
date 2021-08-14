@@ -3,8 +3,8 @@
     <node name="controller" pkg="move_controller" type="controller.py" respawn="true" respawn_delay="5" output="screen"/>
     <node name="bridge" pkg="move_controller" type="localization_bridge.py" respawn="true" respawn_delay="5" output="screen"/>
         
-    <include file="$(find route_planner)/launch/run.launch">
+    <!-- <include file="$(find route_planner)/launch/run.launch">
 
-    </include>
+    </include> -->
 </launch>
 
