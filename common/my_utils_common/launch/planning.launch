@@ -2,5 +2,8 @@
     <include file="$(find coverage_path_planner)/launch/run.launch"/>
     <include file="$(find route_planner)/launch/run.launch"/>
     <include file="$(find move_controller)/launch/run.launch">
+    
     </include>
+    
+    <node pkg="tf2_ros" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 1 world odom" />
 </launch>
