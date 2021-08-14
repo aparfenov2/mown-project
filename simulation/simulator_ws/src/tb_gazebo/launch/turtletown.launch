@@ -8,6 +8,9 @@
     <arg name="paused"       value="false"/>
     <arg name="debug"        value="false"/>
     <arg name="gui"          value="true" />
+    <!-- <arg name="world_name"   value="$(find tb_gazebo)/worlds/turtletown.world"/> -->
+    <!-- <arg name="world_name"   value="$(find tb_gazebo)/worlds/yosemite.world"/> -->
+    <!-- <arg name="world_name"   value="$(find tb_gazebo)/worlds/agriculture.world"/> -->
     <arg name="world_name"   value="$(find tb_gazebo)/worlds/$(arg world).world"/>
   </include>
 
