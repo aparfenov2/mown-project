@@ -1,7 +1,7 @@
 <launch>
     <node name="RoutePlannerNode" pkg="route_planner" type="main.py" respawn="true" respawn_delay="5" output="screen"/>
     <node name="CoveragePlannerNode" pkg="route_planner" type="coverage_planner_main.py" respawn="true" respawn_delay="5" output="screen"/>
-    <!-- <node name="polygon_msg_adapter" pkg="route_planner" type="polygon_msg_adapter.py" respawn="true" respawn_delay="5" output="screen"/> -->
+    <node name="polygon_msg_adapter" pkg="route_planner" type="polygon_msg_adapter.py" respawn="true" respawn_delay="5" output="screen"/>
 
 <!--         
     <include file="$(find coverage_path_planner)/launch/run.launch">
