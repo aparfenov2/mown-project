@@ -1,6 +1,5 @@
 #!/bin/bash
 SEGMENTATION_BYPASS=1
-ROSCORE=1
 ALL_ARGS=("$@")
 CONTAINER_NAME="all"
 WORLD="turtletown"
@@ -14,16 +13,13 @@ while [[ "$#" -gt 0 ]]; do
         --paused) PAUSED=1; ;;
         --rviz) RVIZ=1; ;;
         --teleop) TELEOP=1; ;;
-        --roscore) ROSCORE=1 ;;
-        ---roscore) ROSCORE="" ;;
         --segm) SEGMENTATION=1; ;;
-        --mb_mod) MOVE_BASE_MOD=1; ;;
+        --mb) MOVE_BASE=1; ;;
         --name) CONTAINER_NAME="$2"; shift; ;;
         ---segm_bypass) SEGMENTATION_BYPASS=""; ;;
-        --proj) PROJECTION=1; ;;
         --loca) LOCALIZATION=1; ;;
-        --sim_basic) SIM=1; RVIZ=1; TELEOP=1; ;;
-        --preset1) SIM=1; RVIZ=1; TELEOP=1; SEGMENTATION=1; PROJECTION=1; LOCALIZATION=1;;
+        # --sim_basic) SIM=1; RVIZ=1; TELEOP=1; ;;
+        # --preset1) SIM=1; RVIZ=1; TELEOP=1; SEGMENTATION=1; PROJECTION=1; LOCALIZATION=1;;
         --planning) PLANNING=1; ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -40,7 +36,7 @@ ROSARGS=()
 [ -n "$SEGMENTATION_BYPASS" ] && ROSARGS+=("segm_bypass:=true")
 [ -n "$PROJECTION" ] && ROSARGS+=("proj:=true") && CONTAINER_NAME="proj"
 [ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true") && CONTAINER_NAME="loca"
-[ -n "$MOVE_BASE_MOD" ] && ROSARGS+=("mb_mod:=true") && CONTAINER_NAME="mb_mod"
+[ -n "$MOVE_BASE" ] && ROSARGS+=("mb:=true") && CONTAINER_NAME="mb"
 [ -n "$PLANNING" ] && ROSARGS+=("planning:=true")
 
 [ -n "$INNER" ] && {
@@ -70,47 +66,13 @@ git submodule update --init --recursive
 # setup dependencies
 pushd $PWD
 cd ws/src
-# # sim
-# [ -d "velodyne_simulator" ] || {
-#     git clone https://bitbucket.org/DataspeedInc/velodyne_simulator.git
-# }
-# pushd $PWD
-# cd velodyne_simulator
-# git checkout 1.0.9
-# popd
 
-# # segm
-# [ -d "catkin_simple" ] || {
-#     git clone git@github.com:catkin/catkin_simple.git
-# }
-# PTH="segmentation_node/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth"
 PTH="ddrnet/model/DDRNet_CS.wts"
 [ -n "${SEGMENTATION_BYPASS}" ] && {
     [ -f "$PTH" ] || {
-        # curl -o $PTH  https://download.openmmlab.com/mmsegmentation/v0.5/hrnet/fcn_hr18s_512x1024_40k_cityscapes/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth
-        curl -o $PTH  https://kan-rt.ddns.net:8000/DDRNet_CS.wts
+        curl -o $PTH  https://kan-rt.ddns.net:8000/ddrnet/DDRNet_CS.wts
     }
 }
-
-# # loca
-# [ -d "A-LOAM" ] || {
-#     git clone https://github.com/HKUST-Aerial-Robotics/A-LOAM.git
-#     # echo make build > A-LOAM/docker/build.sh
-# }
-
-# # proj
-# [ -d "elevation_mapping" ] || {
-#     git clone git@github.com:ANYbotics/elevation_mapping.git
-# }
-# [ -d "grid_map" ] || {
-#     git clone git@github.com:ANYbotics/grid_map.git
-# }
-# [ -d "kindr" ] || {
-#     git clone git@github.com:ANYbotics/kindr.git
-# }
-# [ -d "kindr_ros" ] || {
-#     git clone git@github.com:ANYbotics/kindr_ros.git
-# }
 
 popd
 
