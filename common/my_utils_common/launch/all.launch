@@ -170,10 +170,7 @@
     <arg default="0.3" name="robot_radius"/>
     <arg default="0.3" name="tool_radius"/>
 
-    <!-- <arg default="$(find my_utils_common)/maps/grid.yaml" name="map"/> -->
-    <!-- <node clear_params="true" name="move_base_flex" output="screen" pkg="mbf_costmap_nav" respawn="false" type="mbf_costmap_nav"> -->
      <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
-        <!-- <param name="tf_timeout" value="1.5"/> -->
         <param name="base_global_planner" value="full_coverage_path_planner/SpiralSTC"/>
         <!-- <param name="base_local_planner" value="pure_pursuit_local_planner/PurePursuitPlanner"/>         -->
 
@@ -183,25 +180,10 @@
         <param name="SpiralSTC/robot_radius" value="$(arg robot_radius)"/>
         <param name="SpiralSTC/tool_radius" value="$(arg tool_radius)"/>
         <param name="global_costmap/robot_radius" value="$(arg robot_radius)"/>
-<!--
-        <remap from="odom" to="/odom"/>
-        <remap from="scan" to="/scan"/>
- -->        <!-- <remap from="/move_base_flex/SpiralSTC/plan" to="/move_base/SpiralSTC/plan"/> -->
-         <!-- <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/> -->
-         <remap from="cmd_vel" to="/fake_robot/cmd_vel"/>
-         <remap from="move_base_simple/goal" to="/fake_move_base/goal"/>
-        <!-- <remap from="/move_base_flex/tracking_pid/interpolator" to="/move_base/TrackingPidLocalPlanner/interpolator"/> -->
+        <remap from="cmd_vel" to="/fake_robot/cmd_vel"/>
+        <remap from="move_base_simple/goal" to="/fake_move_base/goal"/>
     </node>
-<!--     <node name="move_base" pkg="mbf_costmap_nav" type="move_base_legacy_relay.py">
-        <param name="base_global_planner" value="SpiralSTC"/>
- -->        <!-- <param name="base_local_planner" value="DWAPlannerROS" />-->
-        <!-- <remap from="/move_base/goal" to="/move_base_simple/goal"/>-->
-    <!-- </node> -->
-    <!--We need a map to fully cover-->
-<!--     <node args="$(arg map)" name="grid_server" pkg="map_server" type="map_server">
-        <param name="frame_id" value="map"/>
-    </node>
- -->
+
     <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
     <!-- Launch coverage progress tracking -->
 <!--     <node args="$(arg coverage_area_offset) map coverage_map 100" name="map_to_coveragemap" pkg="tf" type="static_transform_publisher"/>
@@ -235,11 +217,13 @@
     </node>
 
     <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
-    <node pkg="my_utils_common" type="polygon_layer_helper.py" name="exploration_server_node" output="screen"/>
+    <node pkg="my_utils_common" type="polygon_layer_helper.py" name="exploration_server_node" output="screen">
+        <remap from="/set_polygon" to="/move_base/global_costmap/polygon_layer/set_polygon"/>
+    </node>
     <node pkg="my_utils_common" type="mb_service_client.py" name="mb_service_client" output="screen">
         <remap from="/odom" to="$(arg odom_topic)"/>
     </node>
-
+<!-- 
     <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" clear_params="true">
         <rosparam file="$(find my_utils_common)/param/costmap_2d_params.yaml" command="load" ns="costmap" />
     </node>
@@ -247,7 +231,7 @@
         <remap from="/map" to="/costmap_node/costmap/costmap"/>
         <remap from="/map_updates" to="/costmap_node/costmap/costmap_updates"/>
     </node>
-
+ -->
     <!-- provides odom frame, didn't try with turtlebot -->
     <group if="$(eval robot == 'ya_model')">
         <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">

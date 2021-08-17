@@ -1,4 +1,4 @@
-global_frame: odom
+global_frame: map
 robot_base_frame: base_footprint
 
 update_frequency: 10.0
@@ -13,8 +13,12 @@ origin_y: -5
 resolution: 0.1
 
 plugins:
- - {name: obstacle, type: "costmap_2d::ObstacleLayer"}
- - {name: inflation, type: "costmap_2d::InflationLayer"}
+ - {name: polygon_layer, type: "polygon_layer::PolygonLayer"}
+#  - {name: obstacle, type: "costmap_2d::ObstacleLayer"}
+#  - {name: inflation, type: "costmap_2d::InflationLayer"}
+
+polygon_layer:
+    resize_to_polygon: false
 
 obstacle:
   observation_sources: scan

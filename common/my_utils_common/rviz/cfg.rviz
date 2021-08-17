@@ -553,7 +553,7 @@ Visualization Manager:
       Marker Topic: /exploration_polygon_marker
       Name: ploygon_mrk
       Namespaces:
-        {}
+        explore_points: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -569,12 +569,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: ploygon_map
-      Topic: /costmap_node/costmap/costmap
+      Topic: /move_base/global_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -603,7 +603,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 9.433427810668945
+      Distance: 8.791504859924316
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -611,17 +611,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.3148796260356903
-        Y: -0.7329659461975098
-        Z: 0.07217329740524292
+        X: 0.022759854793548584
+        Y: -0.347373902797699
+        Z: 0.09233231097459793
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4247961640357971
+      Pitch: 1.034795880317688
       Target Frame: <Fixed Frame>
-      Yaw: 2.2285618782043457
+      Yaw: 3.1085667610168457
     Saved: ~
 Window Geometry:
   Displays:
