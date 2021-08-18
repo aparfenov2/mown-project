@@ -6,4 +6,10 @@
       Then it uses A* to go back outside of the current spiral and then spirals again.
     </description>
   </class>
+  <class name="tracking_pid/TrackingPidLocalPlanner" type="tracking_pid::TrackingPidLocalPlanner" base_class_type="nav_core::BaseLocalPlanner">
+    <description>
+      A implementation of a local planner using either a DWA or Trajectory Rollout approach based on configuration parameters.
+    </description>
+  </class>
+
 </library>
