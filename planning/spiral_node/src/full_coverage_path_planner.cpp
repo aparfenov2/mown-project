@@ -277,6 +277,26 @@ bool FullCoveragePathPlanner::parseGrid(costmap_2d::Costmap2D *costmap_,
                              floor(costmap_->getSizeInCellsY() / tile_size_)));
 
   unsigned char* data = costmap_->getCharMap();
+
+  static char * cost_translation_table_ = NULL;
+  if (cost_translation_table_ == NULL)
+  {
+    cost_translation_table_ = new char[256];
+
+    // special values:
+    cost_translation_table_[0] = 0;  // NO obstacle
+    cost_translation_table_[253] = 99;  // INSCRIBED obstacle
+    cost_translation_table_[254] = 100;  // LETHAL obstacle
+    cost_translation_table_[255] = -1;  // UNKNOWN
+
+    // regular cost values scale the range 1 to 252 (inclusive) to fit
+    // into 1 to 98 (inclusive).
+    for (int i = 1; i < 253; i++)
+    {
+      cost_translation_table_[ i ] = char(1 + (97 * (i - 1)) / 251);
+    }
+  }
+
   // Scale grid
   for (iy = 0; iy < nRows; iy = iy + nodeSize)
   {
@@ -290,26 +310,6 @@ bool FullCoveragePathPlanner::parseGrid(costmap_2d::Costmap2D *costmap_,
         {
           int index_grid = dmax((iy + nodeRow - ceil(static_cast<float>(robotNodeSize - nodeSize) / 2.0))
                             * nCols + (ix + nodeColl - ceil(static_cast<float>(robotNodeSize - nodeSize) / 2.0)), 0);
-
-          static char * cost_translation_table_ = NULL;
-          if (cost_translation_table_ == NULL)
-          {
-            cost_translation_table_ = new char[256];
-
-            // special values:
-            cost_translation_table_[0] = 0;  // NO obstacle
-            cost_translation_table_[253] = 99;  // INSCRIBED obstacle
-            cost_translation_table_[254] = 100;  // LETHAL obstacle
-            cost_translation_table_[255] = -1;  // UNKNOWN
-
-            // regular cost values scale the range 1 to 252 (inclusive) to fit
-            // into 1 to 98 (inclusive).
-            for (int i = 1; i < 253; i++)
-            {
-              cost_translation_table_[ i ] = char(1 + (97 * (i - 1)) / 251);
-            }
-          }
-
           if (cost_translation_table_[data[index_grid]] > 65)
           {
             nodeOccupied = true;
