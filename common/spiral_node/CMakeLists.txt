@@ -12,6 +12,7 @@ find_package(catkin REQUIRED
             roslint
             rostest
             tf
+            tracking_pid
         )
 
 include_directories(
@@ -36,6 +37,8 @@ add_library(${PROJECT_NAME}
         src/common.cpp
         src/full_coverage_path_planner.cpp
         src/spiral_stc.cpp
+        src/controller.cpp
+        src/pid_local_planner.cpp
         )
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}
