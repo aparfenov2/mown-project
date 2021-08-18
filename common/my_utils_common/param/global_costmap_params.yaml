@@ -14,13 +14,13 @@ resolution: 0.1
 
 plugins:
  - {name: polygon_layer, type: "polygon_layer::PolygonLayer"}
-#  - {name: obstacle, type: "costmap_2d::ObstacleLayer"}
+#  - {name: obstacles, type: "costmap_2d::ObstacleLayer"}
 #  - {name: inflation, type: "costmap_2d::InflationLayer"}
 
 polygon_layer:
     resize_to_polygon: false
 
-obstacle:
+obstacles:
   observation_sources: scan
   scan: 
     sensor_frame: base_link

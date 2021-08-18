@@ -31,3 +31,6 @@
 [submodule "engix_robot"]
 	path = engix_robot
 	url = git@github.com:autrover/engix_robot.git
+[submodule "3rd_party/path_tracking_pid"]
+	path = 3rd_party/path_tracking_pid
+	url = git@github.com:nobleo/path_tracking_pid.git
