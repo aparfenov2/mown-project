@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string>
 #include <tf2_ros/buffer.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tracking_pid/PidConfig.h>
 #include <tracking_pid/PidDebug.h>
 #include <tracking_pid/traj_point.h>
@@ -374,6 +375,8 @@ namespace tracking_pid
 
         bool setPlan(const std::vector<geometry_msgs::PoseStamped> &orig_global_plan)
         {
+            // plan is already published from spiral_stc global planner to inerpolator node.
+            // The planner will wait for trajectory_callback from interpolator.
             return true;
         }
 
@@ -389,6 +392,7 @@ namespace tracking_pid
 
         bool isGoalReached()
         {
+            //TODO: listen to path_interpolator/trajectory_finished
             return false;
         }
 
