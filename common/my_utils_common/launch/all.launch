@@ -152,14 +152,16 @@
 
   <!-- move_base -->
 <group if="$(arg mb)">
-    <node args="manager" name="pcl_proc" output="screen" pkg="nodelet" type="nodelet"/>
-    <node args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc" clear_params="true" name="point_cloud2_laserscan" output="screen" pkg="nodelet" required="true" respawn="false" type="nodelet">
-        <param name="min_height" type="double" value="0.1"/>
-        <param name="max_height" type="double" value="2.0"/>
-        <param name="target_frame" type="str" value="base_link"/>
-        <remap from="cloud_in" to="/velodyne_points"/>
-        <remap from="scan" to="/pcl_proc/scan"/>
-    </node>
+    <group unless="$(arg segm)">
+        <node args="manager" name="pcl_proc" output="screen" pkg="nodelet" type="nodelet"/>
+        <node args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc" clear_params="true" name="point_cloud2_laserscan" output="screen" pkg="nodelet" required="true" respawn="false" type="nodelet">
+            <param name="min_height" type="double" value="0.1"/>
+            <param name="max_height" type="double" value="2.0"/>
+            <param name="target_frame" type="str" value="base_link"/>
+            <remap from="cloud_in" to="/velodyne_points"/>
+            <remap from="scan" to="/pcl_proc/scan"/>
+        </node>
+    </group>
     <!-- Arguments -->
     <arg default="false" name="move_forward_only"/>
     <arg default="-2.5 -2.5 0 0 0 0" name="coverage_area_offset"/>
@@ -217,39 +219,12 @@
         <remap from="path" to="/move_base/SpiralSTC/plan"/>
         <!-- <remap from="trajectory" to="/trajectory"/> -->
     </node>
-<!-- 
-    <node name="controller" output="screen" pkg="tracking_pid" type="controller">
-        <remap from="move_base/cmd_vel" to="$(arg cmd_vel_topic)"/>
-        <remap from="local_trajectory" to="/trajectory"/>
-        <param name="controller_debug_enabled" value="True"/>
-        <param name="track_base_link" value="true"/>
-        <param name="l" value="0.5"/>
-        <param name="Ki_long" value="0.0"/>
-        <param name="Kp_long" value="2.0"/>
-        <param name="Kd_long" value="0.5"/>
-        <param name="Ki_lat" value="0.0"/>
-        <param name="Kp_lat" value="4.0"/>
-        <param name="Kd_lat" value="0.3"/>
-    </node>
- -->
+
     <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
     <node pkg="my_utils_common" type="polygon_layer_helper.py" name="exploration_server_node" output="screen">
         <remap from="/set_polygon" to="/move_base/global_costmap/polygon_layer/set_polygon"/>
     </node>
-<!-- 
-    <node pkg="my_utils_common" type="mb_service_client.py" name="mb_service_client" output="screen">
-        <remap from="/odom" to="$(arg odom_topic)"/>
-    </node>
- -->
-<!-- 
-    <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" clear_params="true">
-        <rosparam file="$(find my_utils_common)/param/costmap_2d_params.yaml" command="load" ns="costmap" />
-    </node>
-    <node pkg="my_utils_common" type="map_server.py" name="grid_server" output="screen">
-        <remap from="/map" to="/costmap_node/costmap/costmap"/>
-        <remap from="/map_updates" to="/costmap_node/costmap/costmap_updates"/>
-    </node>
- -->
+
     <!-- provides odom frame, didn't try with turtlebot -->
     <group if="$(eval robot == 'ya_model')">
         <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
