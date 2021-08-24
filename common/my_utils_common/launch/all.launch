@@ -209,7 +209,7 @@
         <remap from="reset" to="coverage_progress/reset"/>
         <param name="~map_frame" value="/coverage_map"/>
     </node>
- -->   
+ -->
   <!--Tracking_pid cannot just accept a nav_msgs/Path, it can only go to a PoseStamped,
        so the path_interpolator drags a PoseStamped over a Path at a given speed-->
 
