@@ -186,3 +186,5 @@ RUN apt-get update && apt-get install -y ros-noetic-pointcloud-to-laserscan ros-
 
 # EKF
 RUN apt-get update && apt-get install -y ros-noetic-robot-localization
+# message_to_tf
+RUN apt-get update && apt-get install -y ros-noetic-hector-localization
