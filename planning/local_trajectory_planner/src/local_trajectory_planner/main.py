@@ -25,8 +25,8 @@ class LocalTrajectoryPlanner(AbstractNode):
 
         self.__lt_publisher = rospy.Publisher('/local_trajectory_plan', LocalTrajectoryStamped, queue_size=10)
 
-        rospy.Subscriber('/route', Route, self.__route_callback)
-        rospy.Subscriber('/localization', Localization, self.__localization_callback)
+        rospy.Subscriber('/planner/route', Route, self.__route_callback)
+        rospy.Subscriber('/planner/localization', Localization, self.__localization_callback)
 
     def work(self):
         if self.ego_pos is None or self.route is None:

@@ -13,7 +13,7 @@ class CoveragePathPlannerNode(AbstractNode):
     def initialization(self):
         self.s = rospy.Service('coverage_path_request', CoveragePathSrv, self.handle_coverage_path_request)
 
-        self.ft = 0.2
+        self.ft = 0.5
 
     def handle_coverage_path_request(self, message):
         message = message.request
