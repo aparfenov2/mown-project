@@ -39,8 +39,13 @@
             <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
                   args="engix_joint_publisher engix_velocity_controller">
             </node>
-        </group>
 
+            <node name="message_to_tf" pkg="message_to_tf" type="message_to_tf">
+                <param name="odometry_topic" value="ground_truth/state"/>
+                <param name="frame_id" value="odom"/>
+                <param name="child_frame_id" value="base_link"/>
+            </node>
+        </group>
 
         <group if="$(eval robot == 'turtlebot')">
             <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/>
@@ -179,7 +184,7 @@
     <arg default="10" name="coverage_area_size_y"/>
     <arg default="0.5" name="target_x_vel"/>
     <arg default="0.4" name="target_yaw_vel"/>
-    <arg default="0.3" name="robot_radius"/>
+    <arg default="0.5" name="robot_radius"/>
     <arg default="0.3" name="tool_radius"/>
 
      <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
