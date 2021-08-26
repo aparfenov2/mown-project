@@ -26,7 +26,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: cam
+    SyncSource: ya_scan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -213,82 +213,48 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        ZED2_1:
+          Value: true
         base_footprint:
           Value: false
         base_link:
           Value: true
-        camera_depth_frame:
-          Value: false
-        camera_depth_optical_frame:
-          Value: false
-        camera_link:
-          Value: false
-        camera_rgb_frame:
-          Value: false
-        camera_rgb_optical_frame:
-          Value: false
-        caster_back_link:
-          Value: false
-        caster_front_link:
-          Value: false
-        cliff_sensor_front_link:
-          Value: false
-        cliff_sensor_left_link:
-          Value: false
-        cliff_sensor_right_link:
-          Value: false
-        gyro_link:
-          Value: false
+        battery_1:
+          Value: true
+        caster_left:
+          Value: true
+        caster_right:
+          Value: true
+        caster_wheel_left:
+          Value: true
+        caster_wheel_right:
+          Value: true
+        dc_dc_1:
+          Value: true
+        gps_1:
+          Value: true
+        imu_link:
+          Value: true
+        inertial_link:
+          Value: true
+        jetson_nano_1:
+          Value: true
+        lan_1:
+          Value: true
+        laser:
+          Value: true
+        lidar_tof_1:
+          Value: true
+        lwheel:
+          Value: true
         map:
           Value: true
         odom:
           Value: false
-        plate_bottom_link:
-          Value: false
-        plate_middle_link:
-          Value: false
-        plate_top_link:
-          Value: false
-        pole_bottom_0_link:
-          Value: false
-        pole_bottom_1_link:
-          Value: false
-        pole_bottom_2_link:
-          Value: false
-        pole_bottom_3_link:
-          Value: false
-        pole_bottom_4_link:
-          Value: false
-        pole_bottom_5_link:
-          Value: false
-        pole_kinect_0_link:
-          Value: false
-        pole_kinect_1_link:
-          Value: false
-        pole_middle_0_link:
-          Value: false
-        pole_middle_1_link:
-          Value: false
-        pole_middle_2_link:
-          Value: false
-        pole_middle_3_link:
-          Value: false
-        pole_top_0_link:
-          Value: false
-        pole_top_1_link:
-          Value: false
-        pole_top_2_link:
-          Value: false
-        pole_top_3_link:
-          Value: false
-        velodyne:
-          Value: false
-        velodyne_base_link:
-          Value: false
-        wheel_left_link:
-          Value: false
-        wheel_right_link:
-          Value: false
+        rwheel:
+          Value: true
+        usb_hub_1:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -297,73 +263,41 @@ Visualization Manager:
       Show Names: true
       Tree:
         odom:
-          base_footprint:
-            base_link:
-              camera_rgb_frame:
-                camera_depth_frame:
-                  camera_depth_optical_frame:
-                    {}
-                camera_link:
-                  {}
-                camera_rgb_optical_frame:
-                  {}
-              caster_back_link:
+          base_link:
+            ZED2_1:
+              {}
+            base_footprint:
+              {}
+            battery_1:
+              {}
+            caster_left:
+              caster_wheel_left:
                 {}
-              caster_front_link:
+            caster_right:
+              caster_wheel_right:
                 {}
-              cliff_sensor_front_link:
-                {}
-              cliff_sensor_left_link:
-                {}
-              cliff_sensor_right_link:
-                {}
-              gyro_link:
-                {}
-              plate_bottom_link:
-                {}
-              plate_middle_link:
-                {}
-              plate_top_link:
-                {}
-              pole_bottom_0_link:
-                {}
-              pole_bottom_1_link:
-                {}
-              pole_bottom_2_link:
-                {}
-              pole_bottom_3_link:
-                {}
-              pole_bottom_4_link:
-                {}
-              pole_bottom_5_link:
-                {}
-              pole_kinect_0_link:
-                {}
-              pole_kinect_1_link:
-                {}
-              pole_middle_0_link:
-                {}
-              pole_middle_1_link:
-                {}
-              pole_middle_2_link:
-                {}
-              pole_middle_3_link:
-                {}
-              pole_top_0_link:
-                {}
-              pole_top_1_link:
-                {}
-              pole_top_2_link:
-                {}
-              pole_top_3_link:
-                {}
-              velodyne_base_link:
-                velodyne:
-                  {}
-              wheel_left_link:
-                {}
-              wheel_right_link:
-                {}
+            dc_dc_1:
+              {}
+            gps_1:
+              {}
+            imu_link:
+              {}
+            inertial_link:
+              {}
+            jetson_nano_1:
+              {}
+            lan_1:
+              {}
+            laser:
+              {}
+            lidar_tof_1:
+              {}
+            lwheel:
+              {}
+            rwheel:
+              {}
+            usb_hub_1:
+              {}
           map:
             {}
       Update Interval: 0
@@ -553,7 +487,7 @@ Visualization Manager:
       Marker Topic: /exploration_polygon_marker
       Name: ploygon_mrk
       Namespaces:
-        explore_points: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -575,6 +509,42 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: false
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /visualization_marker
+      Name: pid_mrk
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: ya_scan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /scan
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

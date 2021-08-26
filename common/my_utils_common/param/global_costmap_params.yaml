@@ -21,11 +21,18 @@ polygon_layer:
     resize_to_polygon: false
 
 obstacles:
-  observation_sources: scan
+  observation_sources: scan ya_scan
   scan: 
     sensor_frame: base_link
     data_type: LaserScan
     topic: pcl_proc/scan
+    marking: true
+    clearing: true
+
+  ya_scan: 
+    sensor_frame: base_link
+    data_type: LaserScan
+    topic: /scan
     marking: true
     clearing: true
 
