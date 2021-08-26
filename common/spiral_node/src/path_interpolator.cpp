@@ -3,6 +3,7 @@
 #include <ros/ros.h>
 #include <tracking_pid/traj_point.h>
 #include <nav_msgs/Path.h>
+#include <controller/path_interpolator.h>
 
 namespace tracking_pid
 {
@@ -17,58 +18,8 @@ namespace tracking_pid
 
     // the interpolate method then determines an intermediate point along the section given some progress along the section
 
-    class SectionInterpolation
-    {
-    public:
-        // Interpolate over the given section with some x and yaw velocities
-        // :param from_: start of the section
-        // :type from_: PoseStamped
-        // :param to: end of the section
-        // :type to: PoseStamped
-        // :param x_vel: translational velocity to move the trajectory target pose
-        // :type x_vel: float
-        // :param x_acc: translational acceleration to move the trajectory target pose
-        // :type x_acc: float
-        // :param yaw_vel: rotational velocity to rotate the trajectory target pose
-        // :type yaw_vel: float
-        // :param yaw_acc: rotational acceleration to rotate the trajectory target pose
-        // :type yaw_acc: float
-        double _x_vel;
-        double _x_acc_decc;
-        double _yaw_vel;
-        double _yaw_acc_decc;
-        double _start_yaw;
-        double _end_yaw;
-        ros::Duration duration_on_section;
-        geometry_msgs::PoseStamped section_start_pose_stamped;
-        geometry_msgs::PoseStamped section_end_pose_stamped;
-        double _start_xyz[3];
-        double _end_xyz[3];
-        double _delta[3];
-        double _delta_yaw;
-        double length_of_section;
-        double length_of_section_ang;
-        double time_x_acc_decc;
-        double length_x_acc_decc;
-        double length_x_vel;
-        double time_x_vel;
-        double _x_vel_adjusted;
-        double time_yaw_acc_decc;
-        double length_yaw_acc_decc;
-        double length_yaw_vel;
-        double time_yaw_vel;
-        double _yaw_vel_adjusted;
-        double duration_for_section_x;
-        double duration_for_section_yaw;
-        ros::Duration duration_for_section;
-        ros::Time section_start_time;
-        double x_progress;
-        double yaw_progress;
-        double current_x_vel;
-        double current_yaw_vel;
-        ros::Time section_end_time;
 
-        SectionInterpolation(
+        SectionInterpolation::SectionInterpolation(
             geometry_msgs::PoseStamped from_,
             geometry_msgs::PoseStamped to,
             ros::Time start_time,
@@ -191,7 +142,7 @@ namespace tracking_pid
             section_end_time = section_start_time + duration_for_section;
         }
 
-        geometry_msgs::PoseStamped interpolate(double progress_ratio)
+        geometry_msgs::PoseStamped SectionInterpolation::interpolate(double progress_ratio)
         {
             // """
             // Calculate where we should be along the section given a ratio of progress.
@@ -224,7 +175,7 @@ namespace tracking_pid
             return next_pose;
         }
 
-        tracking_pid::traj_point interpolate_with_acceleration(ros::Time current_time)
+        tracking_pid::traj_point SectionInterpolation::interpolate_with_acceleration(ros::Time current_time)
         {
 
             // """
@@ -360,25 +311,11 @@ namespace tracking_pid
 
             return tp;
         }
-    };
 
-    class InterpolatorNode
-    {
-    public:
-        nav_msgs::Path _latest_path_msg;
-        std::vector<std::vector<geometry_msgs::PoseStamped>> _sections;
-        double _target_x_vel;
-        double _target_x_acc;
-        double _target_yaw_vel;
-        double _target_yaw_acc;
-        std::vector<geometry_msgs::PoseStamped> _path_poses;
-        SectionInterpolation *_current_section;
-        double progress_on_section;
-        geometry_msgs::PoseStamped _latest_subgoal_pose;
         /**
          * """Accept and store the path"""
          * */
-        void _process_path(nav_msgs::Path path_msg)
+        void InterpolatorNode::_process_path(nav_msgs::Path path_msg)
         {
             int path_size = path_msg.poses.size();
             ROS_DEBUG("_process_path(...). Path has %d poses.", path_size);
@@ -437,7 +374,7 @@ namespace tracking_pid
             }
         }
 
-        void _update_target(tracking_pid::traj_point &tp)
+        void InterpolatorNode::_update_target(tracking_pid::traj_point &tp)
         {
             // """
             // Called by _timer and determines & publishes a interpolated pose along the received Path
@@ -530,5 +467,4 @@ namespace tracking_pid
             // __publish_marker(tp.pose)
             // trajectory_pub.publish(tp)
         }
-    };
 }

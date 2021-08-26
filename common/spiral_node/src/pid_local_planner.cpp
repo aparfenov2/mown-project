@@ -3,6 +3,7 @@
 #include <nav_core/base_local_planner.h>
 
 #include "controller/controller.h"
+#include "controller/path_interpolator.h"
 #include <dynamic_reconfigure/server.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -39,6 +40,7 @@ namespace tracking_pid
         tf::Transform tfErrorPose = tf::Transform::getIdentity();
         tf::StampedTransform tfMapToOdom;
         tf2_ros::Buffer *tf_buffer;
+        costmap_2d::Costmap2DROS *costmap_ros_;
 
         geometry_msgs::Pose controlPose;
         geometry_msgs::Pose goalPose;
@@ -173,6 +175,8 @@ namespace tracking_pid
 
         tracking_pid::Controller pid_controller;
         dynamic_reconfigure::Server<tracking_pid::PidConfig> *dsrv_;
+
+        InterpolatorNode path_interpolator;
 
         void publishMarkers()
         {
@@ -312,7 +316,7 @@ namespace tracking_pid
             ros::NodeHandle node;
 
             tf_buffer = tf;
-            // costmap_ros_ = costmap_ros;
+            costmap_ros_ = costmap_ros;
 
             // Get params if specified in launch file or as params on command-line, set defaults
             node_priv.param<std::string>("map_frame", map_frame, "map");
@@ -327,7 +331,7 @@ namespace tracking_pid
 
             // instantiate publishers & subscribers
             // control_effort_pub = node.advertise<geometry_msgs::Twist>("move_base/cmd_vel", 1);
-            sub_trajectory = node.subscribe("local_trajectory", 1, &TrackingPidLocalPlanner::trajectory_callback, this);
+            // sub_trajectory = node.subscribe("local_trajectory", 1, &TrackingPidLocalPlanner::trajectory_callback, this);
             enable_service = node.advertiseService("enable_control", &TrackingPidLocalPlanner::enableCallback, this);
             enable_and_wait_service = node.advertiseService("enable_control_and_wait", &TrackingPidLocalPlanner::enableAndWaitCallback, this);
 
@@ -373,15 +377,28 @@ namespace tracking_pid
             // tf2_ros::TransformListener tf_listener(tf_buffer);
         }
 
-        bool setPlan(const std::vector<geometry_msgs::PoseStamped> &orig_global_plan)
+        bool setPlan(const std::vector<geometry_msgs::PoseStamped> &path)
         {
-            // plan is already published from spiral_stc global planner to inerpolator node.
-            // The planner will wait for trajectory_callback from interpolator.
+            nav_msgs::Path gui_path;
+            gui_path.poses.resize(path.size());
+
+            gui_path.header.frame_id = costmap_ros_->getGlobalFrameID();
+            gui_path.header.stamp = ros::Time::now();
+
+            // Extract the plan in world co-ordinates, we assume the path is all in the same frame
+            for (unsigned int i = 0; i < path.size(); i++) {
+                gui_path.poses[i] = path[i];
+            }
+
+            path_interpolator._process_path(gui_path);
             return true;
         }
 
         bool computeVelocityCommands(geometry_msgs::Twist &cmd_vel)
         {
+            tracking_pid::traj_point tp;
+            path_interpolator._update_target(tp);
+            trajectory_callback(tp);
             // Get current robot pose and spin controller
             poseCallback(cmd_vel);
 
