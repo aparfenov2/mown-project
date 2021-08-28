@@ -2,6 +2,9 @@
 #include <pluginlib/class_list_macros.h>
 #include <nav_core/base_local_planner.h>
 
+#include <base_local_planner/world_model.h>
+#include <base_local_planner/costmap_model.h>
+
 #include "controller/controller.h"
 #include "controller/path_interpolator.h"
 #include <dynamic_reconfigure/server.h>
@@ -41,6 +44,7 @@ namespace tracking_pid
         tf::StampedTransform tfMapToOdom;
         tf2_ros::Buffer *tf_buffer;
         costmap_2d::Costmap2DROS *costmap_ros_;
+        base_local_planner::WorldModel *world_model_;
 
         geometry_msgs::Pose controlPose;
         geometry_msgs::Pose goalPose;
@@ -317,6 +321,7 @@ namespace tracking_pid
 
             tf_buffer = tf;
             costmap_ros_ = costmap_ros;
+            world_model_ = new base_local_planner::CostmapModel(*costmap_ros->getCostmap());
 
             // Get params if specified in launch file or as params on command-line, set defaults
             node_priv.param<std::string>("map_frame", map_frame, "map");
@@ -386,7 +391,8 @@ namespace tracking_pid
             gui_path.header.stamp = ros::Time::now();
 
             // Extract the plan in world co-ordinates, we assume the path is all in the same frame
-            for (unsigned int i = 0; i < path.size(); i++) {
+            for (unsigned int i = 0; i < path.size(); i++)
+            {
                 gui_path.poses[i] = path[i];
             }
 
@@ -394,8 +400,78 @@ namespace tracking_pid
             return true;
         }
 
+        std::vector<geometry_msgs::PoseStamped> sample_current_section()
+        {
+            std::vector<geometry_msgs::PoseStamped> ret;
+            if (path_interpolator._current_section)
+            {
+                costmap_2d::Costmap2D *costmap = costmap_ros_->getCostmap();
+                double length_of_section = path_interpolator._current_section->length_of_section;
+                double num_points = length_of_section / costmap->getResolution() * 2;
+                for (int i = 0; i < int(num_points); i++)
+                {
+                    double ratio = double(i) / num_points;
+                    if (ratio > path_interpolator.progress_on_section)
+                    {
+                        geometry_msgs::PoseStamped pt = path_interpolator._current_section->interpolate(ratio);
+                        ret.push_back(pt);
+                    }
+                }
+            }
+            return ret;
+        }
+
+        // double footprintCost(double x_i, double y_i, double theta_i)
+        // {
+        //     std::vector<geometry_msgs::Point> footprint = costmap_ros_->getRobotFootprint();
+        //     //if we have no footprint... do nothing
+        //     // if (footprint.size() < 3)
+        //     //     return -1.0;
+
+        //     //check if the footprint is legal
+        //     double footprint_cost = world_model_->footprintCost(x_i, y_i, theta_i, footprint);
+        //     return footprint_cost;
+        // }
+
+        bool check_path(std::vector<geometry_msgs::PoseStamped> samples)
+        {
+            costmap_2d::Costmap2D *costmap = costmap_ros_->getCostmap();
+            std::vector<geometry_msgs::Point> footprint = costmap_ros_->getRobotFootprint();
+
+            for (auto pt : samples)
+            {
+                //TODO: set yaw angle during cost calc
+                double footprint_cost = world_model_->footprintCost(pt.pose.position.x, pt.pose.position.y, 0, footprint);
+                if (footprint_cost == -1)
+                {
+                    return false;
+                }
+                // ROS_ASSERT(pt.header.frame_id == costmap->getGlobalFrameID());
+                // unsigned int mx, my;
+                // if (costmap->worldToMap(pt.pose.position.x, pt.pose.position.y, mx, my )) {
+                //     unsigned char cost = costmap->getCost(mx, my);
+                //     //TODO: take into consideration robot footprint
+
+                // }
+            }
+            return true;
+        }
+
         bool computeVelocityCommands(geometry_msgs::Twist &cmd_vel)
         {
+            // look forward by sampling current section with local costmap resolution.
+            // If obstacle found - return false & replan
+            if (path_interpolator._current_section)
+            {
+                std::vector<geometry_msgs::PoseStamped> samples = sample_current_section();
+                if (!check_path(samples))
+                {
+                    ROS_INFO("encountered obstacle with current section. Replanning.");
+                    path_interpolator._current_section = nullptr;
+                    return false;
+                }
+            }
+            // path is safe - compute cmd_vel
             tracking_pid::traj_point tp;
             path_interpolator._update_target(tp);
             trajectory_callback(tp);
@@ -409,8 +485,7 @@ namespace tracking_pid
 
         bool isGoalReached()
         {
-            //TODO: listen to path_interpolator/trajectory_finished
-            return false;
+            return path_interpolator._sections.empty();
         }
 
         ~TrackingPidLocalPlanner()

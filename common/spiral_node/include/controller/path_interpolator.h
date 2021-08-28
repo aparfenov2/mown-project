@@ -80,7 +80,7 @@ namespace tracking_pid
         double _target_yaw_vel;
         double _target_yaw_acc;
         std::vector<geometry_msgs::PoseStamped> _path_poses;
-        SectionInterpolation *_current_section;
+        std::unique_ptr<SectionInterpolation> _current_section;
         double progress_on_section;
         geometry_msgs::PoseStamped _latest_subgoal_pose;
         /**

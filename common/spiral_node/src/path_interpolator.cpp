@@ -398,7 +398,7 @@ namespace tracking_pid
                 return;
             }
 
-            if (!_current_section or ros::Time::now() > _current_section->section_end_time)
+            if (!_current_section || ros::Time::now() > _current_section->section_end_time)
             { //  # or when past end time of current section, go to next
                 if (_sections.size() > 0)
                 {
@@ -406,11 +406,11 @@ namespace tracking_pid
                     geometry_msgs::PoseStamped start = start_end[0];
                     geometry_msgs::PoseStamped end = start_end[1];
                     _sections.erase(_sections.begin());
-                    if (_current_section)
-                    {
-                        delete _current_section;
-                    }
-                    _current_section = new SectionInterpolation(start, end, current_real, _target_x_vel, _target_x_acc, _target_yaw_vel, _target_yaw_acc);
+                    // if (_current_section)
+                    // {
+                    //     delete _current_section;
+                    // }
+                    _current_section = std::unique_ptr<SectionInterpolation>(new SectionInterpolation(start, end, current_real, _target_x_vel, _target_x_acc, _target_yaw_vel, _target_yaw_acc));
                     ROS_INFO("Starting new section. duration_for_section = %f", _current_section->duration_for_section.toSec());
 
                     // if flip_for_axis:
@@ -456,7 +456,7 @@ namespace tracking_pid
                 ROS_INFO("Instantaneous completion of 0-length section");
                 progress_on_section = 1;
             }
-            tp = _current_section->interpolate_with_acceleration(ros::Time::now());
+            tp = _current_section->interpolate_with_acceleration(current_real);
             tp.pose.header.stamp = current_real;
 
             // # TODO: Rotate in the corners, using controller mode 3 tp.controller.data = 3
