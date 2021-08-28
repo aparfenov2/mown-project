@@ -12,10 +12,12 @@
     <arg name="robot"  default="ya_model" />
     <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" if="$(eval robot == 'turtlebot')" />
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'turtlebot')" />
+    <arg name="base_frame"    value="base_footprint" if="$(eval robot == 'turtlebot')" />
     <!-- <arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" />
     <arg name="odom_topic"    value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" /> -->
     <arg name="cmd_vel_topic" value="/cmd_vel" if="$(eval robot == 'ya_model')" />
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'ya_model')" />
+    <arg name="base_frame"    value="base_link" if="$(eval robot == 'ya_model')" />
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -196,9 +198,12 @@
         <rosparam command="load" file="$(find my_utils_common)/param/local_costmap_params.yaml" ns="local_costmap"/>
         <rosparam command="load" file="$(find my_utils_common)/param/global_costmap_params.yaml" ns="global_costmap"/>
 
+        <param name="global_costmap/robot_radius" value="$(arg robot_radius)"/>
+        <param name="global_costmap/robot_base_frame" value="$(arg base_frame)"/>
+        <param name="local_costmap/robot_base_frame" value="$(arg base_frame)"/>
+
         <param name="SpiralSTC/robot_radius" value="$(arg robot_radius)"/>
         <param name="SpiralSTC/tool_radius" value="$(arg tool_radius)"/>
-        <param name="global_costmap/robot_radius" value="$(arg robot_radius)"/>
 
         <!-- <remap from="move_base_simple/goal" to="/fake_move_base/goal"/> -->
         <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
