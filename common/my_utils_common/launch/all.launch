@@ -12,8 +12,10 @@
     <arg name="robot"  default="ya_model" />
     <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" if="$(eval robot == 'turtlebot')" />
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'turtlebot')" />
-    <arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" />
-    <arg name="odom_topic"    value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" />
+    <!-- <arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" />
+    <arg name="odom_topic"    value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" /> -->
+    <arg name="cmd_vel_topic" value="/cmd_vel" if="$(eval robot == 'ya_model')" />
+    <arg name="odom_topic"    value="/odom" if="$(eval robot == 'ya_model')" />
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -33,10 +35,10 @@
             <include file="$(find engix_mod)/launch/description.launch" />
 
             <!-- Load controller configuration -->
-            <rosparam command="load" file="$(find engix_control)/config/controller.yaml" />
+            <!-- <rosparam command="load" file="$(find engix_control)/config/controller.yaml" /> -->
 
             <!-- Spawn controllers -->
-            <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
+            <!-- <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
                   args="engix_joint_publisher engix_velocity_controller">
             </node>
 
@@ -44,7 +46,7 @@
                 <param name="odometry_topic" value="ground_truth/state"/>
                 <param name="frame_id" value="odom"/>
                 <param name="child_frame_id" value="base_link"/>
-            </node>
+            </node> -->
         </group>
 
         <group if="$(eval robot == 'turtlebot')">
