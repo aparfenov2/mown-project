@@ -188,7 +188,7 @@
     <arg name="coverage_area_size_y" default="10" />
     <arg name="target_x_vel" default="0.5" />
     <arg name="target_yaw_vel" default="0.4" />
-    <arg name="robot_radius" default="0.5" />
+    <arg name="robot_radius" default="0.3" />
     <arg name="tool_radius" default="0.3"/>
 
      <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
@@ -199,6 +199,7 @@
         <rosparam command="load" file="$(find my_utils_common)/param/global_costmap_params.yaml" ns="global_costmap"/>
 
         <param name="global_costmap/robot_radius" value="$(arg robot_radius)"/>
+        <param name="local_costmap/robot_radius" value="$(arg robot_radius)"/>
         <param name="global_costmap/robot_base_frame" value="$(arg base_frame)"/>
         <param name="local_costmap/robot_base_frame" value="$(arg base_frame)"/>
 
