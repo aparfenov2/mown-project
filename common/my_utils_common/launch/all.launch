@@ -180,14 +180,14 @@
         </node>
     </group>
     <!-- Arguments -->
-    <arg default="false" name="move_forward_only"/>
-    <arg default="-2.5 -2.5 0 0 0 0" name="coverage_area_offset"/>
-    <arg default="10" name="coverage_area_size_x"/>
-    <arg default="10" name="coverage_area_size_y"/>
-    <arg default="0.5" name="target_x_vel"/>
-    <arg default="0.4" name="target_yaw_vel"/>
-    <arg default="0.5" name="robot_radius"/>
-    <arg default="0.3" name="tool_radius"/>
+    <arg name="move_forward_only" default="false"/>
+    <arg name="coverage_area_offset" default="-2.5 -2.5 0 0 0 0"/>
+    <arg name="coverage_area_size_x" default="10" />
+    <arg name="coverage_area_size_y" default="10" />
+    <arg name="target_x_vel" default="0.5" />
+    <arg name="target_yaw_vel" default="0.4" />
+    <arg name="robot_radius" default="0.5" />
+    <arg name="tool_radius" default="0.3"/>
 
      <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
         <param name="base_global_planner" value="full_coverage_path_planner/SpiralSTC"/>
