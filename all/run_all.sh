@@ -8,6 +8,8 @@ ROBOT="ya_model"
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --inner) INNER=1 ;;
+        --jetson) JETSON=1;  ;;
+        --no_rm) NO_RM="--no_rm";  ;;
         --sim) SIM=1;  ;;
         --grass_world) WORLD="baylands";  ;;
         --world) WORLD="$2"; shift; ;;
@@ -88,6 +90,10 @@ for f in $(find ws/src -type l); do
     VOLUMES+=("-v $(readlink -f $f):/cdir/$f")
 done
 
-bash _run_in_docker.sh --script $0 --name ${CONTAINER_NAME} \
+[ -n "$JETSON" ] && {
+    JETSON_ARGS="--ws docker_jetson"
+}
+
+bash _run_in_docker.sh ${JETSON_ARGS} ${NO_RM} --script $0 --name ${CONTAINER_NAME} \
     ${VOLUMES[@]} \
     ${ALL_ARGS[@]}
