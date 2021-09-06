@@ -15,6 +15,7 @@ resolution: 0.1
 plugins:
  - {name: polygon_layer, type: "polygon_layer::PolygonLayer"}
  - {name: obstacles, type: "costmap_2d::ObstacleLayer"}
+ - {name: coverage, type: "full_coverage_path_planner::CoverageLayer"}
 #  - {name: inflation, type: "costmap_2d::InflationLayer"}
 
 polygon_layer:
