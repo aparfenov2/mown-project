@@ -35,6 +35,7 @@
 
   <export>
     <nav_core plugin="${prefix}/fcpp_plugin.xml"/>
+    <costmap_2d plugin="${prefix}/fcpp_plugin.xml"/>
   </export>
 
 </package>

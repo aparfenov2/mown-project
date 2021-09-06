@@ -27,7 +27,7 @@ namespace full_coverage_path_planner
     public:
         dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
         std::set<costmap_2d::MapLocation, MapLocation_lesser> visited_cells;
-        double min_x_, min_y_, max_x_, max_y_;
+        std::set<costmap_2d::MapLocation, MapLocation_lesser> not_footprint;
 
         CoverageLayer()
         {
@@ -39,7 +39,6 @@ namespace full_coverage_path_planner
             ros::NodeHandle nh("~/" + name_);
             default_value_ = NO_INFORMATION;
             current_ = true;
-            min_x_ = min_y_ = max_x_ = max_y_ = 0;
             matchSize();
             dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
             dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb = boost::bind(
@@ -97,33 +96,23 @@ namespace full_coverage_path_planner
             std::vector<costmap_2d::MapLocation> footprint_points = footprint_to_points(origin_x, origin_y, origin_yaw);
             std::set<costmap_2d::MapLocation, MapLocation_lesser> footprint_set(footprint_points.begin(), footprint_points.end());
             visited_cells.insert(footprint_set.begin(), footprint_set.end());
-
-            std::set<costmap_2d::MapLocation, MapLocation_lesser> not_footprint;
+            not_footprint.clear();
             std::set_difference(visited_cells.begin(), visited_cells.end(), footprint_set.begin(), footprint_set.end(),
                                 std::inserter(not_footprint, not_footprint.end()), 
                                 [](const costmap_2d::MapLocation& a, const costmap_2d::MapLocation& b) { return MapLocation_lesser{}(a, b); }
                                 );
-
-            for (auto &it : visited_cells)
-            {
-                double mark_x, mark_y;
-                mapToWorld(it.x, it.y, mark_x, mark_y);
-                min_x_ = std::min(min_x_, mark_x);
-                min_y_ = std::min(min_y_, mark_y);
-                max_x_ = std::max(max_x_, mark_x);
-                max_y_ = std::max(max_y_, mark_y);
-            }
+            // visited_cells.erase(not_footprint.begin(), not_footprint.end());
 
             for (auto &it : not_footprint)
             {
-                setCost(it.x, it.y, LETHAL_OBSTACLE);
+                double mark_x, mark_y;
+                mapToWorld(it.x, it.y, mark_x, mark_y);
+                *min_x = std::min(*min_x, mark_x);
+                *min_y = std::min(*min_y, mark_y);
+                *max_x = std::max(*max_x, mark_x);
+                *max_y = std::max(*max_y, mark_y);
+                visited_cells.erase(it);
             }
-            visited_cells.erase(not_footprint.begin(), not_footprint.end());
-
-            *min_x = min_x_;
-            *min_y = min_y_;
-            *max_x = max_x_;
-            *max_y = max_y_;
         }
 
         void updateCosts(costmap_2d::Costmap2D &master_grid, // NOLINT (runtime/references)
@@ -131,17 +120,14 @@ namespace full_coverage_path_planner
         {
             if (!enabled_)
                 return;
-            unsigned char *master = master_grid.getCharMap();
 
-            for (int j = min_j; j < max_j; j++)
+            for (auto &it : not_footprint)
             {
-                for (int i = min_i; i < max_i; i++)
-                {
-                    int index = getIndex(i, j);
-                    if (master[index] != LETHAL_OBSTACLE && (costmap_[index] == LETHAL_OBSTACLE || costmap_[index] > master[index]))
-                        master_grid.setCost(i, j, costmap_[index]);
-                }
+                setCost(it.x, it.y, LETHAL_OBSTACLE);
             }
+
+            updateWithMax(master_grid,  min_i,  min_j,  max_i,  max_j);
+
         }
     };
 }
