@@ -1,4 +1,4 @@
-#include <set>
+#include <unordered_set>
 
 #include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
@@ -13,12 +13,14 @@ namespace full_coverage_path_planner
     using costmap_2d::LETHAL_OBSTACLE;
     using costmap_2d::NO_INFORMATION;
 
-    struct MapLocation_lesser {
-        bool operator() (const costmap_2d::MapLocation& a, const costmap_2d::MapLocation& b) const {
-            if (a.x < b.x) return true;
-            if (a.x > b.x) return false;
-            if (a.y < b.y) return true;
-            return false;
+    struct MapLocation_hash {
+        bool operator () (const costmap_2d::MapLocation &a, const costmap_2d::MapLocation &b) const {
+            return a.x == b.x && a.y == b.y;
+        }
+        size_t operator () (const costmap_2d::MapLocation& point) const {
+            size_t xHash = std::hash<int>()(point.x);
+            size_t yHash = std::hash<int>()(point.y) << 1;
+            return xHash ^ yHash;
         }
     };
 
@@ -26,8 +28,8 @@ namespace full_coverage_path_planner
     {
     public:
         dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
-        std::set<costmap_2d::MapLocation, MapLocation_lesser> visited_cells;
-        std::set<costmap_2d::MapLocation, MapLocation_lesser> not_footprint;
+        std::unordered_set<costmap_2d::MapLocation, MapLocation_hash, MapLocation_hash> visited_cells_;
+        std::vector<costmap_2d::MapLocation> not_footprint_;
 
         CoverageLayer()
         {
@@ -94,16 +96,15 @@ namespace full_coverage_path_planner
                 return;
 
             std::vector<costmap_2d::MapLocation> footprint_points = footprint_to_points(origin_x, origin_y, origin_yaw);
-            std::set<costmap_2d::MapLocation, MapLocation_lesser> footprint_set(footprint_points.begin(), footprint_points.end());
-            visited_cells.insert(footprint_set.begin(), footprint_set.end());
-            not_footprint.clear();
-            std::set_difference(visited_cells.begin(), visited_cells.end(), footprint_set.begin(), footprint_set.end(),
-                                std::inserter(not_footprint, not_footprint.end()), 
-                                [](const costmap_2d::MapLocation& a, const costmap_2d::MapLocation& b) { return MapLocation_lesser{}(a, b); }
-                                );
-            // visited_cells.erase(not_footprint.begin(), not_footprint.end());
+            std::unordered_set<costmap_2d::MapLocation, MapLocation_hash, MapLocation_hash> footprint_set(footprint_points.begin(), footprint_points.end());
+            visited_cells_.insert(footprint_set.begin(), footprint_set.end());
+            not_footprint_.clear();
 
-            for (auto &it : not_footprint)
+            // not_footprint_ = visited_cells_ - footprint_set
+            std::copy_if(visited_cells_.begin(), visited_cells_.end(), std::back_inserter(not_footprint_),
+                [&footprint_set] (costmap_2d::MapLocation needle) { return footprint_set.find(needle) == footprint_set.end(); });
+
+            for (auto &it : not_footprint_)
             {
                 double mark_x, mark_y;
                 mapToWorld(it.x, it.y, mark_x, mark_y);
@@ -111,7 +112,7 @@ namespace full_coverage_path_planner
                 *min_y = std::min(*min_y, mark_y);
                 *max_x = std::max(*max_x, mark_x);
                 *max_y = std::max(*max_y, mark_y);
-                visited_cells.erase(it);
+                visited_cells_.erase(it);
             }
         }
 
@@ -121,7 +122,7 @@ namespace full_coverage_path_planner
             if (!enabled_)
                 return;
 
-            for (auto &it : not_footprint)
+            for (auto &it : not_footprint_)
             {
                 setCost(it.x, it.y, LETHAL_OBSTACLE);
             }
