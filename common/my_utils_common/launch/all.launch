@@ -112,7 +112,7 @@
                 args="load depth_image_proc/point_cloud_xyzrgb pcl_proc"
           respawn="false" output="screen" >
 
-            <remap from="/rgb/image_rect_color" to="/camera/rgb/image_raw" />
+            <remap from="/rgb/image_rect_color" to="/segmentation_node/mask_color" />
             <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
             
             <remap from="depth_registered/points" to="/pcl_proc/points2" />
@@ -124,14 +124,14 @@
             
             <param name="use_hsi" type="int" value="0"/>
             
-            <param name="r_min" type="double" value="255"/>
-            <param name="r_max" type="double" value="255"/>
+            <param name="r_min" type="double" value="32"/>
+            <param name="r_max" type="double" value="32"/>
 
-            <param name="g_min" type="double" value="232"/>
-            <param name="g_max" type="double" value="255"/>
+            <param name="g_min" type="double" value="0"/>
+            <param name="g_max" type="double" value="0"/>
 
             <param name="b_min" type="double" value="0"/>
-            <param name="b_max" type="double" value="20"/>
+            <param name="b_max" type="double" value="0"/>
         </node>
 
         <node pkg="nodelet" type="nodelet" name="point_cloud2_laserscan"
