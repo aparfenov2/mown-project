@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<launch>
+
+   <include file="$(find engix_control)/launch/control.launch"/>
+   <include file="$(find engix_navigation)/launch/gmapping.launch"/>
+   <include file="$(find zed_wrapper)/launch/zed2.launch" />
+   <!--include file="$(find nmea_comms)/launch/tee.launch" /-->
+   <!--include file="$(find engix_robot)/launch/rplidar.launch" /-->
+   <include file="$(find ce30c_driver)/launch/benewake_ce30c_tif.launch" />
+   <include file="$(find ce30c_driver)/launch/pointcloud_2_laserscan.launch" />
+   <!--include file="$(find ce30c_driver)/launch/hector_slam.launch" /-->
+   <!--include file="$(find engix_robot)/launch/diagnostics.launch" /-->
+   <!--include file="$(find engix_navigation)/launch/explore_light.launch"/-->
+   <!--include file="$(find engix_robot)/launch/cartographer_ros.launch"/-->
+   <!--include file="$(find engix_navigation)/launch/slam_toolbox.launch"/-->
+   <!--include file="$(find engix_navigation)/launch/hector_slam.launch"/-->
+   <include file="$(find engix_control)/launch/teleop.launch"/>
+
+
+   <node pkg="robot_localization" type="ekf_localization_node" name="rosbot_ekf" clear_params="true"/>
+    <rosparam command="load" file="$(find engix_navigation)/config/ekf_params.yaml" />
+ 
+   <!--  Placeholder for output topic remapping -->
+   <remap from="odometry/filtered" to="odom"/>
+     <!--remap from="accel/filtered" to=""/> -->
+   <node pkg="engix_robot" type="twist_to_motors.py" name="twist_to_motors" output="screen">
+        <rosparam param="base_width">0.365</rosparam>
+   </node>
+    <!-- Load joint controller configurations from YAML file to parameter server -->
+  <!--rosparam file="$(find engix_description)/launch/controller.yaml" command="load"/-->
+      
+   <include file="$(find engix_control)/launch/move_base.launch"/>
+
+
+   <node name="engix_robot" pkg="engix_robot" type="engix_robot" required="true">
+        <param name="rate" value="10"/>
+        <param name="od_sn" value="0x3067346E3439"/>
+        <param name="vel_P" value="0.2"/>
+        <param name="vel_I" value="0.0"/>
+        <param name="vel_limit" value="40.0"/>
+        <param name="ramp_rate" value="1500"/>
+        <param name="ramp_enabled" value="true"/>
+        
+        <remap from="engix_robot/odom" to="odom"/>
+    </node>
+
+   
+
+   <node pkg="engix_robot" type="robot_pose_publisher" name="engix_pose_publisher">
+        <param name="is_stamped" value="true"/>
+   </node>
+
+  <node pkg="engix_robot" type="map_to_img_node" name="map_to_img" output="screen">
+    <param name="tile_width" value="640"/>
+    <param name="tile_height" value="480"/>
+    <param name="parent_frame" value="/map"/>
+    <param name="child_frame" value="/base_link"/>
+    <param name="draw_robot" value="true"/>
+    <param name="publish_full_map" value="true"/>
+    <param name="publish_map_tile" value="true"/>
+  </node>
+
+  <!--
+
+   <node pkg="gmapping" type="slam_gmapping" name="gmapping_node" output="log">
+        <param name="base_frame" value="base_link" />
+        <param name="odom_frame" value="odom" />
+        <param name="delta" value="0.01" />
+        <param name="xmin" value="-5" />
+        <param name="ymin" value="-5" />
+        <param name="xmax" value="5" />
+        <param name="ymax" value="5" />
+        <param name="maxUrange" value="5" />
+        <param name="map_update_interval" value="1" />
+        <param name="linearUpdate" value="0.05" />
+        <param name="angularUpdate" value="0.05" />
+        <param name="temporalUpdate" value="0.1" />
+        <param name="particles" value="100" />
+   </node>
+
+    <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen">
+    </node>
+
+    <node pkg="exploration_server" type="exploration_server_node" name="exploration_server_node" output="screen">
+        <param name="frequency" type="double" value="1.0"/>
+        <param name="goal_aliasing" type="double" value="0.2"/>
+        <rosparam ns="explore_costmap" subst_value="true" file="$(find engix_navigation)/params/exploration.yaml" command="load" />
+    </node>
+-->
+    <node pkg="web_video_server" type="web_video_server" name="webvideo4">
+        <param name="address" value="::" />
+        <param name="port" value="8082" />
+    </node>
+
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" >
+        <arg name="port" value="9090"/>
+    </include>
+    <include file="$(find engix_robot)/launch/webui.launch"/>
+
+
+</launch>
