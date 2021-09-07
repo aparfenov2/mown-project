@@ -36,7 +36,7 @@
 
     <include>
       <uri>model://baylands</uri>
-      <pose>16 138 0 0 0 0</pose>
+      <pose>26 134 0 0 0 0</pose>
     </include>
 
     <gui fullscreen='0'>
