@@ -88,8 +88,8 @@
         </node>
     </group>
     <!-- segm -->
-    <group if="$(arg segm)">
-        <group unless="$(arg bypass)">
+    <group if="$(arg segm_bypass)">
+        <group unless="$(arg segm_bypass)">
             <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
                 <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
                 <remap from="camera/image" to="/camera/rgb/image_raw" />

@@ -28,6 +28,3 @@
 [submodule "3rd_party/frontier_exploration"]
 	path = 3rd_party/frontier_exploration
 	url = git@github.com:paulbovbel/frontier_exploration.git
-[submodule "engix_robot"]
-	path = engix_robot
-	url = git@github.com:autrover/engix_robot.git
