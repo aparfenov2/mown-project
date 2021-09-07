@@ -19,7 +19,7 @@
   <!--https://wiki.ros.org/ros_control-->
   <transmission name="left_wheel_tran">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="left_wheel">
+    <joint name="left_wheel_joint">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
     </joint>
     <actuator name="left_wheel_actr">
@@ -29,7 +29,7 @@
   </transmission>
   <transmission name="right_wheel_tran">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="right_wheel">
+    <joint name="right_wheel_joint">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
     </joint>
     <actuator name="right_wheel_actr">
@@ -37,47 +37,119 @@
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <robotNamespace>/</robotNamespace>
+      <legacyMode>true</legacyMode>
+      <alwaysOn>true</alwaysOn>
+      <publishWheelTF>false</publishWheelTF>
+      <publishTf>1</publishTf>
+      <publishOdomTF>true</publishOdomTF>
+      <publishWheelJointState>true</publishWheelJointState>
+      <updateRate>100.0</updateRate>
+      <leftJoint>left_wheel_joint</leftJoint>
+      <rightJoint>right_wheel_joint</rightJoint>
+      <wheelSeparation>0.365</wheelSeparation>
+      <wheelDiameter>0.156</wheelDiameter>
+      <wheelAcceleration>1.0</wheelAcceleration>
+      <wheelTorque>20</wheelTorque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>base_link</robotBaseFrame>
+      <odometrySource>world</odometrySource>
+      <rosDebugLevel>na</rosDebugLevel>
+    </plugin>
+  </gazebo>
+    <!-- <gazebo>
+    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
+      <robotNamespace>/</robotNamespace>
+      <legacyModeNS>true</legacyModeNS>
+    </plugin>
+  </gazebo> -->
+  <gazebo reference="camera_depth_frame">
+    <sensor name="camera" type="depth">
+      <always_on>true</always_on>
+      <update_rate>20.0</update_rate>
+      <camera>
+        <horizontal_fov>1.0471975512</horizontal_fov>
+        <image>
+          <format>B8G8R8</format>
+          <width>640</width>
+          <height>480</height>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>8.0</far>
+        </clip>
+      </camera>
+      <plugin filename="libgazebo_ros_openni_kinect.so" name="camera_depth_frame_kinect_controller">
+        <robotNamespace>/</robotNamespace>
+        <baseline>0.2</baseline>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0</updateRate>
+        <cameraName>camera</cameraName>
+        <imageTopicName>/camera/rgb/image_raw</imageTopicName>
+        <cameraInfoTopicName>/camera/rgb/camera_info</cameraInfoTopicName>
+        <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+        <depthImageCameraInfoTopicName>/camera/depth/camera_info</depthImageCameraInfoTopicName>
+        <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+        <frameName>camera_depth_optical_frame</frameName>
+        <pointCloudCutoff>0.3</pointCloudCutoff>
+        <distortion_k1>0.0</distortion_k1>
+        <distortion_k2>0.0</distortion_k2>
+        <distortion_k3>0.0</distortion_k3>
+        <distortion_t1>0.0</distortion_t1>
+        <distortion_t2>0.0</distortion_t2>
+        <CxPrime>0</CxPrime>
+        <Cx>0</Cx>
+        <Cy>0</Cy>
+        <focalLength>0</focalLength>
+        <hackBaseline>0</hackBaseline>
+      </plugin>
+    </sensor>
+  </gazebo>
 
-<!-- <gazebo>
-  <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
-    <alwaysOn>true</alwaysOn>
-    <updateRate>50.0</updateRate>
-    <bodyName>base_link</bodyName>
-    <topicName>ground_truth/state</topicName>
-    <gaussianNoise>0.01</gaussianNoise>
-    <frameName>world</frameName>
-    <xyzOffsets>0 0 0</xyzOffsets>
-    <rpyOffsets>0 0 0</rpyOffsets>
-  </plugin>
-</gazebo> -->
-
-
-
-<gazebo>
-  <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-    <robotNamespace>/</robotNamespace>
-    <legacyMode>true</legacyMode>
-    <alwaysOn>true</alwaysOn>
-    <publishWheelTF>false</publishWheelTF>
-    <publishOdomTF>true</publishOdomTF>
-    <publishTf>true</publishTf>
-    <publishWheelJointState>true</publishWheelJointState>
-    <updateRate>100.0</updateRate>
-    <leftJoint>left_wheel</leftJoint>
-    <rightJoint>right_wheel</rightJoint>
-    <wheelSeparation>0.365</wheelSeparation>
-    <wheelDiameter>0.156</wheelDiameter>
-    <wheelAcceleration>1.0</wheelAcceleration>
-    <wheelTorque>20</wheelTorque>
-    <commandTopic>cmd_vel</commandTopic>
-    <odometryTopic>odom</odometryTopic>
-    <odometryFrame>odom</odometryFrame>
-    <robotBaseFrame>base_link</robotBaseFrame>
-    <odometrySource>world</odometrySource>
-    <rosDebugLevel>na</rosDebugLevel>
-  </plugin>
-</gazebo>
-
+  <gazebo reference="laser_tof">
+    <sensor name="laser_tof_sensor" type="ray" >
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>20</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>320</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.66</min_angle>
+            <max_angle>0.66</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>24</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.045</min_angle>
+            <max_angle>0.045</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.1</min>
+          <max>4.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_velodyne_laser.so">
+        <robotNamespace>/</robotNamespace>
+        <topicName>ce30c_output</topicName>
+        <frameName>laser_tof</frameName>
+        <!-- <topicName>scan</topicName>
+        <frameName>laser</frameName> -->
+      </plugin>
+    </sensor>
+  </gazebo>
   <gazebo reference="laser">
     <sensor name="head_rplidar_sensor" type="ray">
       <pose>0 0 0.06 0 0 0</pose>
@@ -109,13 +181,8 @@
       </plugin>
     </sensor>
   </gazebo>
-  <!-- <gazebo>
-    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
-      <robotNamespace>/</robotNamespace>
-      <legacyModeNS>true</legacyModeNS>
-    </plugin>
-  </gazebo> -->
-  <gazebo>
+
+  <gazebo reference="imu_link">
     <plugin filename="libgazebo_ros_imu.so" name="gazebo_imu_plugin">
       <robotNamespace>/</robotNamespace>
       <topicName>imu/data</topicName>
@@ -142,8 +209,7 @@
       <drift>0.0001 0.0001 0.0001</drift>
     </plugin>
   </gazebo>
-  <gazebo reference="imu_link">
-</gazebo>
+  
   <!--
 <gazebo reference="base_footprint">
   <material>Gazebo/Grey</material>
@@ -226,7 +292,7 @@
     <!-- <mu2>0.0</mu2> -->
     <!-- <selfCollide>true</selfCollide> -->
   </gazebo>
-  <gazebo reference="lidar_tof_1">
+  <gazebo reference="laser_tof">
     <material>Gazebo/Black</material>
     <!-- <mu1>0.0</mu1> -->
     <!-- <mu2>0.0</mu2> -->
@@ -272,12 +338,12 @@
   </gazebo>
  
   
-  <!-- <link name="base_footprint"/>
+  <link name="base_footprint"/>
   <joint name="base_footprint_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"/>
-    <parent link="base_footprint"/>
-    <child link="base_link"/>
-  </joint> -->
+    <parent link="base_link"/>
+    <child link="base_footprint"/>
+  </joint>
   <!--Inertial link stores the robot's inertial information !!!! RE_EDIT-->
   <link name="inertial_link">
     <inertial>
@@ -441,7 +507,7 @@
       <material name="silver_default"/>
     </visual>
   </link>
-  <link name="lidar_tof_1">
+  <link name="laser_tof">
     <visual>
       <origin rpy="0 0 0" xyz="-0.157645 0.04512 -0.3677"/>
       <geometry>
@@ -449,12 +515,12 @@
       </geometry>
       <material name="silver_default"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin rpy="0 0 0" xyz="-0.157645 0.04512 -0.3677"/>
       <geometry>
         <mesh filename="package://engix_description/meshes/lidar_tof_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   <link name="caster_right">
     <inertial>
@@ -536,13 +602,31 @@
       </geometry>
     </collision>
   </link>
-  <joint name="left_wheel" type="continuous">
+  <link name="camera_link">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <link name="camera_rgb_frame">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <link name="camera_rgb_optical_frame"/>
+  <link name="camera_depth_frame"/>
+  <link name="camera_depth_optical_frame"/>
+
+  <joint name="left_wheel_joint" type="continuous">
     <origin rpy="0 0 0" xyz="-0.133355 0.150817 0.079162"/>
     <parent link="base_link"/>
     <child link="lwheel"/>
     <axis xyz="0.0 1.0 -0.0"/>
   </joint>
-  <joint name="right_wheel" type="continuous">
+  <joint name="right_wheel_joint" type="continuous">
     <origin rpy="0 0 0" xyz="-0.133355 -0.146183 0.079162"/>
     <parent link="base_link"/>
     <child link="rwheel"/>
@@ -583,10 +667,10 @@
     <parent link="base_link"/>
     <child link="usb_hub_1"/>
   </joint>
-  <joint name="lidar_tof_joint" type="fixed">
+  <joint name="laser_tof_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.157645 -0.04512 0.3677"/>
     <parent link="base_link"/>
-    <child link="lidar_tof_1"/>
+    <child link="laser_tof"/>
   </joint>
   <joint name="caster_right_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0.155465 -0.084832 0.072019"/>
@@ -618,4 +702,33 @@
     <parent link="base_link"/>
     <child link="laser"/>
   </joint>
+  <joint name="camera_rgb_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.176645 0.00992 0.4957"/>
+    <parent link="base_link"/>
+    <child link="camera_rgb_frame"/>
+  </joint>
+  <joint name="camera_rgb_optical_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.176645 0.00992 0.4957"/>
+    <parent link="camera_rgb_frame"/>
+    <child link="camera_rgb_optical_frame"/>
+  </joint>
+  <joint name="camera_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.176645 0.00992 0.4957"/>
+    <parent link="camera_rgb_frame"/>
+    <child link="camera_link"/>
+  </joint>
+  <joint name="camera_depth_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.176645 0.00992 0.4957"/>
+    <parent link="camera_rgb_frame"/>
+    <child link="camera_depth_frame"/>
+  </joint>
+  <joint name="camera_depth_optical_joint" type="fixed">
+    <origin rpy="-1.5707 0 -1.5707" xyz="0.176645 0.00992 0.4957"/>
+    <parent link="camera_depth_frame"/>
+    <child link="camera_depth_optical_frame"/>
+  </joint>
+
+
+
+
 </robot>

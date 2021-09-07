@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package>
+  <name>engix_navigation</name>
+  <version>0.0.2</version>
+  <description>Autonomous mapping and navigation Engix robot</description>
+
+  <author email="yarulik1986@gmail.com">Litvinov Yaroslav</author>
+  <maintainer email="yarulik1986@gmail.com">Litvinov Yaroslav</maintainer>
+  
+  <license>BSD</license>
+
+  <url type="website"></url>
+  <url type="bugtracker"></url>
+  <url type="repository"></url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roslaunch</build_depend>
+  <run_depend>amcl</run_depend>
+  <!-- Disabling till package is released -->
+  <!-- <run_depend>frontier_exploration</run_depend> -->
+  <run_depend>gmapping</run_depend>
+  <run_depend>map_server</run_depend>
+  <run_depend>move_base</run_depend>
+  <run_depend>navfn</run_depend>
+  <run_depend>base_local_planner</run_depend>
+  <run_depend>dwa_local_planner</run_depend>
+  <run_depend>imu_filter_madgwick</run_depend>
+  <run_depend>imu_transformer</run_depend>
+  <run_depend>nmea_comms</run_depend>
+  <run_depend>nmea_navsat_driver</run_depend>
+  <run_depend>robot_localization</run_depend>
+  <run_depend>robot_upstart</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>tf2_ros</run_depend>
+
+  <export>
+  </export>
+</package>
