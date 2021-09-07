@@ -89,7 +89,7 @@
     </group>
     <!-- segm -->
     <group if="$(arg segm)">
-        <group unless="$(arg bypass)">
+        <group unless="$(arg segm_bypass)">
             <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
                 <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
                 <remap from="camera/image" to="/camera/rgb/image_raw" />
@@ -112,7 +112,7 @@
                 args="load depth_image_proc/point_cloud_xyzrgb pcl_proc"
           respawn="false" output="screen" >
 
-            <remap from="/rgb/image_rect_color" to="$(arg image_rect_topic)" />
+            <remap from="/rgb/image_rect_color" to="/camera/rgb/image_raw" />
             <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
             
             <remap from="depth_registered/points" to="/pcl_proc/points2" />
