@@ -4,7 +4,6 @@
     <arg name="teleop" default="false" />
     <arg name="sim"    default="false" />
     <arg name="segm"   default="false" />
-    <arg name="segm_bypass" default="false" />
     <arg name="planning" default="false"/>
     <arg name="mb"     default="false" />
     <arg name="paused" default="false" />
@@ -89,12 +88,10 @@
     </group>
     <!-- segm -->
     <group if="$(arg segm)">
-        <group unless="$(arg segm_bypass)">
-            <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
-                <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
-                <remap from="camera/image" to="/camera/rgb/image_raw" />
-            </node>
-        </group>
+        <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
+            <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
+            <remap from="camera/image" to="/camera/rgb/image_raw" />
+        </node>
 
         <node pkg="nodelet" type="nodelet" name="pcl_proc"  args="manager" output="screen"/>
 
