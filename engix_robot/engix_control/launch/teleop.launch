@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="joy_dev" default="/dev/input/js0" />
+  <arg name="joystick" default="true" />
+  
+   <!--rosparam command="load" file="$(find engix_control)/config/teleop_logitech.yaml" /-->
+
+    <node pkg="joy" type="joy_node" name="joy_node">
+      <param name="input/dev" value="$(arg joy_dev)" />
+    </node>
+
+    <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy">
+      <!--param name="joy_node/dev" value="$(arg joy_dev)" /-->
+      <rosparam command="load" file="$(find engix_control)/config/teleop_logitech.yaml"/>
+    </node>
+
+</launch>

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+  <arg name="port" default="/dev/ttyUSB0" />
+  <arg name="baud" default="9600" />
+
+<launch>
+  <group ns="gps">
+    <!-- NavSat Serial -->
+    <node pkg="nmea_comms" type="serial_node" name="nmea_serial_node" output="screen">
+      <param name="port" value="$(arg port)" />
+      <param name="baud" value="$(arg baud)" />
+    </node>
+
+    <!-- NavSat Processing -->
+    <node pkg="nmea_navsat_driver" type="nmea_topic_driver" name="nmea_topic_driver">
+    </node>
+<!--
+    <node pkg="nmea_comms" type="socket_node" name="nmea_socket">
+      <remap from="nmea_sentence" to="socket_in" />
+      <remap from="nmea_sentence_out" to="nmea_sentence" />
+-->
+  </group>
+
+  <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform" >
+    <rosparam>
+      magnetic_declination_radians: 0
+      roll_offset: 0
+      pitch_offset: 0
+      yaw_offset: 0
+      zero_altitude: false
+      broadcast_utm_transform: false
+    </rosparam>
+  </node>
+</launch>
