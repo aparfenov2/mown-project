@@ -69,7 +69,7 @@
             <node args="-urdf -x 5.5 -y -5.7 -z 1.2 -Y 3.14 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'baylands')">
-            <node args="-urdf -x 0 -y 0 -z 0.3638 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+            <node args="-urdf -x 0 -y 0 -z 0.21 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
             <param name="publish_frequency" type="double" value="30.0"/>
