@@ -19,6 +19,7 @@ while [[ "$#" -gt 0 ]]; do
         --robot_turtle) ROBOT="turtlebot"; ;;
         --teleop) TELEOP=1; ;;
         --segm) SEGMENTATION=1; ;;
+        --segm_net) SEGMENTATION_NET=1; ;;
         --mb) MOVE_BASE=1; ;;
         --name) CONTAINER_NAME="$2"; shift; ;;
         --loca) LOCALIZATION=1; ;;
@@ -35,6 +36,7 @@ ROSARGS=()
 [ -n "$RVIZ" ] && ROSARGS+=("rviz:=true") && CONTAINER_NAME="rviz"
 [ -n "$TELEOP" ] && ROSARGS+=("teleop:=true") && CONTAINER_NAME="teleop"
 [ -n "$SEGMENTATION" ] && ROSARGS+=("segm:=true") && CONTAINER_NAME="segm"
+[ -n "${SEGMENTATION_NET}" ] && ROSARGS+=("segm_net:=true") && CONTAINER_NAME="segm_net"
 [ -n "$ROBOT" ] && ROSARGS+=("robot:=$ROBOT")
 [ -n "$PROJECTION" ] && ROSARGS+=("proj:=true") && CONTAINER_NAME="proj"
 [ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true") && CONTAINER_NAME="loca"
@@ -86,6 +88,13 @@ done
 
 [ -n "$JETSON" ] && {
     JETSON_ARGS="--ws docker_jetson"
+    [ -n "$SEGMENTATION" ] && {
+        JETSON_ARGS="--ws docker_jetson_ml"
+        apt -qq list nvidia-container-csv-tensorrt 2>/dev/null | grep -qE "(installed|upgradeable)" || {
+            echo please apt install nvidia-container-csv-tensorrt
+            exit 1
+        }
+    }
 }
 
 bash _run_in_docker.sh ${JETSON_ARGS} ${NO_RM} --script $0 --name ${CONTAINER_NAME} \
