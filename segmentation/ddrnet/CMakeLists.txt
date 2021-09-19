@@ -56,7 +56,7 @@ include_directories(
 option(CUDA_USE_STATIC_CUDA_RUNTIME OFF)
 # set(CMAKE_BUILD_TYPE Debug)
 
-find_package(OpenCV 4.1.0 REQUIRED COMPONENTS core imgproc )
+find_package(OpenCV 4.1.0 REQUIRED COMPONENTS core imgproc imgcodecs)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 
