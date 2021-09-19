@@ -1,4 +1,5 @@
 #include <unordered_set>
+#include <cmath>
 
 #include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
@@ -103,7 +104,27 @@ namespace full_coverage_path_planner
             // not_footprint_ = visited_cells_ - footprint_set
             std::copy_if(visited_cells_.begin(), visited_cells_.end(), std::back_inserter(not_footprint_),
                 [&footprint_set] (costmap_2d::MapLocation needle) { return footprint_set.find(needle) == footprint_set.end(); });
+            
+            for (auto &it : not_footprint_)
+            {
+                visited_cells_.erase(it);
+            }
+            // avoid placing obstacles in front while moving backwards
+            unsigned int origin_mx, origin_my;
+            worldToMap(origin_x, origin_y, origin_mx, origin_my);
 
+            not_footprint_.erase(
+                std::remove_if(not_footprint_.begin(), not_footprint_.end(),
+                    [origin_yaw, origin_mx, origin_my](const costmap_2d::MapLocation& p) -> bool { 
+                        int rx = p.x - origin_mx;
+                        int ry = p.y - origin_my;
+                        double q = std::atan2((double)ry , (double)rx);
+                        return origin_yaw - M_PI_2 < q && q < origin_yaw + M_PI_2;
+                    }),
+                not_footprint_.end()
+                );
+            
+            // update update bounds
             for (auto &it : not_footprint_)
             {
                 double mark_x, mark_y;
@@ -112,8 +133,8 @@ namespace full_coverage_path_planner
                 *min_y = std::min(*min_y, mark_y);
                 *max_x = std::max(*max_x, mark_x);
                 *max_y = std::max(*max_y, mark_y);
-                visited_cells_.erase(it);
             }
+
         }
 
         void updateCosts(costmap_2d::Costmap2D &master_grid, // NOLINT (runtime/references)
