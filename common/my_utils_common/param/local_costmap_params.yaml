@@ -1,18 +1,38 @@
 global_frame: odom
-robot_base_frame: base_footprint
+robot_base_frame: base_link
 
 update_frequency: 10.0
 publish_frequency: 10.0
 transform_tolerance: 0.5  
 
 rolling_window: true
-width: 1
-height: 1
+width: 2
+height: 2
 resolution: 0.005
   
 plugins:
  # - {name: static, type: "costmap_2d::StaticLayer"}
- - {name: obstacle, type: "costmap_2d::ObstacleLayer"}
+ - {name: obstacles, type: "costmap_2d::ObstacleLayer"}
  
-footprint: [[-0.164, -0.124], [-0.164, 0.124], [0.0616, 0.140], [0.0616, -0.140]]
+obstacles:
+  observation_sources: scan ya_scan
+  scan: 
+    sensor_frame: base_link
+    data_type: LaserScan
+    topic: pcl_proc/scan
+    marking: true
+    clearing: true
+
+  ya_scan: 
+    sensor_frame: base_link
+    data_type: LaserScan
+    topic: /scan
+    marking: true
+    clearing: true
+
+  track_unknown_space: true
+  obstacle_range: 3.0
+  raytrace_range: 3.5
+
+# footprint: [[-0.164, -0.124], [-0.164, 0.124], [0.0616, 0.140], [0.0616, -0.140]]
 #robot_radius: 0.17

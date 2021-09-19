@@ -1,13 +1,14 @@
 #!/bin/bash
-SEGMENTATION_BYPASS=
 ALL_ARGS=("$@")
 CONTAINER_NAME="all"
-WORLD="turtletown"
+WORLD="playpen"
 ROBOT="ya_model"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --inner) INNER=1 ;;
+        --jetson) JETSON=1;  ;;
+        --no_rm) NO_RM="--no_rm";  ;;
         --sim) SIM=1;  ;;
         --grass_world) WORLD="baylands";  ;;
         --world) WORLD="$2"; shift; ;;
@@ -18,13 +19,10 @@ while [[ "$#" -gt 0 ]]; do
         --robot_turtle) ROBOT="turtlebot"; ;;
         --teleop) TELEOP=1; ;;
         --segm) SEGMENTATION=1; ;;
-        --segm_bypass) SEGMENTATION_BYPASS=1; ;;
+        --segm_net) SEGMENTATION_NET=1; ;;
         --mb) MOVE_BASE=1; ;;
         --name) CONTAINER_NAME="$2"; shift; ;;
-        --segm_bypass) SEGMENTATION_BYPASS="1"; ;;
         --loca) LOCALIZATION=1; ;;
-        # --sim_basic) SIM=1; RVIZ=1; TELEOP=1; ;;
-        # --preset1) SIM=1; RVIZ=1; TELEOP=1; SEGMENTATION=1; PROJECTION=1; LOCALIZATION=1;;
         --planning) PLANNING=1; ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -38,7 +36,7 @@ ROSARGS=()
 [ -n "$RVIZ" ] && ROSARGS+=("rviz:=true") && CONTAINER_NAME="rviz"
 [ -n "$TELEOP" ] && ROSARGS+=("teleop:=true") && CONTAINER_NAME="teleop"
 [ -n "$SEGMENTATION" ] && ROSARGS+=("segm:=true") && CONTAINER_NAME="segm"
-[ -n "$SEGMENTATION_BYPASS" ] && ROSARGS+=("segm_bypass:=true")
+[ -n "${SEGMENTATION_NET}" ] && ROSARGS+=("segm_net:=true") && CONTAINER_NAME="segm_net"
 [ -n "$ROBOT" ] && ROSARGS+=("robot:=$ROBOT")
 [ -n "$PROJECTION" ] && ROSARGS+=("proj:=true") && CONTAINER_NAME="proj"
 [ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true") && CONTAINER_NAME="loca"
@@ -47,7 +45,7 @@ ROSARGS=()
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
-    export PYTHONPYCACHEPREFIX="/cdir/pycache/"
+    export PYTHONPYCACHEPREFIX="/cdir/ws/pycache/"
 
     set -ex
     pushd $PWD
@@ -88,6 +86,17 @@ for f in $(find ws/src -type l); do
     VOLUMES+=("-v $(readlink -f $f):/cdir/$f")
 done
 
-bash _run_in_docker.sh --script $0 --name ${CONTAINER_NAME} \
+[ -n "$JETSON" ] && {
+    JETSON_ARGS="--ws docker_jetson"
+    [ -n "$SEGMENTATION" ] && {
+        JETSON_ARGS="--ws docker_jetson_ml"
+        apt -qq list nvidia-container-csv-tensorrt 2>/dev/null | grep -qE "(installed|upgradeable)" || {
+            echo please apt install nvidia-container-csv-tensorrt
+            exit 1
+        }
+    }
+}
+
+bash _run_in_docker.sh ${JETSON_ARGS} ${NO_RM} --script $0 --name ${CONTAINER_NAME} \
     ${VOLUMES[@]} \
     ${ALL_ARGS[@]}

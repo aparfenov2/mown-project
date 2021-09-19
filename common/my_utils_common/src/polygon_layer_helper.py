@@ -13,7 +13,7 @@ class PolygonLayerHelper:
         self._action_name = name
         self._as = actionlib.SimpleActionServer(self._action_name, exploration_msgs.msg.ExploreAction, execute_cb=self.execute_cb, auto_start = False)
         self._as.start()
-        self.svc = rospy.ServiceProxy("costmap_node/costmap/polygon_layer/set_polygon", SetPolygon)
+        self.svc = rospy.ServiceProxy("/set_polygon", SetPolygon)
       
     def execute_cb(self, goal):
         rospy.loginfo('%s: Executing' % self._action_name)

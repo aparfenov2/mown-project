@@ -15,6 +15,10 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    --no_rm)
+    NO_RM=1
+    shift # past argument
+    ;;
     --build_image)
     BUILD_IMAGE=1
     shift # past argument
@@ -69,8 +73,12 @@ echo OTHERS="${OTHERS[@]}"
     popd
 }
 
+[ -z "${NO_RM}" ] && {
+    _RM="--rm"
+}
+
 xhost +
-docker run -ti --rm \
+docker run -ti ${_RM} \
     --gpus all \
     -e "DISPLAY" \
     -e "QT_X11_NO_MITSHM=1" \
