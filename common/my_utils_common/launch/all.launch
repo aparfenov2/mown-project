@@ -14,13 +14,14 @@
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'turtlebot')" />
     <arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" />
     <arg name="odom_topic"    value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" />
+    <arg name="use_sim_time_in_gazebo" value="true"/>
 
 <!-- sim -->
     <group if="$(arg sim)">
         <arg name="publish_tf" default="1"/>
 
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
-            <arg name="use_sim_time" value="true"/>
+            <arg name="use_sim_time" value="$(arg use_sim_time_in_gazebo)"/>
             <arg name="paused" value="$(arg paused)"/>
             <arg name="debug" value="false"/>
             <arg name="gui" value="true"/>
@@ -261,9 +262,7 @@
 <!-- planning system -->
     <group if="$(arg planning)">
         <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
-        <!-- <node pkg="my_utils_common" type="polygon_msg_adapter.py" name="exploration_server_node" output="screen">
-            <remap from="route_task_polygon" to="/planner/route_task_polygon"/>
-        </node> -->
+
 
         <include file="$(find move_base_mod)/launch/move_base.launch">
             <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
