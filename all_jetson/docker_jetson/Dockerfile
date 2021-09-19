@@ -176,3 +176,34 @@ RUN apt-get update && apt-get install -y ros-noetic-roslint
 # RUN apt-get update && apt-get install -y software-properties-common
 # RUN apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'   
 # RUN apt-get update && apt-get install -y cmake  
+
+
+    # setup processors number used to compile library
+RUN if [ "x$(nproc)" = "x1" ] ; then export USE_PROC=1 ; else export USE_PROC=$(($(nproc)/2)) ; fi && \
+    # Install dependencies
+      apt-get update && apt-get install -y \
+      cmake \
+      git \
+      gdb \
+      libpcl-dev \
+      libceres-dev \
+      libgoogle-glog-dev \
+      libopencv-dev \
+      python3-catkin-tools \
+      ros-${ROS_DISTRO}-cv-bridge \
+      ros-${ROS_DISTRO}-image-transport \
+      ros-${ROS_DISTRO}-message-filters \
+      ros-${ROS_DISTRO}-tf \
+      python3-catkin-lint python3-pip
+
+WORKDIR /tmp
+
+COPY requirements.txt ./
+
+# Install requirements
+RUN python3 -m pip install --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-cache-dir -r requirements.txt
+RUN rm requirements.txt
+
+RUN apt-get install -y python3-tk
+RUN python3 -m pip install -U catkin_tools
