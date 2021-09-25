@@ -165,7 +165,7 @@
         <!-- provides odom frame, didn't try with turtlebot -->
         <group if="$(eval robot == 'ya_model')">
             <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
-            <rosparam command="load" file="$(find engix_control)/config/localization.yaml" />
+                <rosparam command="load" file="$(find engix_control)/config/localization.yaml" />
                 <!-- <remap from="/imu/data" to="/mobile_base/sensors/imu_data"/> -->
             </node>
         </group>
@@ -257,6 +257,10 @@
             <arg name="odom_topic" value="odom" />
         </include>
 
-        <include file="$(find my_utils_common)/launch/planning.launch"/>    
+        <include file="$(find my_utils_common)/launch/planning.launch">
+            <remap from="/planner/localization" to="/needed_topic"/> <!--Odometry-->
+            <remap from="/mobile_base/commands/velocity" to="/needed_topic"/>     <!--Twist-->
+            <remap from="/planner/occupancy_grid_map" to="/needed_topic"/>  <!--OccupancyGrid-->
+        </include>    
     </group>
 </launch>
