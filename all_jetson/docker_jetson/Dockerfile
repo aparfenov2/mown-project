@@ -207,3 +207,5 @@ RUN rm requirements.txt
 
 RUN apt-get install -y python3-tk
 RUN python3 -m pip install -U catkin_tools
+
+WORKDIR /catkin_ws
