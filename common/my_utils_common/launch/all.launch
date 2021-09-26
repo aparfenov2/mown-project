@@ -13,8 +13,8 @@
     <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" if="$(eval robot == 'turtlebot')" />
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'turtlebot')" />
     <arg name="base_frame"    value="base_footprint" if="$(eval robot == 'turtlebot')" />
-    <!-- <arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" />
-    <arg name="odom_topic"    value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" /> -->
+    <!--arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" /-->
+    <!--arg name="odom_topic"    value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" /> -->
     <arg name="cmd_vel_topic" value="/cmd_vel" if="$(eval robot == 'ya_model')" />
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'ya_model')" />
     <arg name="base_frame"    value="base_link" if="$(eval robot == 'ya_model')" />
@@ -34,7 +34,7 @@
 
         <group if="$(eval robot == 'ya_model')">
             <arg name="robot_namespace" default="/"/>
-            <include file="$(find engix_mod)/launch/description.launch" />
+            <include file="$(find engix_description)/launch/description.launch" />
 
             <!-- Load controller configuration -->
             <!-- <rosparam command="load" file="$(find engix_control)/config/controller.yaml" /> -->
@@ -177,7 +177,7 @@
             <param name="min_height" type="double" value="0.1"/>
             <param name="max_height" type="double" value="2.0"/>
             <param name="target_frame" type="str" value="base_link"/>
-            <remap from="cloud_in" to="/velodyne_points"/>
+            <remap from="cloud_in" to="ce30_output"/>
             <remap from="scan" to="/pcl_proc/scan"/>
         </node>
     </group>
