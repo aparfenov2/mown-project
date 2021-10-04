@@ -181,7 +181,7 @@
             <param name="min_height" type="double" value="0.1"/>
             <param name="max_height" type="double" value="2.0"/>
             <param name="target_frame" type="str" value="base_link"/>
-            <remap from="cloud_in" to="/velodyne_points"/>
+            <remap from="cloud_in" to="ce30_output"/>
             <remap from="scan" to="/pcl_proc/scan"/>
         </node>
     </group>
