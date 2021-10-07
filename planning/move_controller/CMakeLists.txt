@@ -19,17 +19,17 @@ find_package(catkin REQUIRED COMPONENTS
     nav_msgs
 )
 
-find_package(PCL REQUIRED)
-find_package(OpenCV REQUIRED)
-find_package(Ceres REQUIRED)
+# find_package(PCL REQUIRED)
+# find_package(OpenCV REQUIRED)
+# find_package(Ceres REQUIRED)
 
-include_directories(
-  include
-	${catkin_INCLUDE_DIRS} 
-	${PCL_INCLUDE_DIRS}
-  ${CERES_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
-)
+# include_directories(
+#   include
+# 	${catkin_INCLUDE_DIRS} 
+# 	${PCL_INCLUDE_DIRS}
+#   ${CERES_INCLUDE_DIRS}
+#   ${OpenCV_INCLUDE_DIRS}
+# )
 # add_executable(test_ceres src/test_ceres.cpp)
 # target_link_libraries(test_ceres Ceres::ceres)
 
