@@ -4,7 +4,7 @@
     <arg name="teleop" default="false" />
     <arg name="sim"    default="false" />
     <arg name="segm"   default="false" />
-    <arg name="segm_bypass" default="false" />
+    <arg name="segm_net"   default="false" />
     <arg name="planning" default="false"/>
     <arg name="mb"     default="false" />
     <arg name="paused" default="false" />
@@ -12,11 +12,11 @@
     <arg name="robot"  default="ya_model" />
     <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" if="$(eval robot == 'turtlebot')" />
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'turtlebot')" />
-    <arg name="base_frame"    value="base_footprint" if="$(eval robot == 'turtlebot')" />
-    <!--arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" /-->
-    <!--arg name="odom_topic"    value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" /> -->
+    <!-- <arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" />
+    <arg name="odom_topic"    value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" /> -->
     <arg name="cmd_vel_topic" value="/cmd_vel" if="$(eval robot == 'ya_model')" />
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'ya_model')" />
+    <arg name="use_sim_time_in_gazebo" value="true"/>
     <arg name="base_frame"    value="base_link" if="$(eval robot == 'ya_model')" />
 
 <!-- sim -->
@@ -24,7 +24,7 @@
         <arg name="publish_tf" default="1"/>
 
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
-            <arg name="use_sim_time" value="true"/>
+            <arg name="use_sim_time" value="$(arg use_sim_time_in_gazebo)"/>
             <arg name="paused" value="$(arg paused)"/>
             <arg name="debug" value="false"/>
             <arg name="gui" value="true"/>
@@ -70,7 +70,7 @@
             <node args="-urdf -x 5.5 -y -5.7 -z 1.2 -Y 3.14 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'baylands')">
-            <node args="-urdf -x 0 -y 0 -z 0.3638 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+            <node args="-urdf -x 0 -y 0 -z 0.21 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
             <param name="publish_frequency" type="double" value="30.0"/>
@@ -87,14 +87,18 @@
             <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
         </node>
     </group>
-    <!-- segm -->
+
+
+    <!-- segm_net -->
+    <group if="$(arg segm_net)">
+        <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
+            <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
+            <remap from="camera/image" to="/camera/rgb/image_raw" />
+        </node>
+    </group>
+
+    <!-- segm, depends on segm_net -->
     <group if="$(arg segm)">
-        <group unless="$(arg bypass)">
-            <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
-                <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
-                <remap from="camera/image" to="/camera/rgb/image_raw" />
-            </node>
-        </group>
 
         <node pkg="nodelet" type="nodelet" name="pcl_proc"  args="manager" output="screen"/>
 
@@ -112,7 +116,7 @@
                 args="load depth_image_proc/point_cloud_xyzrgb pcl_proc"
           respawn="false" output="screen" >
 
-            <remap from="/rgb/image_rect_color" to="$(arg image_rect_topic)" />
+            <remap from="/rgb/image_rect_color" to="/segmentation_node/mask_color" />
             <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
             
             <remap from="depth_registered/points" to="/pcl_proc/points2" />
@@ -124,14 +128,14 @@
             
             <param name="use_hsi" type="int" value="0"/>
             
-            <param name="r_min" type="double" value="255"/>
-            <param name="r_max" type="double" value="255"/>
+            <param name="r_min" type="double" value="32"/>
+            <param name="r_max" type="double" value="32"/>
 
-            <param name="g_min" type="double" value="232"/>
-            <param name="g_max" type="double" value="255"/>
+            <param name="g_min" type="double" value="0"/>
+            <param name="g_max" type="double" value="0"/>
 
             <param name="b_min" type="double" value="0"/>
-            <param name="b_max" type="double" value="20"/>
+            <param name="b_max" type="double" value="0"/>
         </node>
 
         <node pkg="nodelet" type="nodelet" name="point_cloud2_laserscan"
@@ -161,7 +165,7 @@
         <!-- provides odom frame, didn't try with turtlebot -->
         <group if="$(eval robot == 'ya_model')">
             <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
-            <rosparam command="load" file="$(find engix_control)/config/localization.yaml" />
+                <rosparam command="load" file="$(find engix_control)/config/localization.yaml" />
                 <!-- <remap from="/imu/data" to="/mobile_base/sensors/imu_data"/> -->
             </node>
         </group>
@@ -245,16 +249,18 @@
 
 <!-- planning system -->
     <group if="$(arg planning)">
-        <!--node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/-->
-        <!-- <node pkg="my_utils_common" type="polygon_msg_adapter.py" name="exploration_server_node" output="screen">
-            <remap from="route_task_polygon" to="/planner/route_task_polygon"/>
-        </node> -->
+        <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
+
 
         <include file="$(find move_base_mod)/launch/move_base.launch">
             <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
             <arg name="odom_topic" value="odom" />
         </include>
 
-        <include file="$(find my_utils_common)/launch/planning.launch"/>    
+        <include file="$(find my_utils_common)/launch/planning.launch">
+            <remap from="/planner/localization" to="/needed_topic"/> <!--Odometry-->
+            <remap from="/mobile_base/commands/velocity" to="/needed_topic"/>     <!--Twist-->
+            <remap from="/planner/occupancy_grid_map" to="/needed_topic"/>  <!--OccupancyGrid-->
+        </include>    
     </group>
 </launch>
