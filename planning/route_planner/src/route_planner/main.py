@@ -49,12 +49,12 @@ class RoutePlannerNode(AbstractNode):
 
         self.distance_threshold = 1.0
  
-        self.__route_publisher = rospy.Publisher('/planner/route', Route, queue_size=10)
+        self.__route_publisher = rospy.Publisher('/planner/route/RoutePlannerNode', Route, queue_size=10)
         self.__progress_route_publisher = rospy.Publisher('/planner/route_progress', ProgressRoutePlanner, queue_size=10)
 
         self.path_pub = rospy.Publisher('/planner/path_test', Path, queue_size=10)
-        rospy.Subscriber('/planner/route_task_polygon', RouteTaskPolygon, self.__task_polygon_callback)
-        rospy.Subscriber('/planner/route_task_to_point', RouteTaskToPoint, self.__task_to_point_callback)
+        # rospy.Subscriber('/planner/route_task_polygon', RouteTaskPolygon, self.__task_polygon_callback)
+        rospy.Subscriber('/planner/route_task_to_point/RoutePlannerNode', RouteTaskToPoint, self.__task_to_point_callback)
         rospy.Subscriber('/planner/localization', Localization, self.__localization_callback)
         rospy.Subscriber('/planner/occupancy_grid_map', OccupancyGrid, self.__occupancy_grid_map_callback)
     
@@ -85,8 +85,9 @@ class RoutePlannerNode(AbstractNode):
         self.__state = self.COVER
 
     def __task_to_point_callback(self, message):
+        print('GOT', message)
         self.__task = message
-        self.__state = self.PATH
+        self.__state = self.PATH if message.header.stamp.to_sec() != 0 else self.IDLE
 
     def __occupancy_grid_map_callback(self, message):
         width = message.info.width

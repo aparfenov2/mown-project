@@ -51,16 +51,16 @@ class RoutePlannerNode(AbstractNode):
         self.distance_threshold = 1.0
 
         self.__route_publisher = rospy.Publisher(
-            '/planner/route', Route, queue_size=10)
+            '/planner/route/route_planner_node/CoveragePlannerNode', Route, queue_size=10)
         self.__progress_route_publisher = rospy.Publisher(
             '/planner/route_progress', ProgressRoutePlanner, queue_size=10)
 
         self.path_pub = rospy.Publisher(
             '/planner/path_test', Path, queue_size=10)
-        rospy.Subscriber('/planner/route_task_polygon',
+        rospy.Subscriber('/planner/route_task_polygon/CoveragePlannerNode',
                          RouteTaskPolygon, self.__task_polygon_callback)
-        rospy.Subscriber('/planner/route_task_to_point',
-                         RouteTaskToPoint, self.__task_to_point_callback)
+        # rospy.Subscriber('/planner/route_task_to_point',
+        #                  RouteTaskToPoint, self.__task_to_point_callback)
         rospy.Subscriber('/planner/localization', Localization,
                          self.__localization_callback)
         rospy.Subscriber('/planner/occupancy_grid_map',
@@ -87,7 +87,8 @@ class RoutePlannerNode(AbstractNode):
 
     def __task_polygon_callback(self, message):
         self.__task = message
-        self.__state.status = self.__state.PROCESS
+        self.__state.status = self.__state.PROCESS \
+            if len(message.target_polygon.points) > 0 else self.__state.IDLE
 
     def __task_to_point_callback(self, message):
         self.__task = message
