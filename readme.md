@@ -32,3 +32,9 @@ OBSOLETE:
 
 launcher.sh - common launcher script for all submodules
 
+using docker registry
+------------------------
+You can use docker registry to split build and run stages. 
+1. docker login -u=testuser -p=testpassword kan-rt.ddns.net:5043
+2. docker tag yourimage:latest kan-rt.ddns.net:5043/yourimage:latest
+docker push
