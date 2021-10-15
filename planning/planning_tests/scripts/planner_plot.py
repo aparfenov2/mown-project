@@ -9,7 +9,7 @@ import threading
 import numpy as np
 import rospy
 
-from enginx_msgs.msg import LocalTrajectoryStamped, Localization, Route
+from enginx_msgs.msg import LocalTrajectoryStamped, Localization, Route, RouteTaskToPoint
 
 
 class PlotNode(object):
@@ -18,15 +18,37 @@ class PlotNode(object):
 
         self.robot_pose_plotter = RobotPosePlotter()    
         self.path_plotter = PathPlotter()
+        self.pub = rospy.Publisher(
+            rospy.get_param('/planner/topics/task_to_point_planning'), 
+            RouteTaskToPoint, 
+            queue_size=2
+        )
         
-        rospy.Subscriber('/planner/route', Route, self.__route_task_callback)
-        rospy.Subscriber('/planner/localization', Localization, self.__odometry_callback)
+        rospy.Subscriber(rospy.get_param('/planner/topics/route'), 
+                         Route, 
+                         self.__route_task_callback)
+        rospy.Subscriber(rospy.get_param('/planner/topics/localization'), 
+                         Localization, 
+                         self.__odometry_callback)
 
     def main(self):
         self.fig, self.ax = plt.subplots()
+        cid = self.fig.canvas.mpl_connect('button_press_event', self.onclick)
         self.line, = self.ax.plot([], [])
         ani = FuncAnimation(self.fig, self.update)
         plt.show()
+
+    def onclick(self, event):
+        print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+          ('double' if event.dblclick else 'single', event.button,
+           event.x, event.y, event.xdata, event.ydata))
+        if event.dblclick:
+            message = RouteTaskToPoint()
+            message.header.stamp = rospy.get_rostime()
+            message.target_pose.position.x = event.xdata
+            message.target_pose.position.y = event.ydata
+            self.pub.publish(message)
+
 
     def __route_task_callback(self, msg):
         with self.rlock:
@@ -72,7 +94,8 @@ class RobotPosePlotter(object):
         if self.p is not None:
             self.p.remove()
 
-        self.p = patches.Rectangle((self.x, self.y), self.width, self.height, angle=np.degrees(self.yaw), edgecolor="red")
+        # self.p = patches.Rectangle((self.x, self.y), self.width, self.height, angle=np.degrees(self.yaw), edgecolor="red")
+        self.p = plt.Circle((self.x, self.y), 0.5, color='b', fill=False)
         return self.p
 
 

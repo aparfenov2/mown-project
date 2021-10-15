@@ -1,4 +1,4 @@
-global_frame: map
+global_frame: world
 robot_base_frame: base_link
 
 update_frequency: 10.0
@@ -13,29 +13,29 @@ origin_y: -5
 resolution: 0.1
 
 plugins:
- - {name: polygon_layer, type: "polygon_layer::PolygonLayer"}
+#  - {name: polygon_layer, type: "polygon_layer::PolygonLayer"}
  - {name: obstacles, type: "costmap_2d::ObstacleLayer"}
- - {name: coverage, type: "full_coverage_path_planner::CoverageLayer"}
+#  - {name: coverage, type: "full_coverage_path_planner::CoverageLayer"}
 #  - {name: inflation, type: "costmap_2d::InflationLayer"}
 
 polygon_layer:
     resize_to_polygon: false
 
 obstacles:
-  observation_sources: scan ya_scan
+  observation_sources: scan
   scan: 
     sensor_frame: base_link
-    data_type: LaserScan
-    topic: pcl_proc/scan
+    data_type: PointCloud2
+    topic: velodyne_points
     marking: true
     clearing: true
 
-  ya_scan: 
-    sensor_frame: base_link
-    data_type: LaserScan
-    topic: /scan
-    marking: true
-    clearing: true
+  # ya_scan: 
+  #   sensor_frame: base_link
+  #   data_type: LaserScan
+  #   topic: /scan
+  #   marking: true
+  #   clearing: true
 
   track_unknown_space: true
   obstacle_range: 3.0

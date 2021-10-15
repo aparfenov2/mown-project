@@ -58,8 +58,16 @@ def parse_arguments():
 def main():
     rospy.init_node("test_plan_publisher")
     args = parse_arguments()
-    r_pub = rospy.Publisher('/planner/route_task_polygon', RouteTaskPolygon, queue_size=0)
-    rp_pub = rospy.Publisher('/planner/route_task_to_point', RouteTaskToPoint, queue_size=0)
+    r_pub = rospy.Publisher(
+        rospy.get_param('/planner/topics/task_polygon_planning'), 
+        RouteTaskPolygon, 
+        queue_size=3
+    )
+    rp_pub = rospy.Publisher(
+        rospy.get_param('/planner/topics/task_polygon_planning'), 
+        RouteTaskToPoint, 
+        queue_size=3
+    )
 
     if args.point is not None:
         message = RouteTaskToPoint()

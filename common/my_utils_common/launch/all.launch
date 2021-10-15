@@ -250,17 +250,18 @@
 <!-- planning system -->
     <group if="$(arg planning)">
         <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
+        <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" />
 
-
-        <include file="$(find move_base_mod)/launch/move_base.launch">
+        <!-- <include file="$(find move_base_mod)/launch/move_base.launch">
             <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
             <arg name="odom_topic" value="odom" />
-        </include>
+        </include> -->
 
-        <include file="$(find my_utils_common)/launch/planning.launch">
-            <remap from="/planner/localization" to="/needed_topic"/> <!--Odometry-->
-            <remap from="/mobile_base/commands/velocity" to="/needed_topic"/>     <!--Twist-->
-            <remap from="/planner/occupancy_grid_map" to="/needed_topic"/>  <!--OccupancyGrid-->
-        </include>    
+        <include file="$(find my_utils_common)/launch/planning.launch"/>
+
+        <!-- Run the costmap node -->
+        <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" >
+            <rosparam file="$(find my_utils_common)/param/global_costmap_params.yaml" command="load" ns="costmap" />
+        </node>   
     </group>
 </launch>
