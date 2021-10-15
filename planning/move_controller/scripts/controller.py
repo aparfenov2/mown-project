@@ -47,7 +47,12 @@ class ControllerNode(AbstractNode):
         self.speed_control = SpeedController(0.2)
         self.steering_pid = SteeringPIDController(0.5, 0.0, 1.0, 0.2, 10.0)
 
-        self.control_publisher = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=10)
+        self.control_publisher = rospy.Publisher(
+            rospy.get_param('/planner/topics/velocity_commands'),
+            Twist, 
+            queue_size=10
+        )
+
         self.last_linear_speed = 0
         self.last_angular_speed = 0
 
@@ -55,9 +60,13 @@ class ControllerNode(AbstractNode):
         self.last_idx = -1
 
         # rospy.Subscriber('/local_trajectory_plan', LocalTrajectoryStamped, self.__route_callback)
-        rospy.Subscriber('/planner/route', Route, self.__route_task_callback)
+        rospy.Subscriber(rospy.get_param('/planner/topics/route'), 
+                         Route, 
+                         self.__route_task_callback)
         # rospy.Subscriber('/laser_odom_to_init', Odometry, self.__odometry_callback)
-        rospy.Subscriber('/planner/localization', Localization, self.__odometry_callback)
+        rospy.Subscriber(rospy.get_param('/planner/topics/localization'), 
+                         Localization, 
+                         self.__odometry_callback)
 
     def local_trajectory_callback(self, message: LocalTrajectoryStamped):
         with self.__lock:

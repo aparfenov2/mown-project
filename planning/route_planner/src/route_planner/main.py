@@ -49,14 +49,30 @@ class RoutePlannerNode(AbstractNode):
 
         self.distance_threshold = 1.0
  
-        self.__route_publisher = rospy.Publisher('/planner/route/RoutePlannerNode', Route, queue_size=10)
-        self.__progress_route_publisher = rospy.Publisher('/planner/route_progress', ProgressRoutePlanner, queue_size=10)
+        self.__route_publisher = rospy.Publisher(
+            rospy.get_param('/planner/topics/route') + '/RoutePlannerNode', 
+            Route, 
+            queue_size=10
+        )
+        self.__progress_route_publisher = rospy.Publisher(rospy.get_param('/planner/topics/path_progress'), ProgressRoutePlanner, queue_size=10)
 
         self.path_pub = rospy.Publisher('/planner/path_test', Path, queue_size=10)
         # rospy.Subscriber('/planner/route_task_polygon', RouteTaskPolygon, self.__task_polygon_callback)
-        rospy.Subscriber('/planner/route_task_to_point/RoutePlannerNode', RouteTaskToPoint, self.__task_to_point_callback)
-        rospy.Subscriber('/planner/localization', Localization, self.__localization_callback)
-        rospy.Subscriber('/planner/occupancy_grid_map', OccupancyGrid, self.__occupancy_grid_map_callback)
+        rospy.Subscriber(
+            rospy.get_param('/planner/topics/task_to_point_planning') + '/RoutePlannerNode', 
+            RouteTaskToPoint, 
+            self.__task_to_point_callback
+        )
+        rospy.Subscriber(
+            rospy.get_param('/planner/topics/localization'),
+            Localization, 
+            self.__localization_callback
+            )
+        rospy.Subscriber(
+            rospy.get_param('/planner/topics/costmap'),
+            OccupancyGrid, 
+            self.__occupancy_grid_map_callback
+        )
     
     def work(self):
         self.__states_dict[self.__state]()        
@@ -93,6 +109,10 @@ class RoutePlannerNode(AbstractNode):
         width = message.info.width
         height = message.info.height
         resolution = message.info.resolution
+
+        self.obstacles = set()
+
+        print('Grid map info:', message.info, set(message.data))
 
         self.__astar_planner.set_scale(resolution)
 

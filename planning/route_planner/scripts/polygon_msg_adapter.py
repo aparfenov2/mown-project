@@ -17,7 +17,7 @@ class Main:
         rospy.init_node('polygon_msg_adapter')
         self._action_name = rospy.get_name()
         self._as = actionlib.SimpleActionServer(self._action_name, ExploreAction, execute_cb=self.execute_cb, auto_start = False)
-        self.pub = rospy.Publisher('/planner/route_task_polygon', RouteTaskPolygon, queue_size=2)
+        self.pub = rospy.Publisher(rospy.get_param('/planner/topics/task_polygon_planning'), RouteTaskPolygon, queue_size=2)
         self._as.start()
 
     def execute_cb(self, goal):
