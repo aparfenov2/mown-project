@@ -249,7 +249,7 @@
 
 <!-- planning system -->
     <group if="$(arg planning)">
-        <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
+        <!--node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/-->
 
 
         <include file="$(find move_base_mod)/launch/move_base.launch">
