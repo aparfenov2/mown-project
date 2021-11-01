@@ -112,14 +112,14 @@ class RoutePlannerNode(AbstractNode):
 
         self.obstacles = set()
 
-        print('Grid map info:', message.info, set(message.data))
+        # print('Grid map info:', message.info, set(message.data))
 
-        self.__astar_planner.set_scale(resolution)
+        # self.__astar_planner.set_scale(resolution)
 
-        for x in range(width):
-            for y in range(height):
-                if message.data[x + width * y] == 1:
-                    pass
+        # for x in range(width):
+        #     for y in range(height):
+        #         if message.data[x + width * y] == 1:
+        #             pass
 
     def __localization_callback(self, message):
         self.__position = message
@@ -330,7 +330,25 @@ class AstarWrapper(object):
 
         # print("GOT result, {} points".format(len(result)))
         result = reversed(result)
-        return result
+        result = self.smooth_path(np.array(list(result)), 0.5, 0.2, 0.001)
+        return result.tolist()
+
+    def smooth_path(self, path, alpha, betta, tol):
+        npath = np.copy(path)
+
+        npoints = npath.shape[0]
+
+        change = tol
+        while change >= tol:
+            change = 0.0
+            for i in range(1, npoints - 1):
+                y_saved = np.copy(npath[i])
+
+                npath[i] += alpha * (path[i] - npath[i]) + betta * (npath[i - 1] + npath[i + 1] - 2 * (npath[i]))
+
+                change += abs(np.linalg.norm(y_saved - npath[i]))
+
+        return npath
 
     def convert_to_grid(self, point):
         return tuple([ int(p / self.scale) for p in point[:2]])
