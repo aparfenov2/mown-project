@@ -3,8 +3,5 @@
     <include file="$(find route_planner)/launch/run.launch"/>
     <include file="$(find move_controller)/launch/run.launch"/>
     
-    <node name="polygon_msg_adapter" pkg="route_planner" type="polygon_msg_adapter.py" respawn="true" respawn_delay="5" output="screen"/>
-    <node name="rviz_adapter" pkg="route_planner" type="rviz_adapter.py" respawn="true" respawn_delay="5" output="screen"/>
-    
     <node pkg="tf2_ros" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 1 world odom" />
 </launch>
