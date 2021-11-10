@@ -29,7 +29,7 @@ class PathPlannerManager(AbstractNode):
             "task_do_coverage_planning": CoveragePathInPolygon(self, False)
         }
 
-        self.route_publisher = rospy.Publisher(rospy.get_param('/planner/topics/route'), Route, queue_size=10)
+        self.route_publisher = rospy.Publisher(rospy.get_param('/planner/topics/route/path_cutter'), Route, queue_size=10)
 
         rospy.Subscriber(rospy.get_param('/planner/topics/task_polygon_planning'),
                          RouteTaskPolygon, 
@@ -85,7 +85,7 @@ class PathToPointPlanner(CommonPlanner):
     def __init__(self, *args, **kwargs):
         super(PathToPointPlanner, self).__init__(*args, **kwargs)
         self.sender = rospy.Publisher(rospy.get_param('/planner/topics/task_to_point_planning') + '/RoutePlannerNode', RouteTaskToPoint, queue_size=10)
-        rospy.Subscriber(rospy.get_param('/planner/topics/route') + '/RoutePlannerNode', Route, self.callback)
+        rospy.Subscriber(rospy.get_param('/planner/topics/route/path_planner'), Route, self.callback)
 
     def send_plan_to_planner(self, message):
         self.sender.publish(message)
@@ -104,7 +104,7 @@ class CoveragePathInPolygon(CommonPlanner):
     def __init__(self, *args, **kwargs):
         super(CoveragePathInPolygon, self).__init__(*args, **kwargs)
         self.sender = rospy.Publisher(rospy.get_param('/planner/topics/task_polygon_planning') + '/CoveragePlannerNode', RouteTaskPolygon, queue_size=10)
-        rospy.Subscriber(rospy.get_param('/planner/topics/route') + '/CoveragePlannerNode', Route, self.callback)
+        rospy.Subscriber(rospy.get_param('/planner/topics/route/coverage_planner'), Route, self.callback)
 
     def send_plan_to_planner(self, message):
         self.sender.publish(message)

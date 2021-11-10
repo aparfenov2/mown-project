@@ -59,7 +59,7 @@ class Main:
         )     
 
         rospy.Subscriber(
-            rospy.get_param('/planner/topics/route'), 
+            rospy.get_param('/planner/topics/route/control'), 
             Route,
             self.route_callback
         ) 

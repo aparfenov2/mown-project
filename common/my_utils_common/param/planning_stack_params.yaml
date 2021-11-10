@@ -1,14 +1,22 @@
 topics:
-  route: "/planner/route"
+  route: 
+    control: "/planner/route"
+    path_cutter: "/planner/route/path_cutter"
+    path_planner: "/planner/route/path_planner"
+    coverage_planner: "/planner/route/coverage_planner"
   task_polygon_planning: "/planner/route/task_polygon"
   task_to_point_planning: "/planner/route/task_to_point"
   path_progress: '/planner/route_progress'
 
   localization: '/planner/localization'
   costmap: '/costmap_node/costmap/costmap'
+  lidar: '/velodyne_points/new'
   odometry: '/ground_truth/state'
 
   velocity_commands: '/mobile_base/commands/velocity'
+
+path_cutter:
+  robot_radius: 1.0 # meters
 
 move_controller:
   speed_params:

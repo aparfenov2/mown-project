@@ -50,7 +50,7 @@ class RoutePlannerNode(AbstractNode):
         self.distance_threshold = 1.0
  
         self.__route_publisher = rospy.Publisher(
-            rospy.get_param('/planner/topics/route') + '/RoutePlannerNode', 
+            rospy.get_param('/planner/topics/route/path_planner'), 
             Route, 
             queue_size=10
         )

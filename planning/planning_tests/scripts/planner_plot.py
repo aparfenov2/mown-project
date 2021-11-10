@@ -29,7 +29,7 @@ class PlotNode(object):
             queue_size=2
         )
         
-        rospy.Subscriber(rospy.get_param('/planner/topics/route'), 
+        rospy.Subscriber(rospy.get_param('/planner/topics/route/control'), 
                          Route, 
                          self.__route_task_callback)
         rospy.Subscriber(rospy.get_param('/planner/topics/localization'), 
@@ -209,18 +209,19 @@ class GridMapPlotter(object):
         width = message.info.width
         height = message.info.height
 
-        print('Help text', pos_x, pos_y, message.info.origin.orientation, message.header)
+        print('Help text', pos_x, pos_y, '\n', message.header)
 
         # c, s = np.cos(self.yaw), np.sin(self.yaw)
         # # R = np.array(((c, -s), (s, c)))
         # message.header.frame_id = 'velodyne'
         # R = self.tl.asMatrix('world', message.header)
 
-        for x in range(width):
-            for y in range(height):
-                if message.data[x + y * width] > 0:
-                    world_x = (x * resolution) + pos_x + resolution / 2
-                    world_y = (y * resolution) + pos_y + resolution / 2
+        for y in range(height):
+            for x in range(width):
+                if message.data[y + width * x] > 0:
+                # if message.data[x + y * height] > 0:
+                    world_y = pos_x + (x + 0.5) * resolution
+                    world_x = pos_y + (y + 0.5) * resolution
 
                     # self.points.append([world_x, world_y])
                     # xs.append(world_x)
@@ -229,7 +230,8 @@ class GridMapPlotter(object):
                     points.append(v)
 
         points = np.array(points)
-        print('points shape', points.shape)
+
+        # print(points)
         self.pc_x = points[:, 0]
         self.pc_y = points[:, 1]
 

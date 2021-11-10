@@ -63,7 +63,7 @@ class ControllerNode(AbstractNode):
         self.last_idx = -1
 
         # rospy.Subscriber('/local_trajectory_plan', LocalTrajectoryStamped, self.__route_callback)
-        rospy.Subscriber(rospy.get_param('/planner/topics/route'), 
+        rospy.Subscriber(rospy.get_param('/planner/topics/route/control'), 
                          Route, 
                          self.__route_task_callback)
         # rospy.Subscriber('/laser_odom_to_init', Odometry, self.__odometry_callback)

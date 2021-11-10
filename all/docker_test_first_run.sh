@@ -10,6 +10,7 @@ done
 
 docker run \
 	-it \
+	-p 8088:8088 \
 	--name $(cat docker/image) \
 	--gpus all \
 	-v /tmp/.X11-unix:/tmp/.X11-unix \

@@ -30,7 +30,7 @@ class OdometryToLocalizationNode(AbstractNode):
         localization_msg = self.__odom_to_loc(message)
         self.localization_publisher.publish(localization_msg)
 
-        # self.send_transform(message)
+        self.send_transform(message)
 
     def __odom_to_loc(self, odometry: Odometry):
         localization = Localization()
