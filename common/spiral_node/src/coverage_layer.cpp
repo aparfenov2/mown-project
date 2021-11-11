@@ -31,6 +31,8 @@ namespace full_coverage_path_planner
         dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
         std::unordered_set<costmap_2d::MapLocation, MapLocation_hash, MapLocation_hash> visited_cells_;
         std::vector<costmap_2d::MapLocation> not_footprint_;
+        double least_obstacles_direction_;
+        std::vector<costmap_2d::MapLocation> footprint_points_;
 
         CoverageLayer()
         {
@@ -96,8 +98,8 @@ namespace full_coverage_path_planner
             if (!enabled_)
                 return;
 
-            std::vector<costmap_2d::MapLocation> footprint_points = footprint_to_points(origin_x, origin_y, origin_yaw);
-            std::unordered_set<costmap_2d::MapLocation, MapLocation_hash, MapLocation_hash> footprint_set(footprint_points.begin(), footprint_points.end());
+            footprint_points_ = footprint_to_points(origin_x, origin_y, origin_yaw);
+            std::unordered_set<costmap_2d::MapLocation, MapLocation_hash, MapLocation_hash> footprint_set(footprint_points_.begin(), footprint_points_.end());
             visited_cells_.insert(footprint_set.begin(), footprint_set.end());
             not_footprint_.clear();
 
@@ -109,23 +111,60 @@ namespace full_coverage_path_planner
             {
                 visited_cells_.erase(it);
             }
+
             // avoid placing obstacles in front while moving backwards
             unsigned int origin_mx, origin_my;
             worldToMap(origin_x, origin_y, origin_mx, origin_my);
+            // scan in all directions
+            least_obstacles_direction_ = origin_yaw;
+            int least_cost = INT_MAX;
 
-            not_footprint_.erase(
-                std::remove_if(not_footprint_.begin(), not_footprint_.end(),
-                    [origin_yaw, origin_mx, origin_my](const costmap_2d::MapLocation& p) -> bool { 
-                        int rx = p.x - origin_mx;
-                        int ry = p.y - origin_my;
-                        double q = std::atan2((double)ry , (double)rx);
-                        return origin_yaw - M_PI_2 < q && q < origin_yaw + M_PI_2;
-                    }),
-                not_footprint_.end()
-                );
+            for (double phi=origin_yaw; phi < origin_yaw + 2*M_PI; phi += M_PI_4)
+            {   
+                std::vector<costmap_2d::MapLocation> cells;
+                costmap_2d::Costmap2D::PolygonOutlineCells cell_gatherer(*this, nullptr, cells);
+                double radius = 1.5 * layered_costmap_->getCircumscribedRadius();
+                ROS_DEBUG_ONCE("scan radius %f", radius);
+                double x1 = origin_x + radius * std::cos(phi);
+                double y1 = origin_y + radius * std::sin(phi);
+
+                unsigned int mx1, my1;
+                if (!worldToMap(x1, y1, mx1, my1)) {
+                    continue;
+                }                
+                raytraceLine(cell_gatherer, origin_mx, origin_my, mx1, my1);
+                int cost = 0;
+                for (const costmap_2d::MapLocation& p : cells) {
+                    cost += getCost(p.x, p.y) == LETHAL_OBSTACLE ? 1 : 0;
+                }
+                if (cost < least_cost) {
+                    least_cost = cost;
+                    least_obstacles_direction_ = phi;
+                }
+            }
+
+            // not_footprint_.erase(
+            //     std::remove_if(not_footprint_.begin(), not_footprint_.end(),
+            //         [least_obstacles_direction_, origin_mx, origin_my](const costmap_2d::MapLocation& p) -> bool { 
+            //             int rx = p.x - origin_mx;
+            //             int ry = p.y - origin_my;
+            //             double q = std::atan2((double)ry , (double)rx);
+            //             return least_obstacles_direction_ - M_PI_2 < q && q < least_obstacles_direction_ + M_PI_2;
+            //         }),
+            //     not_footprint_.end()
+            //     );
             
             // update update bounds
             for (auto &it : not_footprint_)
+            {
+                double mark_x, mark_y;
+                mapToWorld(it.x, it.y, mark_x, mark_y);
+                *min_x = std::min(*min_x, mark_x);
+                *min_y = std::min(*min_y, mark_y);
+                *max_x = std::max(*max_x, mark_x);
+                *max_y = std::max(*max_y, mark_y);
+            }
+            for (auto &it : footprint_points_)
             {
                 double mark_x, mark_y;
                 mapToWorld(it.x, it.y, mark_x, mark_y);
@@ -146,6 +185,9 @@ namespace full_coverage_path_planner
             for (auto &it : not_footprint_)
             {
                 setCost(it.x, it.y, LETHAL_OBSTACLE);
+            }
+            for (auto &it : footprint_points_) {
+                setCost(it.x, it.y, FREE_SPACE);
             }
 
             updateWithMax(master_grid,  min_i,  min_j,  max_i,  max_j);
