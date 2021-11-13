@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(move_controller)
-
-set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_CXX_FLAGS "-std=c++14")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g")
+project(path_cutter)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -13,26 +9,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g")
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
     roslaunch
-    rospy
-    roscpp
-    geometry_msgs
-    nav_msgs
-)
-
-# find_package(PCL REQUIRED)
-# find_package(OpenCV REQUIRED)
-# find_package(Ceres REQUIRED)
-
-# include_directories(
-#   include
-# 	${catkin_INCLUDE_DIRS} 
-# 	${PCL_INCLUDE_DIRS}
-#   ${CERES_INCLUDE_DIRS}
-#   ${OpenCV_INCLUDE_DIRS}
-# )
-# add_executable(test_ceres src/test_ceres.cpp)
-# target_link_libraries(test_ceres Ceres::ceres)
-
+    )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -41,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-catkin_python_setup()
+# catkin_python_setup()
 roslaunch_add_file_check(launch)
 
 ################################################
@@ -124,20 +101,12 @@ roslaunch_add_file_check(launch)
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-# catkin_package(
-# #  INCLUDE_DIRS include
-# #  LIBRARIES driver
-# #  CATKIN_DEPENDS other_catkin_pkg
-#  #DEPENDS geometry_msgs
-#   # INCLUDE_DIRS include
-# )
-
 catkin_package(
-  # CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs
-  # DEPENDS EIGEN3 PCL 
-  # INCLUDE_DIRS include
+#  INCLUDE_DIRS include
+#  LIBRARIES driver
+#  CATKIN_DEPENDS other_catkin_pkg
+ #DEPENDS geometry_msgs
 )
-
 
 ###########
 ## Build ##
@@ -150,21 +119,6 @@ catkin_package(
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/driver.cpp
-# )
-
-
-
-# add_executable(test_ceres src/test_ceres.cpp)
-# # target_link_libraries(test_ceres ${CERES_INCLUDE_DIRS})
-
-# target_include_directories(test_ceres
-#   PRIVATE
-#     ${CERES_INCLUDE_DIRS}
-# )
-
-# target_link_libraries(test_ceres
-#   PRIVATE
-#     ${CERES_LIBRARIES}
 # )
 
 ## Add cmake target dependencies of the library

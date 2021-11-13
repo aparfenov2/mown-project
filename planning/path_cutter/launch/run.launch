@@ -1,0 +1,3 @@
+<launch>
+    <node name="PathCutter" pkg="path_cutter" type="main.py" respawn="true" respawn_delay="5" output="screen"/>
+</launch>

@@ -43,11 +43,19 @@ class ControllerNode(AbstractNode):
         self.__last_loc = None
         self.__last_trajectory = None
 
-        self.mpc = Controller2(20, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0)
-        self.speed_control = SpeedController(0.2)
-        self.steering_pid = SteeringPIDController(0.5, 0.0, 1.0, 0.2, 10.0)
+        controller_params = rospy.get_param('/planner/move_controller', {})
 
-        self.control_publisher = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=10)
+        self.mpc = Controller2(20, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0)
+        self.speed_control = SpeedController(controller_params.get('speed_params', {}))
+
+        self.steering_pid = SteeringPIDController(controller_params.get('steer_params', {}))
+
+        self.control_publisher = rospy.Publisher(
+            rospy.get_param('/planner/topics/velocity_commands'),
+            Twist, 
+            queue_size=10
+        )
+
         self.last_linear_speed = 0
         self.last_angular_speed = 0
 
@@ -55,9 +63,13 @@ class ControllerNode(AbstractNode):
         self.last_idx = -1
 
         # rospy.Subscriber('/local_trajectory_plan', LocalTrajectoryStamped, self.__route_callback)
-        rospy.Subscriber('/planner/route', Route, self.__route_task_callback)
+        rospy.Subscriber(rospy.get_param('/planner/topics/route/control'), 
+                         Route, 
+                         self.__route_task_callback)
         # rospy.Subscriber('/laser_odom_to_init', Odometry, self.__odometry_callback)
-        rospy.Subscriber('/planner/localization', Localization, self.__odometry_callback)
+        rospy.Subscriber(rospy.get_param('/planner/topics/localization'), 
+                         Localization, 
+                         self.__odometry_callback)
 
     def local_trajectory_callback(self, message: LocalTrajectoryStamped):
         with self.__lock:
@@ -159,12 +171,9 @@ class ControllerNode(AbstractNode):
         dw = angles_difference(convert_orientation(yaw), theta)
         w = self.steering_pid.calc_steering(dw)
 
-        print("Target theta: {0}, current yaw: {1}, diff:{2}, cur_pos: {3}, target_pos: {4}".format(
-            theta, 
-            yaw,
-            dw,
-            initial_pos,
-            target_point))
+        print("Calculated: speed - {}, ang. rate - {}".format(
+            speed, w
+        ))
 
         # if res is None:
         #     v, w = 0, dw * 0.1
@@ -463,9 +472,10 @@ class Controller2:
 
 
 class SpeedController(object):
-    def __init__(self, speed_threshold=0.1, theta_threshold=0.1):
-        self.theta_threshold = theta_threshold
-        self.speed_threshold = speed_threshold
+    def __init__(self, controller_params):
+        self.theta_threshold = controller_params.get('theta_threshold', 0.1)
+
+        self.speed_pid = SteeringPIDController(controller_params)
 
     def control_speed(self, initial_pos, yaw, current_speed, target_point, target_speed):
         theta = compute_theta(initial_pos, target_point)
@@ -474,37 +484,51 @@ class SpeedController(object):
             print("BIGG DIFF BTWN ANGLES: {0}, yaw: {1}, theta: {2}".format(
                 angles_difference(yaw, theta), yaw, theta
             ))
-            return 0.0
+            s = 0.0
+        else:
+            s = self.speed_pid.calc_steering(target_speed - current_speed)
 
-        if abs(current_speed - target_speed) > self.speed_threshold:
-            print("DIFF BTWN ANGLES: {0}, yaw: {1}, theta: {2}".format(
-                angles_difference(yaw, theta), yaw, theta
-            ))
-            coeffs = np.polyfit([0.0, 0.5, 1.0], 
-                                [current_speed, 
-                                 0.5 * current_speed * (target_speed - current_speed), 
-                                 target_speed], 
-                                1)
-            f = np.poly1d(coeffs)
-            f2 = f(0.2)
-            s = max(0.1, f2)
-            s = min(target_speed, s)
-            return s
+        return s
+            
 
-        return target_speed
+         
+        # theta = compute_theta(initial_pos, target_point)
+
+        # if abs(angles_difference(yaw, theta)) > self.theta_threshold:
+        #     print("BIGG DIFF BTWN ANGLES: {0}, yaw: {1}, theta: {2}".format(
+        #         angles_difference(yaw, theta), yaw, theta
+        #     ))
+        #     return 0.0
+
+        # if abs(current_speed - target_speed) > self.speed_threshold:
+        #     print("DIFF BTWN ANGLES: {0}, yaw: {1}, theta: {2}".format(
+        #         angles_difference(yaw, theta), yaw, theta
+        #     ))
+        #     coeffs = np.polyfit([0.0, 0.5, 1.0], 
+        #                         [current_speed, 
+        #                          0.5 * current_speed * (target_speed - current_speed), 
+        #                          target_speed], 
+        #                         1)
+        #     f = np.poly1d(coeffs)
+        #     f2 = f(0.2)
+        #     s = max(0.1, f2)
+        #     s = min(target_speed, s)
+        #     return s
+
+        # return target_speed
 
 
 class SteeringPIDController(object):
-    def __init__(self, p, i, d, max_speed, max_integrator):
-        self.p = p
-        self.i = i
-        self.d = d
+    def __init__(self, controller_params):
+        self.p = controller_params.get('p', 0.0)
+        self.i = controller_params.get('i', 0.0)
+        self.d = controller_params.get('d', 0.0)
 
         self.last_error = 0
         self.integrate_error = 0
 
-        self.max_speed = max_speed
-        self.max_integrator = max_integrator
+        self.max_speed = controller_params.get('max_val', 100.0)
+        self.max_integrator = controller_params.get('max_integrator', 100.0)
 
     def calc_steering(self, error):
         d_error = error - self.last_error

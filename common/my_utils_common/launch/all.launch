@@ -18,6 +18,7 @@
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'ya_model')" />
     <arg name="use_sim_time_in_gazebo" value="true"/>
     <arg name="base_frame"    value="base_link" if="$(eval robot == 'ya_model')" />
+    <arg name="rosbridge" default="false" />
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -165,7 +166,7 @@
         <!-- provides odom frame, didn't try with turtlebot -->
         <group if="$(eval robot == 'ya_model')">
             <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
-            <rosparam command="load" file="$(find engix_control)/config/localization.yaml" />
+                <rosparam command="load" file="$(find engix_control)/config/localization.yaml" />
                 <!-- <remap from="/imu/data" to="/mobile_base/sensors/imu_data"/> -->
             </node>
         </group>
@@ -181,7 +182,7 @@
             <param name="min_height" type="double" value="0.1"/>
             <param name="max_height" type="double" value="2.0"/>
             <param name="target_frame" type="str" value="base_link"/>
-            <remap from="cloud_in" to="/velodyne_points"/>
+            <remap from="cloud_in" to="ce30_output"/>
             <remap from="scan" to="/pcl_proc/scan"/>
         </node>
     </group>
@@ -249,14 +250,30 @@
 
 <!-- planning system -->
     <group if="$(arg planning)">
-        <!--node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/-->
+        <!-- <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/> -->
+        <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" />
 
-
-        <include file="$(find move_base_mod)/launch/move_base.launch">
+        <!-- <include file="$(find move_base_mod)/launch/move_base.launch">
             <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
             <arg name="odom_topic" value="odom" />
-        </include>
+        </include> -->
 
-        <include file="$(find my_utils_common)/launch/planning.launch"/>    
+        <include file="$(find my_utils_common)/launch/planning.launch"/>
+        <include file="$(find route_util)/launch/utils.launch"/>
+        <include file="$(find mapping)/launch/run.launch"/>
+
+        <!-- Run the costmap node -->
+        <!-- <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" >
+            <rosparam file="$(find my_utils_common)/param/global_costmap_params_test.yaml" command="load" ns="costmap" />
+            <rosparam file="$(find my_utils_common)/param/global_costmap_params.yaml" command="load" ns="costmap" />
+        </node>    -->
     </group>
+
+<!-- ROSBRIDGE -->
+    <group if="$(arg rosbridge)">
+        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" > 
+            <arg name="port" value="8088"/>
+        </include>
+    </group>
+
 </launch>

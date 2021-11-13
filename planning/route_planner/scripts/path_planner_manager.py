@@ -29,13 +29,13 @@ class PathPlannerManager(AbstractNode):
             "task_do_coverage_planning": CoveragePathInPolygon(self, False)
         }
 
-        self.route_publisher = rospy.Publisher('/planner/route', Route, queue_size=10)
+        self.route_publisher = rospy.Publisher(rospy.get_param('/planner/topics/route/path_cutter'), Route, queue_size=10)
 
-        rospy.Subscriber('/planner/route_task_polygon',
+        rospy.Subscriber(rospy.get_param('/planner/topics/task_polygon_planning'),
                          RouteTaskPolygon, 
                          self.__task_polygon_callback)
 
-        rospy.Subscriber('/planner/route_task_to_point',
+        rospy.Subscriber(rospy.get_param('/planner/topics/task_to_point_planning'),
                          RouteTaskToPoint, 
                          self.__task_to_point_callback)
 
@@ -84,8 +84,8 @@ class IdlePlanner(CommonPlanner):
 class PathToPointPlanner(CommonPlanner):
     def __init__(self, *args, **kwargs):
         super(PathToPointPlanner, self).__init__(*args, **kwargs)
-        self.sender = rospy.Publisher('/planner/route_task_to_point/RoutePlannerNode', RouteTaskToPoint, queue_size=10)
-        rospy.Subscriber('/planner/route/RoutePlannerNode', Route, self.callback)
+        self.sender = rospy.Publisher(rospy.get_param('/planner/topics/task_to_point_planning') + '/RoutePlannerNode', RouteTaskToPoint, queue_size=10)
+        rospy.Subscriber(rospy.get_param('/planner/topics/route/path_planner'), Route, self.callback)
 
     def send_plan_to_planner(self, message):
         self.sender.publish(message)
@@ -103,8 +103,8 @@ class PathToPointPlanner(CommonPlanner):
 class CoveragePathInPolygon(CommonPlanner):
     def __init__(self, *args, **kwargs):
         super(CoveragePathInPolygon, self).__init__(*args, **kwargs)
-        self.sender = rospy.Publisher('/planner/route_task_polygon/CoveragePlannerNode', RouteTaskPolygon, queue_size=10)
-        rospy.Subscriber('/planner/route/route_planner_node/CoveragePlannerNode', Route, self.callback)
+        self.sender = rospy.Publisher(rospy.get_param('/planner/topics/task_polygon_planning') + '/CoveragePlannerNode', RouteTaskPolygon, queue_size=10)
+        rospy.Subscriber(rospy.get_param('/planner/topics/route/coverage_planner'), Route, self.callback)
 
     def send_plan_to_planner(self, message):
         self.sender.publish(message)
