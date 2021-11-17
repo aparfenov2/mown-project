@@ -38,3 +38,33 @@ You can use docker registry to split build and run stages.
 1. docker login -u=testuser -p=testpassword kan-rt.ddns.net:5043
 2. docker tag yourimage:latest kan-rt.ddns.net:5043/yourimage:latest
 docker push
+
+Planning
+------------------------
+### Usage
+Run planning modules with roslaunch command: 
+```
+roslaunch my_utils_common all.launch planning:=true
+```
+
+We can use script test_planning.py for publish coverage planning task and task go to point:
+```
+cd catkin_ws/src
+cd planning/planning_tests/scripts/
+
+# publish task go to point
+python3 test_planning.py --point 1.0 2.0
+
+# publish task go to point
+python3 test_planning.py --polygon 1.0,2.0 3.0,5.0 7.0,6.0
+```
+
+Also we can use ui app for publish task to point:
+```
+cd catkin_ws/src
+cd planning/planning_tests/scripts/
+
+python3 planner_plot.py
+```
+
+Then we can double click to any point at plot and script publish task to that point.
