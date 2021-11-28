@@ -20,9 +20,9 @@ path_cutter:
 
 move_controller:
   speed_params:
-    p: 0.4
+    p: 0.0
     i: 0.0
-    d: 0.8
+    d: 0.0
 
     theta_threshold: 0.1
 
@@ -30,9 +30,9 @@ move_controller:
     max_integrator: 0.8
 
   steer_params:
-    p: 2.0
-    i: 0.0
-    d: 10.0
+    p: 0.2
+    i: 0.1
+    d: 0.5
 
     max_val: 2.0
     max_integrator: 1.0

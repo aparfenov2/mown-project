@@ -10,11 +10,13 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 from abstractnode import AbstractNode
 
+from std_msgs.msg import Float32
 from geometry_msgs.msg import PoseStamped, Pose, Quaternion, TwistStamped, Twist, Vector3
 # from move_base_mod.msg import TrajectoryControllerAction, TrajectoryControllerGoal
 from nav_msgs.msg import Odometry
 
 from enginx_msgs.msg import LocalTrajectoryStamped, Localization, Route
+from enginx_debug_msgs.msg import ControlDebug
 
 
 def convert_orientation(theta):
@@ -53,6 +55,12 @@ class ControllerNode(AbstractNode):
         self.control_publisher = rospy.Publisher(
             rospy.get_param('/planner/topics/velocity_commands'),
             Twist, 
+            queue_size=10
+        )
+
+        self.control_debug_publisher = rospy.Publisher(
+            'planner/debug/control',
+            ControlDebug, 
             queue_size=10
         )
 
@@ -201,9 +209,15 @@ class ControllerNode(AbstractNode):
         message.angular = angular_velocity
         self.control_publisher.publish(message)
 
+        debug_msg = ControlDebug()
+        debug_msg.linear_velocity = linear_velocity.x
+        debug_msg.angular_velocity = angular_velocity.z
+        debug_msg.header.stamp = rospy.get_rostime()
+
+        self.control_debug_publisher.publish(debug_msg)
+
     def send_idle_control(self):
-        message = Twist()
-        self.control_publisher.publish(message)
+        self.send_control(Vector3(x=0.0, y=0.0, z=0.0), Vector3(x=0.0, y=0.0, z=0.0))
 
     def __get_target_point(self, cur_pose):
         # poses = self.__last_trajectory.route
@@ -477,6 +491,12 @@ class SpeedController(object):
 
         self.speed_pid = SteeringPIDController(controller_params)
 
+        self.debug_publisher = rospy.Publisher(
+            'planner/debug/ang_dif',
+            Float32, 
+            queue_size=10
+        )
+
     def control_speed(self, initial_pos, yaw, current_speed, target_point, target_speed):
         theta = compute_theta(initial_pos, target_point)
 
@@ -487,6 +507,10 @@ class SpeedController(object):
             s = 0.0
         else:
             s = self.speed_pid.calc_steering(target_speed - current_speed)
+
+        msg = Float32()
+        msg.data = abs(angles_difference(yaw, theta))
+        self.debug_publisher.publish(msg)
 
         return s
             
