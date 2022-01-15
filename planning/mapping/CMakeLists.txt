@@ -48,6 +48,12 @@ include_directories(
 add_executable(map_server
     src/map_server.cpp
 )
+add_executable(label_server
+    src/label_server.cpp
+)
 target_link_libraries(map_server
+    ${catkin_LIBRARIES}
+)
+target_link_libraries(label_server
     ${catkin_LIBRARIES}
 )
