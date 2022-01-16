@@ -24,6 +24,7 @@ while [[ "$#" -gt 0 ]]; do
         --name) CONTAINER_NAME="$2"; shift; ;;
         --loca) LOCALIZATION=1; ;;
         --planning) PLANNING=1; ;;
+        --no_build) NO_BUILD=1; ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -48,16 +49,17 @@ ROSARGS=()
     export PYTHONPYCACHEPREFIX="/cdir/ws/pycache/"
 
     set -ex
-    pushd $PWD
-    cd /cdir/ws 
-    # catkin_make
-    catkin config \
-      --extend /opt/ros/$ROS_DISTRO \
-      --cmake-args \
-        -DCMAKE_BUILD_TYPE=Release
-    catkin build
-    popd
-
+    [ -z "${NO_BUILD}" ] && {
+        pushd $PWD
+        cd /cdir/ws 
+        # catkin_make
+        catkin config \
+        --extend /opt/ros/$ROS_DISTRO \
+        --cmake-args \
+            -DCMAKE_BUILD_TYPE=Release
+        catkin build
+        popd
+    }
     . /cdir/ws/devel/setup.bash
     export GAZEBO_MODEL_PATH="/cdir/ws/src/gazebo_models"
     # echo GAZEBO_MODEL_PATH="${GAZEBO_MODEL_PATH}"

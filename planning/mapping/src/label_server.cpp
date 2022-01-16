@@ -33,9 +33,9 @@ public:
         std::string lidar_topic_name;
         std::string ocupancy_grid_topic_name;
 
-        ROS_ASSERT(pnh.getParam("/planner/topics/lidar", lidar_topic_name));
-        ROS_ASSERT(pnh.getParam("/planner/topics/costmap", ocupancy_grid_topic_name));
-        ROS_ERROR_STREAM("LIDAR: " << lidar_topic_name << " OM: " <<  ocupancy_grid_topic_name);
+        ROS_ASSERT(pnh.getParam("rgbPoints", lidar_topic_name));
+        ROS_ASSERT(pnh.getParam("labelmap", ocupancy_grid_topic_name));
+        ROS_ERROR_STREAM("labels: " << lidar_topic_name << " labels_map: " <<  ocupancy_grid_topic_name);
         ROS_ASSERT(!lidar_topic_name.empty() && !ocupancy_grid_topic_name.empty());
 
         occupied_cells_publisher = nh.advertise<nav_msgs::OccupancyGrid>(ocupancy_grid_topic_name, 1);
@@ -43,8 +43,6 @@ public:
         pointcloud_subscriber = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidar_topic_name, 1);
         tf_pointcloud_subscriber = new tf::MessageFilter<sensor_msgs::PointCloud2>(*pointcloud_subscriber, tf_listener, FIXED_FRAME_ID, 1);
         tf_pointcloud_subscriber->registerCallback(boost::bind(&MappingServer::update_occupancy_map, this, _1));
-
-
 
         map_.setGeometry(grid_map::Length(MAXIMUM_RANGE, MAXIMUM_RANGE), RESOLUTION, grid_map::Position(0.0, 0.0));
         map_.setFrameId(FIXED_FRAME_ID);
@@ -74,7 +72,7 @@ public:
     void publish_occupied_cells() {
         nav_msgs::OccupancyGrid occupancyGrid;
         grid_map::GridMapRosConverter::toOccupancyGrid(map_, "occupancy", MIN_LOGPROB, MAX_LOGPROB, occupancyGrid);
-        occupancyGrid.header.frame_id = "odom";
+        occupancyGrid.header.frame_id = FIXED_FRAME_ID;
         occupied_cells_publisher.publish(occupancyGrid);
     }
 
@@ -123,10 +121,10 @@ protected:
         }
 
         // in the sensor coordinate ====================================================================================
-        pcl::PointCloud<pcl::PointXYZ> pcl_pointcloud;
+        pcl::PointCloud<pcl::PointXYZRGB> pcl_pointcloud;
         pcl::fromROSMsg(_ros_pc, pcl_pointcloud);
 
-        pcl::PointCloud<pcl::PointXYZ> pcl_pointcloud_in_sensor_coordinate;
+        pcl::PointCloud<pcl::PointXYZRGB> pcl_pointcloud_in_sensor_coordinate;
         for(const auto& point : pcl_pointcloud) {
             // Remove the invalid data: NaN
             if(std::isnan(point.x) || std::isnan(point.y) || std::isnan(point.z))
@@ -143,7 +141,7 @@ protected:
         // in the world coordinate =====================================================================================
         Eigen::Matrix4f transform;
         pcl_ros::transformAsMatrix(sensor_to_world, transform);
-        pcl::PointCloud<pcl::PointXYZ> pcl_pointcloud_in_world_coordinate;
+        pcl::PointCloud<pcl::PointXYZRGB> pcl_pointcloud_in_world_coordinate;
         pcl::transformPointCloud(pcl_pointcloud_in_sensor_coordinate, pcl_pointcloud_in_world_coordinate, transform);
 
         double or_x = sensor_to_world.getOrigin().x();
@@ -155,50 +153,28 @@ protected:
 
     }
 
-    void updateMap(const pcl::PointXYZ &point_pose, double origin_x, double origin_y) {
+    void updateMap(const pcl::PointXYZRGB &point_pose, double origin_x, double origin_y) {
 
-        grid_map::Position start(origin_x, origin_y);
         grid_map::Position end(point_pose.x, point_pose.y);
 
-        if (!map_.isInside(end) || !map_.isInside(start)) {
-            ROS_ERROR_STREAM("End or Start point is not inside map boundary. Start: " << 
-                             origin_x << ", " << origin_y <<
-                             ", end point: " << point_pose.x << "," << point_pose.y);
+        grid_map::Index subIndex;
+        if (!map_.getIndex(end, subIndex)) {
             return;
         }
-
-        for (grid_map::LineIterator iterator(map_, start, end); !iterator.isPastEnd(); ) {
-            const grid_map::Index subIndex = *iterator;
-            ++iterator;
-
-            // if (!map_.isValid(subIndex)) {
-            //     continue;
-            // }
-            if (std::isnan(map_.at("occupancy", subIndex))) {
-                map_.at("occupancy", subIndex) = MIN_LOGPROB;
-            }
-
-            if (iterator.isPastEnd()) {
-                if (map_.at("occupancy", subIndex) < MAX_LOGPROB) {
-                    map_.at("occupancy", subIndex) = std::max(MAX_LOGPROB, map_.at("occupancy", *iterator) + HIT_LOGPROB);
-                }
-            } else {
-                if (map_.at("occupancy", subIndex) > MIN_LOGPROB) {
-                    map_.at("occupancy", subIndex) = std::min(MIN_LOGPROB, map_.at("occupancy", *iterator) + MISS_LOGPROB);
-                }
-            }
-        }
+        float lab = point_pose.r;
+        if (lab < 0 || lab > 100) lab = NAN;
+        map_.at("occupancy", subIndex) = lab;
     }
 };
 
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "mapping_server");
+    ros::init(argc, argv, "label_server");
     ros::NodeHandle nh;
-    ros::NodeHandle pnh("~");
+    ros::NodeHandle nhp("~");
 
-    MappingServer mapping_server(nh, pnh);
+    MappingServer mapping_server(nh,nhp);
 
     try{
         ros::spin();
