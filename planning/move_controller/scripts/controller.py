@@ -9,6 +9,7 @@ from scipy import optimize
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 from abstractnode import AbstractNode
+from move_controller import PIDController, Frame, PIDSpeedController, Target, SteerMPC, MoveMPC
 
 from std_msgs.msg import Float32
 from geometry_msgs.msg import PoseStamped, Pose, Quaternion, TwistStamped, Twist, Vector3
@@ -45,12 +46,18 @@ class ControllerNode(AbstractNode):
         self.__last_loc = None
         self.__last_trajectory = None
 
-        controller_params = rospy.get_param('/planner/move_controller', {})
+        controller_params = rospy.get_param('/planner/move_controller')
 
-        self.mpc = Controller2(20, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0)
+        self._frame = Frame()
+        self._target = Target(self._frame, controller_params['target_distance'])
+
+
+        self.mpc = MoveMPC(self._frame, 1.0)
+        self.speed_controller = PIDSpeedController(self._frame)
         self.speed_control = SpeedController(controller_params.get('speed_params', {}))
 
-        self.steering_pid = SteeringPIDController(controller_params.get('steer_params', {}))
+        self.steering_pid = PIDController(controller_params.get('steer_params', {}))
+        self.mpc_steering = SteerMPC(self._frame)
 
         self.control_publisher = rospy.Publisher(
             rospy.get_param('/planner/topics/velocity_commands'),
@@ -73,11 +80,11 @@ class ControllerNode(AbstractNode):
         # rospy.Subscriber('/local_trajectory_plan', LocalTrajectoryStamped, self.__route_callback)
         rospy.Subscriber(rospy.get_param('/planner/topics/route/control'), 
                          Route, 
-                         self.__route_task_callback)
+                         self._frame.receive_route)
         # rospy.Subscriber('/laser_odom_to_init', Odometry, self.__odometry_callback)
         rospy.Subscriber(rospy.get_param('/planner/topics/localization'), 
                          Localization, 
-                         self.__odometry_callback)
+                         self._frame.receive_localization)
 
     def local_trajectory_callback(self, message: LocalTrajectoryStamped):
         with self.__lock:
@@ -132,40 +139,61 @@ class ControllerNode(AbstractNode):
         return self.client.get_result()
 
     def work(self):
-        with self.__lock:
-            if self.__last_loc is None or self.__last_trajectory is None:
+        with self._frame.lock():
+            if not self._frame.has_localization() or not self._frame.has_trajectory():
                 self.send_idle_control()
-                return 
+                return
 
-            current_pos = (self.__last_loc.pose.x, self.__last_loc.pose.y, self.__last_loc.yaw)
+            self._target.prepare_data()
 
-            if self.__close_to_end(current_pos):
-                self.__last_trajectory = None
+            if self.__close_to_end():
                 self.send_idle_control()
                 self.last_idx = -1
                 return
 
-            target_point = self.__get_target_point(current_pos)
+            # target_point = self.__get_target_point(current_pos)
 
             # print("Cur: {0}, target: {1}".format(
             #     current_pos, target_point
             # ))
-            linear_velocity = self.__linear_velocity_control(current_pos, target_point)
-            angular_velocity = self.__angular_velocity_control(current_pos, target_point)
+            # linear_velocity = self.__linear_velocity_control(current_pos, target_point)
+            # angular_velocity = self.__angular_velocity_control(current_pos, target_point)
 
-            linear_velocity, angular_velocity = self.mpc_control(
-                [current_pos[0], current_pos[1]],
-                [target_point[0], target_point[1]],
-                current_pos[2],
-                target_point[2]
-            )
+            # linear_velocity, angular_velocity = self.mpc_control(
+            #     [current_pos[0], current_pos[1]],
+            #     [target_point[0], target_point[1]],
+            #     current_pos[2],
+            #     target_point[2]
+            # )
+            # linear_velocity = self.speed_controller.execute(self._target)
+            # angular_velocity = self.mpc_steering.execute(self._target)
+            linear_velocity, angular_velocity = self.mpc.execute(self._target)
 
+            if linear_velocity is None:
+                linear_velocity = 0.0
+            # angular_velocity = self.__calculate_angular_velocity()
+            print("CALCULATE: ", linear_velocity, angular_velocity)
+
+            if angular_velocity is None:
+                angular_velocity = 0.0
             self.send_control(linear_velocity, angular_velocity)
 
-    def __close_to_end(self, pos):
-        p1 = np.array(pos[:2])
-        p2 = np.array(self.__last_trajectory[-1][:2])
-        return np.linalg.norm(p1 - p2) < 0.49
+    def __close_to_end(self):
+        pos = self._frame.get_robot_location()
+        last_point = self._frame.get_trajectory_as_list()[-1][:2]
+        p1 = np.array(pos)
+        p2 = np.array(last_point)
+        return np.linalg.norm(p1 - p2) < 0.2
+
+    def __calculate_angular_velocity(self):
+        current_location = self._frame.get_robot_location()
+        target_location = self._target.get_target_point()
+        yaw = self._frame.get_robot_yaw()
+
+        theta = compute_theta(current_location, target_location)
+        dw = angles_difference(convert_orientation(yaw), theta)
+        w = self.steering_pid.execute(dw)
+        return w
 
     def mpc_control(self, initial_pos, target_point, yaw, target_speed):
         path = np.array([p[:2] for p in self.__last_trajectory])
@@ -177,7 +205,7 @@ class ControllerNode(AbstractNode):
 
         theta = compute_theta(initial_pos, target_point)
         dw = angles_difference(convert_orientation(yaw), theta)
-        w = self.steering_pid.calc_steering(dw)
+        w = self.steering_pid.execute(dw)
 
         print("Calculated: speed - {}, ang. rate - {}".format(
             speed, w
@@ -204,20 +232,19 @@ class ControllerNode(AbstractNode):
 
     def send_control(self, linear_velocity, angular_velocity):
         message = Twist()
-        # message.header.stamp = rospy.get_rostime()
-        message.linear = linear_velocity
-        message.angular = angular_velocity
+        message.linear.x = linear_velocity
+        message.angular.z = angular_velocity
         self.control_publisher.publish(message)
 
         debug_msg = ControlDebug()
-        debug_msg.linear_velocity = linear_velocity.x
-        debug_msg.angular_velocity = angular_velocity.z
+        debug_msg.linear_velocity = linear_velocity
+        debug_msg.angular_velocity = angular_velocity
         debug_msg.header.stamp = rospy.get_rostime()
 
         self.control_debug_publisher.publish(debug_msg)
 
     def send_idle_control(self):
-        self.send_control(Vector3(x=0.0, y=0.0, z=0.0), Vector3(x=0.0, y=0.0, z=0.0))
+        self.send_control(0.0, 0.0)
 
     def __get_target_point(self, cur_pose):
         # poses = self.__last_trajectory.route
@@ -489,7 +516,7 @@ class SpeedController(object):
     def __init__(self, controller_params):
         self.theta_threshold = controller_params.get('theta_threshold', 0.1)
 
-        self.speed_pid = SteeringPIDController(controller_params)
+        self.speed_pid = PIDController(controller_params)
 
         self.debug_publisher = rospy.Publisher(
             'planner/debug/ang_dif',
@@ -506,7 +533,7 @@ class SpeedController(object):
             ))
             s = 0.0
         else:
-            s = self.speed_pid.calc_steering(target_speed - current_speed)
+            s = self.speed_pid.execute(target_speed - current_speed)
 
         msg = Float32()
         msg.data = abs(angles_difference(yaw, theta))
@@ -540,34 +567,6 @@ class SpeedController(object):
         #     return s
 
         # return target_speed
-
-
-class SteeringPIDController(object):
-    def __init__(self, controller_params):
-        self.p = controller_params.get('p', 0.0)
-        self.i = controller_params.get('i', 0.0)
-        self.d = controller_params.get('d', 0.0)
-
-        self.last_error = 0
-        self.integrate_error = 0
-
-        self.max_speed = controller_params.get('max_val', 100.0)
-        self.max_integrator = controller_params.get('max_integrator', 100.0)
-
-    def calc_steering(self, error):
-        d_error = error - self.last_error
-        self.integrate_error += error
-        self.last_error = error
-
-        self.integrate_error = self.bound(self.integrate_error, self.max_integrator)
-
-        steer = self.p * error + self.i * self.integrate_error + self.d * d_error
-
-        steer = self.bound(steer, self.max_speed)
-        return steer
-
-    def bound(self, val, bound_val):
-        return min(bound_val, max(-bound_val, val))
 
 def main():
     node = ControllerNode('ControllerNode', 10)

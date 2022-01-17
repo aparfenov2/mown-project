@@ -125,15 +125,52 @@ class CurveSegment:
         return points
 
 
-class LinesGenerator(object):
+class CurveGenerator(object):
     def __init__(self) -> None:
         super().__init__()
 
         movements = []
 
-        for i in [1.0, 5.0]:
+        for i in [1, 2]:
             # for direction in [0, np.pi / 4.0, np.pi / -4.0, np.pi / 2.0, np.pi / -2.0, np.pi * 3.0/ 4.0, np.pi * 3.0/ -4.0, np.pi]:
-            for direction in np.linspace(0.0, 2.0 * np.pi, num=20):
+            for curvature in np.linspace(-0.25, 0.25, num=11):
+                movements.append((curvature, i))
+
+        for i in [5]:
+            # for direction in [0, np.pi / 4.0, np.pi / -4.0, np.pi / 2.0, np.pi / -2.0, np.pi * 3.0/ 4.0, np.pi * 3.0/ -4.0, np.pi]:
+            for curvature in np.linspace(-0.1, 0.1, num=11):
+                movements.append((curvature, i))
+
+        self.movements = movements
+
+    def generate(self, pose):
+        states = list()
+        for i in range(len(self.movements)):
+            curvature, length = self.movements[i]
+            new_pose = CurveSegment.end_pose(pose, curvature, length)
+            states.append((new_pose, length, i))
+
+        return states
+
+    def segment_points(self, start_pose, segment_points_args, delta_length):
+        curvature, length = self.movements[segment_points_args]
+        return CurveSegment.segment_points(start_pose, curvature, length, delta_length)
+
+
+class LinesGenerator(object):
+    def __init__(self, grid_size) -> None:
+        super().__init__()
+
+        movements = []
+
+        for i in [grid_size, 2 * grid_size]:
+            # for direction in [0, np.pi / 4.0, np.pi / -4.0, np.pi / 2.0, np.pi / -2.0, np.pi * 3.0/ 4.0, np.pi * 3.0/ -4.0, np.pi]:
+            for direction in np.linspace(-np.pi / 4, np.pi / 4, num=5):
+                movements.append((direction, i))
+
+        for i in [5 * grid_size]:
+            # for direction in [0, np.pi / 4.0, np.pi / -4.0, np.pi / 2.0, np.pi / -2.0, np.pi * 3.0/ 4.0, np.pi * 3.0/ -4.0, np.pi]:
+            for direction in np.linspace(-np.pi / 6, np.pi / 6, num=3):
                 movements.append((direction, i))
 
         self.movements = movements
@@ -141,15 +178,15 @@ class LinesGenerator(object):
     def generate(self, pose):
         states = list()
         for i in range(len(self.movements)):
-                curvature, length = self.movements[i]
-                new_pose = LineSegment.end_pose(pose, curvature, length)
-                states.append((new_pose, length, i))
+            curvature, length = self.movements[i]
+            new_pose = CurveSegment.end_pose(pose, curvature, length)
+            states.append((new_pose, length, i))
 
         return states
 
     def segment_points(self, start_pose, segment_points_args, delta_length):
         curvature, length = self.movements[segment_points_args]
-        return LineSegment.segment_points(start_pose, curvature, length, delta_length)
+        return CurveSegment.segment_points(start_pose, curvature, length, delta_length)
 
 
 class GridGenerator(object):
@@ -221,11 +258,11 @@ def distance(p, q):
 
 def states_close(p, q):
     """Checks if two poses (x, y, heading) are the same within a tolerance."""
-    d_angle = abs((p[2]-q[2]+pi) % (2*pi) - pi)
+    # d_angle = abs((p[2]-q[2]+pi) % (2*pi) - pi)
     # For the sake of simplicity, tolerances are hardcoded here:
     # 15 degrees for the heading angle, 2.0 for the position.
     # return d_angle < radians(15.) and distance(p, q) <= 1.0
-    return distance(p, q) <= 2.0
+    return distance(p, q) <= 1.0
 
 def pose_index(pose):
     """Given a pose, returns a discrete version (a triple index)."""
@@ -241,7 +278,7 @@ def pose_index(pose):
 class AstarPathPlanner(object):
     def __init__(self, generator):
         
-        self.STOP_SEARCH_FRONT_LEN = 5000000
+        self.STOP_SEARCH_FRONT_LEN = 500000
         self.state_generator = generator
 
     def astar_statespace(self, start_pose, goal_pose):
@@ -312,7 +349,7 @@ class AstarPathPlanner(object):
             for state in new_states:
                 new_pose, length, segment_points_args = state
                 new_cost = cost + abs(length)
-                total_cost = new_cost + distance(new_pose, goal_pose)
+                total_cost = new_cost + 5 * distance(new_pose, goal_pose)
                 heappush(front, (total_cost, new_cost, new_pose, pose, segment_points_args))
 
             # for i in range(len(self.movements)):
@@ -349,6 +386,14 @@ class AstarPathPlanner(object):
         #         path.extend(reversed(points))
         #         pose, move, _ = generated_states[pose_index(pose)]
         #     path.reverse()
+
+        # for key, value in generated_states.items():
+        #     pos = value[0]
+        #     if pos is not None:
+
+        #         plt.scatter(pos[0], pos[1])
+
+
         if states_close(pose, goal_pose):
             path = []
             path.append(pose[0:2])
@@ -359,7 +404,7 @@ class AstarPathPlanner(object):
                 points = self.state_generator.segment_points(
                     pose,
                     segment_points_args, 
-                    0.50
+                    0.2
                 )
                 path.extend(reversed(points))
                 pose, segment_points_args, _ = generated_states[pose_index(pose)]
@@ -434,16 +479,27 @@ def draw_movements():
 
 def find_path():
     start_pos = (0.0, 0.0, 0.0)
-    goal_pos = (10.0, 20.0, -0.5)
+    goal_pos = (-20.0, 110.0, 0.0)
+    
+    lg = CurveGenerator()
 
-    planner = AstarPathPlanner(GridGenerator(1.0))
+    planner = AstarPathPlanner(lg)
     path = planner.astar_statespace(start_pos, goal_pos)
 
     import matplotlib.pyplot as plt   
     import matplotlib
 
     matplotlib.use('TkAgg')
+
+    generated_states = lg.generate((0.0, 0.0, 0.0))
+
+    poses = [state[0] for state in generated_states]
+
+    plt.scatter([p[0] for p in poses], [p[1] for p in poses], label='Trajectory')
     
+    plt.legend()
+    plt.show()
+
     plt.plot([p[0] for p in path], [p[1] for p in path], label='Trajectory')
     
 

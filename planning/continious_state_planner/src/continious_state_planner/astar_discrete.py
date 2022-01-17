@@ -542,8 +542,6 @@ class AStar:
         path = [self.s_goal]
         s = self.s_goal
 
-        print("test: {}".format(PARENT.keys()))
-
         while True:
             s = PARENT[s]
             path.append(s)

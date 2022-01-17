@@ -8,6 +8,7 @@ import numpy as np
 from tf.transformations import euler_from_quaternion
 
 from .astart_wrapper import AstarWrapper
+from .continuos_astar_wrapper import ContinuosAstarWrapper
 from abstractnode import AbstractNode
 from continious_state_planner import AstarPathPlanner, GridGenerator, AStar
 from coverage_path_planner import CoveragePathClient
@@ -30,7 +31,7 @@ class APathPlanner(object):
 
     def __init__(self, node, frame):
 
-        self.__astar_planner = AstarWrapper(frame)
+        self.__astar_planner = ContinuosAstarWrapper(frame)
         self._frame = frame
         self._node = node
 

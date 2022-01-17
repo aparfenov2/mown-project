@@ -19,15 +19,23 @@ path_cutter:
   robot_radius: 1.0 # meters
 
 move_controller:
-  speed_params:
-    p: 0.0
-    i: 0.0
-    d: 0.0
+  target_distance: 0.3
+  speed_controller:
+    speed_coefs:
+      p: 0.1
+      i: 10.0
+      d: 0.0
+      max_val: 1.0
+      max_integrator: 0.0
+    
+    position_coefs:
+      p: 0.5
+      i: 0.0
+      d: 0.0
+      max_val: 1.0
+      max_integrator: 0.0
 
-    theta_threshold: 0.1
-
-    max_val: 1.0
-    max_integrator: 0.8
+    theta_threshold: 0.5
 
   steer_params:
     p: 0.2

@@ -72,6 +72,9 @@ class Frame(object):
     def get_localization(self):
         return self._localization
 
+    def get_robot_yaw(self):
+        return self._localization.yaw
+
     def get_grid_map_obstacles(self):
         return self._grid_map_obstacles
 
