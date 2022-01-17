@@ -19,7 +19,7 @@ class PlotNode(object):
     def __init__(self):
         self.rlock = threading.RLock() 
 
-        self.robot_pose_plotter = RobotPosePlotter()    
+        self.robot_pose_plotter = RobotPosePlotter(radius=0.1)    
         self.path_plotter = PathPlotter()
         self.grid_plotter = GridMapPlotter()
 
@@ -232,8 +232,13 @@ class GridMapPlotter(object):
         points = np.array(points)
 
         # print(points)
-        self.pc_x = points[:, 0]
-        self.pc_y = points[:, 1]
+        if points.shape[0] > 0:
+            self.pc_x = points[:, 0]
+            self.pc_y = points[:, 1]
+        else:
+            self.pc_x = []
+            self.pc_y = []
+
 
     def get_points(self):
         return self.pc_x, self.pc_y

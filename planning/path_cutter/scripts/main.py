@@ -166,8 +166,8 @@ class BresenhamCircle(set):
         xsign = 1 if dx > 0 else -1
         ysign = 1 if dy > 0 else -1
 
-        dx = abs(dx)
-        dy = abs(dy)
+        dx = int(abs(dx))
+        dy = int(abs(dy))
 
         if dx > dy:
             xx, xy, yx, yy = xsign, 0, 0, ysign

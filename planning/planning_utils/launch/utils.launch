@@ -2,4 +2,5 @@
     <node name="polygon_msg_adapter" pkg="route_util" type="polygon_msg_adapter.py" respawn="true" respawn_delay="5" output="screen"/>
     <node name="rviz_adapter" pkg="route_util" type="rviz_adapter.py" respawn="true" respawn_delay="5" output="screen"/>
     <node name="bridge" pkg="route_util" type="localization_bridge.py" respawn="true" respawn_delay="5" output="screen"/>
+    <node name="web_viz_adapter" pkg="route_util" type="web_viz_adapter.py" respawn="true" respawn_delay="5" output="screen"/>
 </launch>

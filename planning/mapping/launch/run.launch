@@ -2,7 +2,7 @@
     <!-- Parameters -->
     <param name="fixed_frame_id" type="str"    value="world" />
     <param name="resolution"     type="double" value="0.1"  />
-    <param name="max_range"      type="double" value="40.0"  />
+    <param name="max_range"      type="double" value="100.0"  />
     <param name="hit_logprob"       type="double" value="10"  />
     <param name="miss_logprob"      type="double" value="1"  />
     <param name="max_logprob"       type="double" value="100"  />
