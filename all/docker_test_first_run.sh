@@ -1,5 +1,5 @@
 
-sudo xhost +local:root
+docker stop $(cat docker/image) || true && docker rm $(cat docker/image) || true
 
 VOLUMES=()
 for f in $(find ws/src -type l); do
@@ -7,6 +7,8 @@ for f in $(find ws/src -type l); do
 	# echo $ff 
     VOLUMES+=("-v $(readlink -f $f):/catkin_ws/src/$ff")
 done
+
+sudo xhost +local:root
 
 docker run \
 	-it \
@@ -18,5 +20,3 @@ docker run \
 	-e QT_X11_NO_MITSHM=1 \
 	${VOLUMES[@]} \
     $(cat docker/image) bash
-
-# docker start goofy_mayer

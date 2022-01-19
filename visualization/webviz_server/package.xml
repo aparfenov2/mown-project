@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>route_util</name>
+  <name>webviz_server</name>
   <version>0.0.0</version>
-  <description>route_util</description>
+  <description>Adapter for webviz and foxglove</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

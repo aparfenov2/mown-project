@@ -5,4 +5,5 @@
     <include file="$(find move_controller)/launch/run.launch"/>
     
     <node pkg="tf2_ros" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 1 world odom" />
+    <include file="$(find webviz_server)/launch/main.launch"/>
 </launch>
