@@ -1,0 +1,3 @@
+<launch>
+    <node name="webviz_adapter" pkg="webviz_server" type="webviz_adapter.py" respawn="true" respawn_delay="5" output="screen"/>
+</launch>

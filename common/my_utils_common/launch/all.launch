@@ -259,7 +259,7 @@
         </include> -->
 
         <include file="$(find my_utils_common)/launch/planning.launch"/>
-        <include file="$(find route_util)/launch/utils.launch"/>
+        <!-- <include file="$(find route_util)/launch/utils.launch"/> -->
         <!-- <include file="$(find mapping)/launch/run.launch"/> -->
   
         <node pkg="mapping" type="map_server" name="mapping">
