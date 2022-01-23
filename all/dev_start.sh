@@ -1,3 +1,4 @@
+#!/bin/bash
 container_name=$(cat docker/image)
 
 if [ "$( docker container inspect -f '{{.State.Running}}' $container_name )" == "false" ]; then
