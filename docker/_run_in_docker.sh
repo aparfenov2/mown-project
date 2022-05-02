@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 VOLUMES=()
+ENVT=()
 OTHERS=()
 DOCKERWS="docker"
 BUILD_IMAGE=1
@@ -43,6 +44,11 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    -e|--environment)
+    ENVT+=(-e $2)
+    shift # past argument
+    shift # past value
+    ;;
     *)    # unknown option
     OTHERS+=($1)
     shift # past argument
@@ -82,7 +88,9 @@ docker run -ti ${_RM} \
     --gpus all \
     -e "DISPLAY" \
     -e "QT_X11_NO_MITSHM=1" \
+    -e "NVIDIA_DRIVER_CAPABILITIES=all" \
     -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+    ${ENVT[@]} \
     -e XAUTHORITY \
     -v /dev:/dev \
     --privileged \

@@ -194,7 +194,11 @@ RUN apt-get update && apt-get install -y ros-noetic-hector-gazebo-plugins
 
 RUN apt-get install -y ros-noetic-rosbridge-suite
 
+RUN apt-get update && apt-get install -y libturbojpeg
+RUN ln -s $(which python3) /usr/bin/python
+
 # RUN add-apt-repository ppa:deadsnakes/ppa
 # RUN apt-get update
 RUN apt-get install python3-tk
 RUN python3 -m pip install Rtree
+
