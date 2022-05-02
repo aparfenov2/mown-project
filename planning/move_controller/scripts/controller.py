@@ -9,15 +9,15 @@ from scipy import optimize
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 from abstractnode import AbstractNode
-from move_controller import PIDController, Frame, PIDSpeedController, Target, SteerMPC, MoveMPC
+from move_controller import PIDController, NonlinearController, NonLinearMPC, Frame, PIDSpeedController, Target, SteerMPC, MoveMPC
 
 from std_msgs.msg import Float32
 from geometry_msgs.msg import PoseStamped, Pose, Quaternion, TwistStamped, Twist, Vector3
 # from move_base_mod.msg import TrajectoryControllerAction, TrajectoryControllerGoal
 from nav_msgs.msg import Odometry
 
-from enginx_msgs.msg import LocalTrajectoryStamped, Localization, Route
-from enginx_debug_msgs.msg import ControlDebug
+from enginx_msgs.msg import LocalTrajectoryStamped, Localization, ControlDebug, Route
+# from enginx_debug_msgs.msg import ControlDebug
 
 
 def convert_orientation(theta):
@@ -51,7 +51,7 @@ class ControllerNode(AbstractNode):
         self._frame = Frame()
         self._target = Target(self._frame, controller_params['target_distance'])
 
-
+        self.nmpc = NonlinearController(self._frame)
         self.mpc = MoveMPC(self._frame, 1.0)
         self.speed_controller = PIDSpeedController(self._frame)
         self.speed_control = SpeedController(controller_params.get('speed_params', {}))
@@ -61,13 +61,19 @@ class ControllerNode(AbstractNode):
 
         self.control_publisher = rospy.Publisher(
             rospy.get_param('/planner/topics/velocity_commands'),
-            Twist, 
+            Twist,
             queue_size=10
         )
 
-        self.control_debug_publisher = rospy.Publisher(
-            'planner/debug/control',
-            ControlDebug, 
+        # self.control_debug_publisher = rospy.Publisher(
+        #     'planner/debug/control',
+        #     ControlDebug,
+        #     queue_size=10
+        # )
+
+        self._debug_publisher = rospy.Publisher(
+            rospy.get_param('/planner/topics/debug/control'),
+            ControlDebug,
             queue_size=10
         )
 
@@ -78,12 +84,12 @@ class ControllerNode(AbstractNode):
         self.last_idx = -1
 
         # rospy.Subscriber('/local_trajectory_plan', LocalTrajectoryStamped, self.__route_callback)
-        rospy.Subscriber(rospy.get_param('/planner/topics/route/control'), 
-                         Route, 
+        rospy.Subscriber(rospy.get_param('/planner/topics/route/control'),
+                         Route,
                          self._frame.receive_route)
         # rospy.Subscriber('/laser_odom_to_init', Odometry, self.__odometry_callback)
-        rospy.Subscriber(rospy.get_param('/planner/topics/localization'), 
-                         Localization, 
+        rospy.Subscriber(rospy.get_param('/planner/topics/localization'),
+                         Localization,
                          self._frame.receive_localization)
 
     def local_trajectory_callback(self, message: LocalTrajectoryStamped):
@@ -140,6 +146,8 @@ class ControllerNode(AbstractNode):
 
     def work(self):
         with self._frame.lock():
+            self._frame.reset_debug()
+
             if not self._frame.has_localization() or not self._frame.has_trajectory():
                 self.send_idle_control()
                 return
@@ -167,7 +175,8 @@ class ControllerNode(AbstractNode):
             # )
             # linear_velocity = self.speed_controller.execute(self._target)
             # angular_velocity = self.mpc_steering.execute(self._target)
-            linear_velocity, angular_velocity = self.mpc.execute(self._target)
+            # linear_velocity, angular_velocity = self.mpc.execute(self._target)
+            linear_velocity, angular_velocity = self.nmpc.execute()
 
             if linear_velocity is None:
                 linear_velocity = 0.0
@@ -228,7 +237,7 @@ class ControllerNode(AbstractNode):
         angular_vel = Vector3(x=0.0, y=0.0, z=w)
         self.last_linear_speed = v
         self.last_angular_speed = w
-        return linear_vel, angular_vel         
+        return linear_vel, angular_vel      
 
     def send_control(self, linear_velocity, angular_velocity):
         message = Twist()
@@ -236,12 +245,13 @@ class ControllerNode(AbstractNode):
         message.angular.z = angular_velocity
         self.control_publisher.publish(message)
 
-        debug_msg = ControlDebug()
-        debug_msg.linear_velocity = linear_velocity
-        debug_msg.angular_velocity = angular_velocity
-        debug_msg.header.stamp = rospy.get_rostime()
+        # debug_msg = ControlDebug()
+        # debug_msg.linear_velocity = linear_velocity
+        # debug_msg.angular_velocity = angular_velocity
+        # debug_msg.header.stamp = rospy.get_rostime()
 
-        self.control_debug_publisher.publish(debug_msg)
+        # self.control_debug_publisher.publish(debug_msg)
+        self._debug_publisher.publish(self._frame.control_debug)
 
     def send_idle_control(self):
         self.send_control(0.0, 0.0)

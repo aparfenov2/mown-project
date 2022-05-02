@@ -1,0 +1,3 @@
+<launch>
+    <node name="command_panel_gui" pkg="command_panel" type="main.py" output="screen"/>
+</launch>

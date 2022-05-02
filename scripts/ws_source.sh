@@ -1,3 +1,4 @@
+echo "USAGE: . ws_source.bash"
 FILE=/catkin_ws/devel/setup.bash
 if test -f "$FILE"; then
     source $FILE

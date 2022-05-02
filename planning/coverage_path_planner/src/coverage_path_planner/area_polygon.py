@@ -28,16 +28,15 @@ class AreaPolygon:
 
         # Compute path angle
         if angle is not None:
-            self.rtf = Rtf(angle) # base on provided angle
+            self.rtf = Rtf(angle)  # base on provided angle
         else:
-            self.rtf = self.rtf_longest_edge() # based on longest edge of polygon
+            self.rtf = self.rtf_longest_edge()  # based on longest edge of polygon
         self.rP = self.rotated_polygon()    
             
         # Determine origin (i.e. closest vertex to current position)
         self.origin = self.get_furthest_point(self.P.exterior.coords, initial_pos)[0]
         print('Origin: ({}, {}), coords: {}'.format(self.origin[0], self.origin[1], coordinates))
         self.ft = ft
-
 
     def rtf_longest_edge(self):
         """Computes rotation transform based on longest edge"""
@@ -70,7 +69,7 @@ class AreaPolygon:
             raise TypeError("rotate_from: takes an numpy.ndarray")
         new_points = []
         for point in points:
-            point_mat = np.mat([[point[0]],[point[1]],[0]], dtype='float64')
+            point_mat = np.mat([[point[0]], [point[1]], [0]], dtype='float64')
             new_point = self.rtf.irm.I * point_mat
             new_points.append(np.array(new_point[:-1].T, dtype='float64'))
         return np.squeeze(np.array(new_points, dtype='float64'))
@@ -200,9 +199,18 @@ if __name__ == '__main__':
     from matplotlib.collections import LineCollection
     
     ext = [(0, 0), (4, 4), (5, 6), (0, 8), (-4, 4)]
+
+    polygon_points = []
+
+    for i in range(1, len(ext)):
+        polygon_points.append(ext[i-1])
+        l = np.linspace(ext[i-1], ext[i], 5).tolist()
+        polygon_points += l
+    
+    polygon_points.append(ext[-1])
     holes = [] #[[(0, 3), (2, 3), (1, 6), (-3, 5)]]
-    polygon = AreaPolygon(ext, (0, 4), interior=holes, ft=0.2, angle=0.0)
-    print(polygon.rtf.angle)
+    polygon = AreaPolygon(polygon_points, (-2, 3.5), interior=holes, ft=1.0)
+    # print(polygon.rtf.angle)
     ll = polygon.get_area_coverage()
     
     # Plotting results
@@ -216,5 +224,5 @@ if __name__ == '__main__':
     plt.gca().set_aspect('equal', adjustable='box')
     plt.rcParams['figure.figsize'] = [50, 50]
     plt.show()
-    list(ll.coords)
-    print(ll)
+    # list(ll.coords)
+    # print(ll)

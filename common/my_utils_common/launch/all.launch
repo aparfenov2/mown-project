@@ -8,8 +8,8 @@
     <arg name="planning" default="false"/>
     <arg name="mb"     default="false" />
     <arg name="paused" default="false" />
-    <arg name="world"  default="turtletown" />
-    <arg name="robot"  default="ya_model" />
+    <arg name="world"  default="agriculture" />
+    <arg name="robot"  default="turtlebot" />
     <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" if="$(eval robot == 'turtlebot')" />
     <arg name="odom_topic"    value="/odom" if="$(eval robot == 'turtlebot')" />
     <!-- <arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" />
@@ -19,6 +19,8 @@
     <arg name="use_sim_time_in_gazebo" value="true"/>
     <arg name="base_frame"    value="base_link" if="$(eval robot == 'ya_model')" />
     <arg name="rosbridge" default="false" />
+    <arg name="rosbridge_port" default="8088" />
+    <arg name="command_panel" default="false" />
 
 <!-- sim -->
     <group if="$(arg sim)">
@@ -62,6 +64,9 @@
             <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'playpen')">
+            <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+        </group>
+        <group if="$(eval world == 'agriculture')">
             <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'yosemite')">
@@ -270,10 +275,15 @@
         <!-- </node>    -->
     </group>
 
+<!-- Command panel -->
+    <group if="$(arg command_panel)">
+        <include file="$(find command_panel)/launch/run.launch"/>
+    </group>
+
 <!-- ROSBRIDGE -->
     <group if="$(arg rosbridge)">
         <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" > 
-            <arg name="port" value="8088"/>
+            <arg name="port" value="$(arg rosbridge_port)"/>
         </include>
     </group>
 
