@@ -9,18 +9,18 @@ from sensor_msgs.msg import PointCloud2
 def cloud_msg_to_numpy(cloud_msg):
     # Convert Ros pointcloud2 msg to numpy array
     pc = ros_numpy.numpify(cloud_msg)
-    points=np.zeros((pc.shape[0],4))
-    points[:,0]=pc['x']
-    points[:,1]=pc['y']
-    points[:,2]=pc['z']
-    points[:,3]=pc['intensity']
+    points = np.zeros((pc.shape[0], 4))
+    points[:, 0] = pc['x']
+    points[:, 1] = pc['y']
+    points[:, 2] = pc['z']
+    points[:, 3] = pc['intensity']
     cloud = np.array(points, dtype=np.float32)
 
     return cloud
 
 
 def np2ros_pub_2(points, frame_id, timestamp):
-    npoints = points.shape[0] # Num of points in PointCloud
+    npoints = points.shape[0]  # Num of points in PointCloud
     points_arr = np.zeros((npoints,), dtype=[
                                         ('x', np.float32),
                                         ('y', np.float32),
@@ -33,7 +33,7 @@ def np2ros_pub_2(points, frame_id, timestamp):
     points_arr['z'] = points[2]
     points_arr['intensity'] = points[3]
     
-    cloud_msg = ros_numpy.msgify(PointCloud2, points_arr,stamp=timestamp, frame_id=frame_id)
+    cloud_msg = ros_numpy.msgify(PointCloud2, points_arr, stamp=timestamp, frame_id=frame_id)
     return cloud_msg
 
 
@@ -122,8 +122,9 @@ class Main:
         plane_filter = GroundFiltering()
         idx = plane_filter.filter_point_cloud(cloud[:, :3], 0.5, 40, 100)
         cloud = cloud[idx]
-        cloud = cloud[np.where(cloud[:, 2] > 1.25 - 1.733)]
-        cloud = cloud[np.where(cloud[:, 2] < 2.0 + 1.25 - 1.733)]
+        # cloud = cloud[np.where(cloud[:, 2] > 1.25 - 1.733)]
+        # cloud = cloud[np.where(cloud[:, 2] < 2.0 + 1.25 - 1.733)]
+        # rospy.logwarn(f"{np.max(cloud[:, 2])}, {np.min(cloud[:, 2])}")
 
         cloud_msg = np2ros_pub_2(cloud, message.header.frame_id, message.header.stamp)
         self.pcl_pub.publish(cloud_msg)

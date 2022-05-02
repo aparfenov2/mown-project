@@ -1,6 +1,5 @@
 
-import numpy as np
-from scipy import optimize
+import numpy as np 
 
 from .common import convert_orientation, compute_theta, angles_difference
 
@@ -50,7 +49,7 @@ class MoveMPC(object):
             p2 = trajectory[index + 1]
             dist += self.__distance_between_poses(p1, p2)
             table[index] = dist
-        return table            
+        return table
 
     def cost_function(self, x, init_pos, trajectory):
         cost = 0
@@ -104,14 +103,13 @@ class MoveMPC(object):
             )
 
             cost += a_s_distance * distances[target_traj_id]
-            
             last_pos = cur_pos
 
             l_error = self.__distance_between_poses(
                 cur_pos,
                 trajectory[target_traj_id]
             )
-                
+
             cost += a_l_err * l_error * l_error
         return cost
 
@@ -123,13 +121,13 @@ class MoveMPC(object):
         init_pos = self._frame.get_robot_pose()
         # v = self._frame.get_robot_speed()
 
-        solution = optimize.minimize(self.cost_function, 
-                                     x0=x0,  
-                                     bounds=self.bounds, 
+        solution = optimize.minimize(self.cost_function,
+                                     x0=x0,
+                                     bounds=self.bounds,
                                      args=(init_pos, trajectory),
                                      method='SLSQP',
-                                     tol = 1e-5,
-                                     options = {'eps': 0.01, 'disp': False})
+                                     tol=1e-5,
+                                     options={'eps': 0.01, 'disp': False})
         if solution.success:
             self.last_v0 = solution.x[0]
             self.last_w0 = solution.x[self._horizon]

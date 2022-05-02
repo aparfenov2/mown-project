@@ -201,4 +201,4 @@ RUN ln -s $(which python3) /usr/bin/python
 # RUN apt-get update
 RUN apt-get install python3-tk
 RUN python3 -m pip install Rtree
-
+RUN python3 -m pip install casadi

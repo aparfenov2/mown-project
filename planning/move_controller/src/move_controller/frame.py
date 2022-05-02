@@ -1,5 +1,9 @@
 from threading import RLock
 
+from .discrete_trajectory import DiscreteTrajectory
+
+from enginx_msgs.msg import ControlDebug
+
 
 class Frame(object):
     def __init__(self):
@@ -7,6 +11,20 @@ class Frame(object):
         self._localization = None
         self._route = None
         self._route_as_list = []
+        self._discrete_trajectory = DiscreteTrajectory()
+
+        self._debug = ControlDebug()
+
+    def reset_debug(self):
+        self._debug = ControlDebug()
+
+    @property
+    def control_debug(self):
+        return self._debug
+
+    @property
+    def discrete_trajectory(self):
+        return self._discrete_trajectory
 
     def lock(self):
         return self._rlock
@@ -15,6 +33,7 @@ class Frame(object):
         with self._rlock:
             self._route = message
             self.__trajectory_to_list()
+            self._discrete_trajectory.process_route(message)
 
     def receive_localization(self, message):
         with self._rlock:
@@ -49,7 +68,9 @@ class Frame(object):
         return (self._localization.pose.x,
                 self._localization.pose.y)
 
-
     def get_robot_speed(self):
         return self._localization.speed
+
+    def get_robot_angular_speed(self):
+        return self._localization.angular_speed
 

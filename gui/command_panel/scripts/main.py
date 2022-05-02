@@ -44,7 +44,7 @@ class MainWindows(object):
             '/clicked_point',
             PointStamped,
             self.clicked_point_callback
-        )  
+        )
 
     def run(self):
         self.window.mainloop()
@@ -121,7 +121,6 @@ class TaskPointState(object):
         self.viz_publisher.publish(point)
 
 
-
 class TaskPolygonState(object):
     def __init__(self, main_window) -> None:
         self.main = main_window
@@ -156,22 +155,23 @@ class TaskPolygonState(object):
 
     def clicked_point_callback(self, message):
         if len(self.visualized_poly.polygon.points) > 2:
-            idx = index.Index()
-            for ind, pt in enumerate(self.visualized_poly.polygon.points):
-                idx.insert(ind, (pt.x, pt.y))
+            # idx = index.Index()
+            # for ind, pt in enumerate(self.visualized_poly.polygon.points):
+            #     idx.insert(ind, (pt.x, pt.y))
 
-            nearest_index_list = list(idx.nearest((message.point.x, message.point.y), 2))
-            print(nearest_index_list)
-            nearest_index = min(nearest_index_list)
+            # nearest_index_list = list(idx.nearest((message.point.x, message.point.y), 2))
+            # print(nearest_index_list)
+            # nearest_index = min(nearest_index_list)
 
-            if nearest_index == 0 and 1 not in nearest_index_list:
-                nearest_index = max(nearest_index_list)
+            # if nearest_index == 0 and 1 not in nearest_index_list:
+            #     nearest_index = max(nearest_index_list)
 
             new_point = Point32()
             new_point.x = message.point.x
             new_point.y = message.point.y
 
-            self.visualized_poly.polygon.points.insert(nearest_index + 1, new_point)
+            # self.visualized_poly.polygon.points.insert(nearest_index + 1, new_point)
+            self.visualized_poly.polygon.points.append(new_point)
         else:
             new_point = Point32()
             new_point.x = message.point.x
@@ -187,7 +187,10 @@ class TaskPolygonState(object):
     def publish_task(self):
         if len(self.visualized_poly.polygon.points) > 2:
             self.message.header.stamp = rospy.get_rostime()
-            self.message.target_polygon = self.visualized_poly
+            # self.message.target_polygon = []
+            # for point in self.visualized_poly:
+
+            self.message.target_polygon = self.visualized_poly.polygon
             self.pub.publish(self.message)
 
     def publish_visualization(self):
@@ -197,5 +200,5 @@ class TaskPolygonState(object):
 
 
 if __name__ == "__main__":
-    rospy.init_node('CommandPanelGUI')
+    rospy.init_node('command_panel_gui')
     MainWindows().run()

@@ -120,6 +120,14 @@ add_message_files(
   RouteTaskProgressEvent.msg
 )
 
+add_message_files(
+  DIRECTORY msg/debug
+  FILES
+  PlanningDebug.msg
+  SpeedGeneratorDebug.msg
+  ControlDebug.msg
+)
+
 generate_messages(DEPENDENCIES std_msgs geometry_msgs)
 
 catkin_package(CATKIN_DEPENDS message_runtime std_msgs geometry_msgs)

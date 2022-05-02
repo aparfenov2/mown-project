@@ -51,7 +51,7 @@ class APathPlanner(object):
  
         self.__route_publisher = rospy.Publisher(
             rospy.get_param('/planner/topics/route/path_planner'), 
-            Route, 
+            Route,
             queue_size=10
         )
         self.__progress_route_publisher = rospy.Publisher(rospy.get_param('/planner/topics/path_progress'), ProgressRoutePlanner, queue_size=10)

@@ -24,6 +24,9 @@ while [[ "$#" -gt 0 ]]; do
         --name) CONTAINER_NAME="$2"; shift; ;;
         --loca) LOCALIZATION=1; ;;
         --planning) PLANNING=1; ;;
+        --rosbridge) ROSBRIDGE=1; ;;
+        --rosbridge_port) ROSBRIDGE_PORT="$2"; shift; ;;
+        --command_panel) COMMAND_PANEL=1; ;;
         --no_build) NO_BUILD=1; ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -43,6 +46,9 @@ ROSARGS=()
 [ -n "$LOCALIZATION" ] && ROSARGS+=("loca:=true") && CONTAINER_NAME="loca"
 [ -n "$MOVE_BASE" ] && ROSARGS+=("mb:=true") && CONTAINER_NAME="mb"
 [ -n "$PLANNING" ] && ROSARGS+=("planning:=true") && CONTAINER_NAME="planning"
+[ -n "$ROSBRIDGE" ] && ROSARGS+=("rosbridge:=true") && CONTAINER_NAME="rosbridge"
+[ -n "$ROSBRIDGE_PORT" ] && ROSARGS+=("rosbridge_port:=$ROSBRIDGE_PORT")
+[ -n "$COMMAND_PANEL" ] && ROSARGS+=("command_panel:=true") && CONTAINER_NAME="command_panel"
 
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"

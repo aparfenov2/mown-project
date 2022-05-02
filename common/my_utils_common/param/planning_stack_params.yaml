@@ -7,6 +7,9 @@ topics:
   task_polygon_planning: "/planner/route/task_polygon"
   task_to_point_planning: "/planner/route/task_to_point"
   path_progress: '/planner/route_progress'
+  debug:
+    planning: '/planner/debug/planning'
+    control: '/planner/debug/control'
 
   localization: '/planner/localization'
   costmap: '/costmap_node/costmap/costmap'

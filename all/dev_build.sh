@@ -3,7 +3,7 @@ DOCKER_IMAGE_NAME=$(cat docker/image)
 DOCKER_CONTAINER_NAME=$(cat docker/image)
 docker stop $DOCKER_CONTAINER_NAME || true && docker rm $DOCKER_CONTAINER_NAME || true
 
-# ./docker/build.sh
+docker build -t $(cat docker/image) docker/
 SCRIPTS_FOLDER='../scripts'
 
 VOLUMES=()

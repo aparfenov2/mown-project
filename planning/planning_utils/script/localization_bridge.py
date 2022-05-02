@@ -12,21 +12,22 @@ from enginx_msgs.msg import Localization
 
 
 class OdometryToLocalizationNode(AbstractNode):
-    
+
     def initialization(self):
         self.localization_publisher = rospy.Publisher(
-            rospy.get_param('/planner/topics/localization'), 
-            Localization, 
+            rospy.get_param('/planner/topics/localization'),
+            Localization,
             queue_size=10
         )
         self.br = tf.TransformBroadcaster()
+        self._last_time = None
+        self._last_speed = None
 
         # rospy.Subscriber('/laser_odom_to_init', Odometry, self.__odometry_callback) 
         odometry_topic = rospy.get_param('/planner/topics/odometry', '/ground_truth/state')
         rospy.Subscriber(odometry_topic, Odometry, self.__odometry_callback)
 
     def __odometry_callback(self, message: Odometry):
-
         localization_msg = self.__odom_to_loc(message)
         self.localization_publisher.publish(localization_msg)
 
@@ -39,8 +40,16 @@ class OdometryToLocalizationNode(AbstractNode):
         q = odometry.pose.pose.orientation
         euler = euler_from_quaternion([q.x, q.y, q.z, q.w])
         localization.yaw = euler[2]
-        localization.speed = odometry.twist.twist.linear.x
+        localization.angular_speed = odometry.twist.twist.angular.z
 
+        localization.speed = odometry.twist.twist.linear.x
+        if self._last_time is None:
+            localization.linear_acceleration = 0.0
+        else:
+            localization.linear_acceleration = (localization.speed - self._last_speed) / max(10e-10, odometry.header.stamp.to_sec() - self._last_time)
+
+        self._last_time = odometry.header.stamp.to_sec()
+        self._last_speed = odometry.twist.twist.linear.x
         return localization
 
     def send_transform(self, msg):

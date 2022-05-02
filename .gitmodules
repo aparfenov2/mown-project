@@ -28,3 +28,6 @@
 [submodule "3rd_party/frontier_exploration"]
 	path = 3rd_party/frontier_exploration
 	url = git@github.com:paulbovbel/frontier_exploration.git
+[submodule "3rd_party/task_behavior_engine"]
+	path = 3rd_party/task_behavior_engine
+	url = git@github.com:ToyotaResearchInstitute/task_behavior_engine.git

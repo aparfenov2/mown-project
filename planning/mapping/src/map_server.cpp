@@ -32,7 +32,7 @@ public:
         ROS_ASSERT(pnh.getParam("min_logprob", MIN_LOGPROB));
         // HIT_PROB  = std::max(0.0, std::min(HIT_PROB,  1.0));
         // MISS_PROB = std::max(0.0, std::min(MISS_PROB, 1.0));
-
+        // map_(std::vector<std::string>({"occupancy"}));
         std::string lidar_topic_name;
         std::string ocupancy_grid_topic_name;
 
@@ -56,6 +56,7 @@ public:
                                                                this, _1));
 
         map_.setGeometry(grid_map::Length(MAXIMUM_RANGE, MAXIMUM_RANGE), RESOLUTION, grid_map::Position(0.0, 0.0));
+        map_.add("occupancy", MIN_LOGPROB);
         map_.setFrameId(FIXED_FRAME_ID);
     }
 
@@ -140,7 +141,7 @@ protected:
         }
         catch (tf::TransformException &e)
         {
-            ROS_ERROR_STREAM("Cannot find a transform from sensor to world: "
+            ROS_DEBUG_STREAM("Cannot find a transform from sensor to world: "
                              << _ros_pc.header.frame_id << " --> "
                              << FIXED_FRAME_ID);
             // return false;
@@ -190,9 +191,9 @@ protected:
 
         if (!map_.isInside(end) || !map_.isInside(start))
         {
-            ROS_WARN_STREAM("End or Start point is not inside map boundary. Start: "
-                            << origin_x << ", " << origin_y 
-                            << ", end point: " << point_pose.x << "," << point_pose.y);
+            ROS_DEBUG_STREAM("End or Start point is not inside map boundary. Start: "
+                             << origin_x << ", " << origin_y 
+                             << ", end point: " << point_pose.x << "," << point_pose.y);
             return;
         }
 
@@ -214,7 +215,7 @@ protected:
                 if (map_.at("occupancy", subIndex) < MAX_LOGPROB)
                 {
                     map_.at("occupancy", subIndex) = 
-                        std::max(MAX_LOGPROB, map_.at("occupancy", *iterator) + HIT_LOGPROB);
+                        std::max(MAX_LOGPROB, map_.at("occupancy", subIndex) + HIT_LOGPROB);
                 }
             }
             else
