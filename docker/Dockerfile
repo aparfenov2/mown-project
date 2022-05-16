@@ -200,6 +200,7 @@ RUN apt-get update && apt-get install -y ros-noetic-robot-localization
 RUN apt-get update && apt-get install -y ros-noetic-hector-gazebo-plugins
 
 RUN apt-get install -y ros-noetic-rosbridge-suite
+RUN apt-get update && apt-get install -y ros-noetic-rtabmap-ros
 
 RUN apt-get update && apt-get install -y libturbojpeg
 RUN ln -s $(which python3) /usr/bin/python

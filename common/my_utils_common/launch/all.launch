@@ -1,28 +1,30 @@
 <launch>
-    <arg name="rviz"   default="false" />
-    <arg name="loca"   default="false" />
+    <arg name="rviz" default="false" />
+    <arg name="loca" default="false" />
     <arg name="teleop" default="false" />
-    <arg name="sim"    default="false" />
-    <arg name="segm"   default="false" />
-    <arg name="segm_net"   default="false" />
+    <arg name="sim" default="false" />
+    <arg name="segm" default="false" />
+    <arg name="segm_net" default="false" />
     <arg name="planning" default="false"/>
-    <arg name="mb"     default="false" />
+    <arg name="mb" default="false" />
     <arg name="paused" default="false" />
-    <arg name="world"  default="agriculture" />
-    <arg name="robot"  default="turtlebot" />
+    <arg name="world" default="agriculture" />
+    <arg name="robot" default="turtlebot" />
     <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" if="$(eval robot == 'turtlebot')" />
-    <arg name="odom_topic"    value="/odom" if="$(eval robot == 'turtlebot')" />
+    <arg name="odom_topic" value="/odom" if="$(eval robot == 'turtlebot')" />
     <!-- <arg name="cmd_vel_topic" value="/engix_velocity_controller/cmd_vel" if="$(eval robot == 'ya_model')" />
-    <arg name="odom_topic"    value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" /> -->
+    <arg name="odom_topic" value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" /> -->
     <arg name="cmd_vel_topic" value="/cmd_vel" if="$(eval robot == 'ya_model')" />
-    <arg name="odom_topic"    value="/odom" if="$(eval robot == 'ya_model')" />
+    <arg name="odom_topic" value="/odom" if="$(eval robot == 'ya_model')" />
     <arg name="use_sim_time_in_gazebo" value="true"/>
-    <arg name="base_frame"    value="base_link" if="$(eval robot == 'ya_model')" />
+    <arg name="base_frame" value="base_link" if="$(eval robot == 'ya_model')" />
     <arg name="rosbridge" default="false" />
     <arg name="rosbridge_port" default="8088" />
     <arg name="command_panel" default="false" />
+    <!-- rtabmap is supposed to be used in sim mode only to provide global merged pointcloud. In real robot ZED2 already provides the cloud. -->
+    <arg name="rtabmap" default="false" />
 
-<!-- sim -->
+    <!-- sim -->
     <group if="$(arg sim)">
         <arg name="publish_tf" default="1"/>
 
@@ -43,8 +45,7 @@
             <!-- <rosparam command="load" file="$(find engix_control)/config/controller.yaml" /> -->
 
             <!-- Spawn controllers -->
-            <!-- <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
-                  args="engix_joint_publisher engix_velocity_controller">
+            <!-- <node name="base_controller_spawner" pkg="controller_manager" type="spawner" args="engix_joint_publisher engix_velocity_controller">
             </node>
 
             <node name="message_to_tf" pkg="message_to_tf" type="message_to_tf">
@@ -106,28 +107,24 @@
     <!-- segm, depends on segm_net -->
     <group if="$(arg segm)">
 
-        <node pkg="nodelet" type="nodelet" name="pcl_proc"  args="manager" output="screen"/>
+        <node pkg="nodelet" type="nodelet" name="pcl_proc" args="manager" output="screen"/>
 
         <!-- register depth image -->
-        <node pkg="nodelet" type="nodelet" name="point_cloud2_register"
-                args="load depth_image_proc/register pcl_proc"
-          respawn="false" output="screen" >
+        <node pkg="nodelet" type="nodelet" name="point_cloud2_register" args="load depth_image_proc/register pcl_proc" respawn="false" output="screen">
             <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
             <remap from="/depth/camera_info" to="/camera/depth/camera_info" />
             <remap from="/depth/image_rect" to="/camera/depth/image_raw" />
         </node>
 
         <!-- registered depth to pcl rgb -->
-        <node pkg="nodelet" type="nodelet" name="point_cloud2_pcl"
-                args="load depth_image_proc/point_cloud_xyzrgb pcl_proc"
-          respawn="false" output="screen" >
+        <node pkg="nodelet" type="nodelet" name="point_cloud2_pcl" args="load depth_image_proc/point_cloud_xyzrgb pcl_proc" respawn="false" output="screen">
 
             <remap from="/rgb/image_rect_color" to="/segmentation_node/mask_color" />
             <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
-            
+
             <remap from="depth_registered/points" to="/pcl_proc/points2" />
         </node>
-<!-- 
+        <!-- 
         <node name="color_filter" pkg="simpcl" type="color_filter" output="screen">
             <remap from="points_in" to="/pcl_proc/points2"/>
             <remap from="points_out" to="/pcl_proc/filtered"/>
@@ -144,9 +141,7 @@
             <param name="b_max" type="double" value="0"/>
         </node>
 
-        <node pkg="nodelet" type="nodelet" name="point_cloud2_laserscan"
-                args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc"
-          respawn="false" output="screen" required="true" clear_params="true">
+        <node pkg="nodelet" type="nodelet" name="point_cloud2_laserscan" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc" respawn="false" output="screen" required="true" clear_params="true">
             <param name="min_height" type="double" value="0.1"/>
             <param name="max_height" type="double" value="2.0"/>
             <param name="target_frame" type="str" value="base_link"/>
@@ -157,9 +152,9 @@
  -->
     </group>
 
-<!-- loca -->
+    <!-- loca -->
     <group if="$(arg loca)">
-<!--
+        <!--
         <include file="$(find aloam_velodyne)/launch/aloam_velodyne_HDL_32.launch">
             <arg name="rviz" value="false" />
             <arg name="output" value="log" />
@@ -179,64 +174,64 @@
     </group>
 
 
-  <!-- move_base -->
-<group if="$(arg mb)">
-    <group unless="$(arg segm)">
-        <node args="manager" name="pcl_proc" output="screen" pkg="nodelet" type="nodelet"/>
-        <node args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc" clear_params="true" name="point_cloud2_laserscan" output="screen" pkg="nodelet" required="true" respawn="false" type="nodelet">
-            <param name="min_height" type="double" value="0.1"/>
-            <param name="max_height" type="double" value="2.0"/>
-            <param name="target_frame" type="str" value="base_link"/>
-            <remap from="cloud_in" to="ce30_output"/>
-            <remap from="scan" to="/pcl_proc/scan"/>
+    <!-- move_base -->
+    <group if="$(arg mb)">
+        <group unless="$(arg segm)">
+            <node args="manager" name="pcl_proc" output="screen" pkg="nodelet" type="nodelet"/>
+            <node args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc" clear_params="true" name="point_cloud2_laserscan" output="screen" pkg="nodelet" required="true" respawn="false" type="nodelet">
+                <param name="min_height" type="double" value="0.1"/>
+                <param name="max_height" type="double" value="2.0"/>
+                <param name="target_frame" type="str" value="base_link"/>
+                <remap from="cloud_in" to="ce30_output"/>
+                <remap from="scan" to="/pcl_proc/scan"/>
+            </node>
+        </group>
+        <!-- Arguments -->
+        <arg name="move_forward_only" default="false"/>
+        <arg name="coverage_area_offset" default="-2.5 -2.5 0 0 0 0"/>
+        <arg name="coverage_area_size_x" default="10" />
+        <arg name="coverage_area_size_y" default="10" />
+        <arg name="target_x_vel" default="0.5" />
+        <arg name="target_yaw_vel" default="0.4" />
+        <arg name="robot_radius" default="0.3" />
+        <arg name="tool_radius" default="0.3"/>
+
+        <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+            <param name="base_global_planner" value="full_coverage_path_planner/SpiralSTC"/>
+            <param name="base_local_planner" value="tracking_pid/TrackingPidLocalPlanner"/>
+
+            <rosparam command="load" file="$(find my_utils_common)/param/local_costmap_params.yaml" ns="local_costmap"/>
+            <rosparam command="load" file="$(find my_utils_common)/param/global_costmap_params.yaml" ns="global_costmap"/>
+
+            <param name="global_costmap/robot_radius" value="$(arg robot_radius)"/>
+            <param name="local_costmap/robot_radius" value="$(arg robot_radius)"/>
+            <param name="global_costmap/robot_base_frame" value="$(arg base_frame)"/>
+            <param name="local_costmap/robot_base_frame" value="$(arg base_frame)"/>
+
+            <param name="SpiralSTC/robot_radius" value="$(arg robot_radius)"/>
+            <param name="SpiralSTC/tool_radius" value="$(arg tool_radius)"/>
+
+            <!-- <remap from="move_base_simple/goal" to="/fake_move_base/goal"/> -->
+            <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
+            <!-- <remap from="/local_trajectory" to="/trajectory"/> -->
+
+            <param name="TrackingPidLocalPlanner/controller_debug_enabled" value="True"/>
+            <param name="TrackingPidLocalPlanner/track_base_link" value="true"/>
+            <param name="TrackingPidLocalPlanner/l" value="0.5"/>
+            <param name="TrackingPidLocalPlanner/Ki_long" value="0.0"/>
+            <param name="TrackingPidLocalPlanner/Kp_long" value="2.0"/>
+            <param name="TrackingPidLocalPlanner/Kd_long" value="0.5"/>
+            <param name="TrackingPidLocalPlanner/Ki_lat" value="0.0"/>
+            <param name="TrackingPidLocalPlanner/Kp_lat" value="4.0"/>
+            <param name="TrackingPidLocalPlanner/Kd_lat" value="0.3"/>
+            <param name="TrackingPidLocalPlanner/target_x_vel" value="$(arg target_x_vel)"/>
+            <param name="TrackingPidLocalPlanner/target_yaw_vel" value="$(arg target_yaw_vel)"/>
+
         </node>
-    </group>
-    <!-- Arguments -->
-    <arg name="move_forward_only" default="false"/>
-    <arg name="coverage_area_offset" default="-2.5 -2.5 0 0 0 0"/>
-    <arg name="coverage_area_size_x" default="10" />
-    <arg name="coverage_area_size_y" default="10" />
-    <arg name="target_x_vel" default="0.5" />
-    <arg name="target_yaw_vel" default="0.4" />
-    <arg name="robot_radius" default="0.3" />
-    <arg name="tool_radius" default="0.3"/>
 
-     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
-        <param name="base_global_planner" value="full_coverage_path_planner/SpiralSTC"/>
-        <param name="base_local_planner" value="tracking_pid/TrackingPidLocalPlanner"/>
-
-        <rosparam command="load" file="$(find my_utils_common)/param/local_costmap_params.yaml" ns="local_costmap"/>
-        <rosparam command="load" file="$(find my_utils_common)/param/global_costmap_params.yaml" ns="global_costmap"/>
-
-        <param name="global_costmap/robot_radius" value="$(arg robot_radius)"/>
-        <param name="local_costmap/robot_radius" value="$(arg robot_radius)"/>
-        <param name="global_costmap/robot_base_frame" value="$(arg base_frame)"/>
-        <param name="local_costmap/robot_base_frame" value="$(arg base_frame)"/>
-
-        <param name="SpiralSTC/robot_radius" value="$(arg robot_radius)"/>
-        <param name="SpiralSTC/tool_radius" value="$(arg tool_radius)"/>
-
-        <!-- <remap from="move_base_simple/goal" to="/fake_move_base/goal"/> -->
-        <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
-        <!-- <remap from="/local_trajectory" to="/trajectory"/> -->
-
-        <param name="TrackingPidLocalPlanner/controller_debug_enabled" value="True"/>
-        <param name="TrackingPidLocalPlanner/track_base_link" value="true"/>
-        <param name="TrackingPidLocalPlanner/l" value="0.5"/>
-        <param name="TrackingPidLocalPlanner/Ki_long" value="0.0"/>
-        <param name="TrackingPidLocalPlanner/Kp_long" value="2.0"/>
-        <param name="TrackingPidLocalPlanner/Kd_long" value="0.5"/>
-        <param name="TrackingPidLocalPlanner/Ki_lat" value="0.0"/>
-        <param name="TrackingPidLocalPlanner/Kp_lat" value="4.0"/>
-        <param name="TrackingPidLocalPlanner/Kd_lat" value="0.3"/>
-        <param name="TrackingPidLocalPlanner/target_x_vel" value="$(arg target_x_vel)"/>
-        <param name="TrackingPidLocalPlanner/target_yaw_vel" value="$(arg target_yaw_vel)"/>
-
-    </node>
-
-    <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
-    <!-- Launch coverage progress tracking -->
-<!--     <node args="$(arg coverage_area_offset) map coverage_map 100" name="map_to_coveragemap" pkg="tf" type="static_transform_publisher"/>
+        <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
+        <!-- Launch coverage progress tracking -->
+        <!--     <node args="$(arg coverage_area_offset) map coverage_map 100" name="map_to_coveragemap" pkg="tf" type="static_transform_publisher"/>
     <node name="coverage_progress" pkg="full_coverage_path_planner" type="coverage_progress">
         <param name="~target_area/x" value="$(arg coverage_area_size_x)"/>
         <param name="~target_area/y" value="$(arg coverage_area_size_y)"/>
@@ -246,14 +241,14 @@
     </node>
  -->
 
-    <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
-    <node pkg="my_utils_common" type="polygon_layer_helper.py" name="exploration_server_node" output="screen">
-        <remap from="/set_polygon" to="/move_base/global_costmap/polygon_layer/set_polygon"/>
-    </node>
+        <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/>
+        <node pkg="my_utils_common" type="polygon_layer_helper.py" name="exploration_server_node" output="screen">
+            <remap from="/set_polygon" to="/move_base/global_costmap/polygon_layer/set_polygon"/>
+        </node>
 
-</group>
+    </group>
 
-<!-- planning system -->
+    <!-- planning system -->
     <group if="$(arg planning)">
         <!-- <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/> -->
         <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" />
@@ -269,22 +264,104 @@
         <!-- <include file="$(find mapping)/launch/run.launch"/> -->
 
         <!-- Run the costmap node -->
-        <!-- <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" > -->
-            <!-- <rosparam file="$(find my_utils_common)/param/global_costmap_params_test.yaml" command="load" ns="costmap" /> -->
-            <!-- <rosparam file="$(find my_utils_common)/param/global_costmap_params.yaml" command="load" ns="costmap" /> -->
+        <!-- <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node"> -->
+        <!-- <rosparam file="$(find my_utils_common)/param/global_costmap_params_test.yaml" command="load" ns="costmap" /> -->
+        <!-- <rosparam file="$(find my_utils_common)/param/global_costmap_params.yaml" command="load" ns="costmap" /> -->
         <!-- </node>    -->
     </group>
 
-<!-- Command panel -->
+    <!-- Command panel -->
     <group if="$(arg command_panel)">
         <include file="$(find command_panel)/launch/run.launch"/>
     </group>
 
-<!-- ROSBRIDGE -->
+    <!-- ROSBRIDGE -->
     <group if="$(arg rosbridge)">
-        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" > 
+        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
             <arg name="port" value="$(arg rosbridge_port)"/>
         </include>
+    </group>
+
+    <group ns="rtabmap" if="$(arg rtabmap)">
+
+        <!-- http://wiki.ros.org/rtabmap_ros/Tutorials/SetupOnYourRobot -->
+
+        <arg name="database_path" default="rtabmap.db"/>
+        <arg name="rgbd_odometry" default="false"/>
+        <arg name="rtabmapviz" default="false"/>
+        <arg name="localization" default="false"/>
+        <arg name="subscribe_lidar" default="false"/>
+
+        <arg unless="$(arg localization)" name="args" default="--delete_db_on_start"/>
+        <arg name="simulation" default="true"/>
+        <arg if="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_raw"/>
+        <arg unless="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_rect_color"/>
+        <arg if="$(arg simulation)" name="depth_topic" default="/camera/depth/image_raw"/>
+        <arg unless="$(arg simulation)" name="depth_topic" default="/camera/depth_registered/image_raw"/>
+        <arg name="camera_info_topic" default="/camera/rgb/camera_info"/>
+        <arg name="wait_for_transform" default="0.2"/>
+        <arg unless="$(arg rgbd_odometry)" name="rtmap_odom_topic" default="$(arg odom_topic)" />
+        <arg if="$(arg rgbd_odometry)" name="rtmap_odom_topic"     default="odom" />
+
+        <!-- RTABmap -->
+        <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" output="screen" args="$(arg args)" launch-prefix="">
+            <rosparam command="load" file="$(find my_utils_common)/param/rtabmap_sim.yaml" />
+
+            <remap from="rgb/image" to="$(arg rgb_topic)"/>
+            <remap from="depth/image" to="$(arg depth_topic)"/>
+            <remap from="rgb/camera_info" to="$(arg camera_info_topic)"/>
+
+            <remap from="grid_map" to="map" />
+            <remap from="odom" to="$(arg rtmap_odom_topic)"/>
+            <remap from="scan_cloud" to="/velodyne_points" if="$(arg subscribe_lidar)"/>
+
+            <!-- localization mode -->
+            <param if="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="false"/>
+            <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
+            <param name="Mem/InitWMWithAllNodes" type="string" value="$(arg localization)"/>
+        </node>
+
+        <!-- Run a VoxelGrid filter to clean NaNs and downsample the data -->
+        <!-- 
+        <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+        <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
+            <remap from="~input" to="/rtabmap/cloud_map" />
+            <rosparam>
+            filter_field_name: z
+            filter_limit_min: 0
+            filter_limit_max: 2
+            filter_limit_negative: False
+            leaf_size: 0.01
+            </rosparam>
+        </node>
+ -->
+        <!-- Odometry : ONLY for testing without the actual robot! /odom TF should not be already published. -->
+        <node if="$(arg rgbd_odometry)" pkg="rtabmap_ros" type="rgbd_odometry" name="rgbd_odometry" output="screen">
+            <param name="frame_id" type="string" value="base_footprint"/>
+            <param name="wait_for_transform_duration" type="double" value="$(arg wait_for_transform)"/>
+            <param name="Reg/Force3DoF" type="string" value="true"/>
+            <param name="Vis/InlierDistance" type="string" value="0.05"/>
+
+            <remap from="rgb/image" to="$(arg rgb_topic)"/>
+            <remap from="depth/image" to="$(arg depth_topic)"/>
+            <remap from="rgb/camera_info" to="$(arg camera_info_topic)"/>
+        </node>
+
+        <!-- visualization with rtabmapviz -->
+        <node if="$(arg rtabmapviz)" pkg="rtabmap_ros" type="rtabmapviz" name="rtabmapviz" args="-d $(find rtabmap_ros)/launch/config/rgbd_gui.ini" output="screen">
+            <param name="subscribe_depth" type="bool" value="true"/>
+            <param name="subscribe_scan" type="bool" value="false"/>
+            <param name="subscribe_scan_cloud" type="bool" value="$(arg subscribe_lidar)"/>
+            <param name="frame_id" type="string" value="base_footprint"/>
+            <param name="wait_for_transform_duration" type="double" value="$(arg wait_for_transform)"/>
+            <remap from="odom" to="/odom" unless="$(arg rgbd_odometry)"/>
+            <remap from="rgb/image" to="$(arg rgb_topic)"/>
+            <remap from="depth/image" to="$(arg depth_topic)"/>
+            <remap from="rgb/camera_info" to="$(arg camera_info_topic)"/>
+            <!-- <remap from="scan" to="/scan"/> -->
+            <remap from="scan_cloud" to="/velodyne_points" if="$(arg subscribe_lidar)"/>
+        </node>
+
     </group>
 
 </launch>

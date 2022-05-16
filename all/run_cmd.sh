@@ -4,6 +4,20 @@ set -e
     shift
     . "/opt/ros/$ROS_DISTRO/setup.bash"    
     . /cdir/ws/devel/setup.bash
+
+    [ "$1" == "--build" ] && {
+        shift
+        pushd $PWD
+        cd /cdir/ws 
+        # catkin_make
+        catkin config \
+        --extend /opt/ros/$ROS_DISTRO \
+        --cmake-args \
+            -DCMAKE_BUILD_TYPE=Release
+        catkin build
+        popd
+    }
+    
     $@
     exit 0
 }
