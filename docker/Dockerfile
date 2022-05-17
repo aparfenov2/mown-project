@@ -91,6 +91,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-desktop-full=1.5.0-1*
 
+# ddrnet
+ARG version="8.0.0-1+cuda11.0"
+RUN apt-get update && apt-get install -y libnvinfer8=${version} libnvonnxparsers8=${version} libnvparsers8=${version} libnvinfer-plugin8=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python3-libnvinfer=${version}
+RUN dpkg -l | grep TensorRT
+
 # Turtlebot 3
 RUN apt-get update && apt-get install -y ros-noetic-joy ros-noetic-teleop-twist-joy \
   ros-noetic-teleop-twist-keyboard ros-noetic-laser-proc \
@@ -101,10 +106,9 @@ RUN apt-get update && apt-get install -y ros-noetic-joy ros-noetic-teleop-twist-
   ros-noetic-compressed-image-transport ros-noetic-rqt-image-view \
   ros-noetic-gmapping ros-noetic-navigation ros-noetic-interactive-markers
 
-# RUN apt install -y ros-noetic-turtlebot3-msgs
-# RUN apt install -y ros-noetic-turtlebot3
-# RUN apt install -y ros-noetic-turtlebot3-simulations
-
+RUN apt install -y ros-noetic-turtlebot3-msgs
+RUN apt install -y ros-noetic-turtlebot3
+RUN apt install -y ros-noetic-turtlebot3-simulations
 
 # Additional ROS packages
 # RUN apt-get update && apt-get install -y ros-noetic-teleop-twist-keyboard ros-noetic-hector-models
@@ -133,27 +137,27 @@ RUN apt-get update && apt-get install -y python3-pip
 
 
 # A-LOAM
-ENV CERES_VERSION="1.12.0"
-ENV PCL_VERSION="1.8.0"
-ENV CATKIN_WS=/root/catkin_ws
+# ENV CERES_VERSION="1.12.0"
+# ENV PCL_VERSION="1.8.0"
+# ENV CATKIN_WS=/root/catkin_ws
 
-    # setup processors number used to compile library
-RUN if [ "x$(nproc)" = "x1" ] ; then export USE_PROC=1 ; else export USE_PROC=$(($(nproc)/2)) ; fi && \
-    # Install dependencies
-      apt-get update && apt-get install -y \
-      cmake \
-      git \
-      gdb \
-      libpcl-dev \
-      libceres-dev \
-      libgoogle-glog-dev \
-      libopencv-dev \
-      python3-catkin-tools \
-      ros-${ROS_DISTRO}-cv-bridge \
-      ros-${ROS_DISTRO}-image-transport \
-      ros-${ROS_DISTRO}-message-filters \
-      ros-${ROS_DISTRO}-tf \
-      python3-catkin-lint python3-pip
+#     # setup processors number used to compile library
+# RUN if [ "x$(nproc)" = "x1" ] ; then export USE_PROC=1 ; else export USE_PROC=$(($(nproc)/2)) ; fi && \
+#     # Install dependencies
+#       apt-get update && apt-get install -y \
+#       cmake \
+#       git \
+#       gdb \
+#       libpcl-dev \
+#       libceres-dev \
+#       libgoogle-glog-dev \
+#       libopencv-dev \
+#       python3-catkin-tools \
+#       ros-${ROS_DISTRO}-cv-bridge \
+#       ros-${ROS_DISTRO}-image-transport \
+#       ros-${ROS_DISTRO}-message-filters \
+#       ros-${ROS_DISTRO}-tf \
+#       python3-catkin-lint python3-pip
 
 WORKDIR /tmp
 
@@ -175,11 +179,6 @@ RUN echo 'source ${ROS_ROOT}/setup.bash' >> /root/.bashrc
 WORKDIR /catkin_ws
 
 RUN pip3 install osrf-pycommon
-
-# ddrnet
-ARG version="8.0.0-1+cuda11.0"
-RUN apt-get update && apt-get install -y libnvinfer8=${version} libnvonnxparsers8=${version} libnvparsers8=${version} libnvinfer-plugin8=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python3-libnvinfer=${version}
-RUN dpkg -l | grep TensorRT
 
 # debug support
 RUN apt-get update && apt-get install -y xterm gdb
@@ -210,3 +209,5 @@ RUN ln -s $(which python3) /usr/bin/python
 RUN apt-get install python3-tk
 RUN python3 -m pip install Rtree
 RUN python3 -m pip install casadi
+# RUN apt-get update && apt-get install -y ros-noetic-robot-pose-ekf
+# RUN apt-get update && apt-get install ros-noetic-depthimage-to-laserscan

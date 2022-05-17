@@ -72,7 +72,7 @@ Then we can double click to any point at plot and script publish task to that po
 
 rtabmap
 --------------------------
-bash run_all.sh --sim --robot turtlebot world:=playpen publish_tf:=false
-bash run_all.sh --rtabmap rtabmapviz:=true rgbd_odometry:=true subscribe_lidar:=true
+bash run_all.sh --sim --robot turtlebot3 world:=playpen
+bash run_all.sh --rtabmap rtabmapviz:=true
 bash run_all.sh --rviz
 bash run_all.sh --teleop
