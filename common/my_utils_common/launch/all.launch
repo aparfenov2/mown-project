@@ -258,7 +258,7 @@
     <group if="$(arg planning)">
         <!-- <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/> -->
         <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" />
-
+        <param name="planner/topics/velocity_commands" value="$(arg cmd_vel_topic)"/>
         <!-- <include file="$(find move_base_mod)/launch/move_base.launch">
             <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
             <arg name="odom_topic" value="odom" />
