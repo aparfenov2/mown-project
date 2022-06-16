@@ -28,3 +28,7 @@
 [submodule "3rd_party/frontier_exploration"]
 	path = 3rd_party/frontier_exploration
 	url = git@github.com:paulbovbel/frontier_exploration.git
+[submodule "studio"]
+	path = studio
+	url = git@github.com:kantengri/studio.git
+	branch = aparfenov/control-panel
