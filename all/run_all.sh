@@ -11,6 +11,7 @@ ROSARGS=()
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --jetson) JETSON=1;  ;;
+        --studio) STUDIO=1 && CONTAINER_NAME="${CONTAINER_NAME}-studio"; ;;
         --sim) ROSARGS+=("sim:=true") && CONTAINER_NAME="${CONTAINER_NAME}-sim";  ;;
         --rviz) ROSARGS+=("rviz:=true") && CONTAINER_NAME="${CONTAINER_NAME}-rviz"; ;;
         --robot) ROBOT="$2"; shift; ;;
@@ -21,9 +22,10 @@ while [[ "$#" -gt 0 ]]; do
         --rosbridge) ROSARGS+=("rosbridge:=true") && CONTAINER_NAME="${CONTAINER_NAME}-rosbridge"; ;;
         --command_panel) ROSARGS+=("command_panel:=true") && CONTAINER_NAME="${CONTAINER_NAME}-command-panel"; ;;
         --rtabmap) ROSARGS+=("rtabmap:=true") && CONTAINER_NAME="${CONTAINER_NAME}-rtabmap"; ;;
+        --backend) ROSARGS+=("backend:=true") && CONTAINER_NAME="${CONTAINER_NAME}-backend"; ;;
 
         --inner) INNER=1 ;;
-        --name) CONTAINER_NAME="$2"; shift; ;;
+        --name) CONTAINER_NAME="${CONTAINER_NAME}-$2"; shift; ;;
         --build) BUILD=1; ;;
         --no_rm) NO_RM="--no_rm";  ;;
 
@@ -73,7 +75,7 @@ done
     exit 0
 }
 
-git submodule update --init --recursive
+# git submodule update --init --recursive  # commented out because it will reset modified submodules to current ver
 
 # setup dependencies
 pushd $PWD
@@ -103,6 +105,19 @@ done
         }
     }
 }
+
+[ -n "$STUDIO" ] && {
+cd studio
+docker build -t foxglove:my .
+docker run --rm \
+    ${VOLUMES[@]} \
+    --name ${CONTAINER_NAME} \
+    -p "8080:8080" \
+    foxglove:my
+
+    exit 0
+}
+
 mkdir .ros || true
 bash _run_in_docker.sh ${JETSON_ARGS} ${NO_RM} --script $0 --name ${CONTAINER_NAME} \
     -v $PWD/.ros:/root/.ros \

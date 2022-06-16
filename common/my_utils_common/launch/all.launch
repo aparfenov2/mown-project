@@ -25,6 +25,7 @@
     <arg name="command_panel" default="false" />
     <!-- rtabmap is supposed to be used in sim mode only to provide global merged pointcloud. In real robot ZED2 already provides the cloud. -->
     <arg name="rtabmap" default="false" />
+    <arg name="backend" default="false" />
 
     <!-- sim -->
     <group if="$(arg sim)">
@@ -279,6 +280,10 @@
     <!-- Command panel -->
     <group if="$(arg command_panel)">
         <include file="$(find command_panel)/launch/run.launch"/>
+    </group>
+
+    <group if="$(arg backend)">
+        <node pkg="backend" type="backend.py" name="backend" output="screen" />
     </group>
 
     <!-- ROSBRIDGE -->

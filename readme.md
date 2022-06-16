@@ -76,3 +76,30 @@ bash run_all.sh --sim --robot turtlebot3 world:=playpen
 bash run_all.sh --rtabmap rtabmapviz:=true
 bash run_all.sh --rviz
 bash run_all.sh --teleop
+
+
+
+Go button test
+--------------------------
+тест отрисовки полигона в foxglove, и запуске робота по пути кнопкой Go
+
+! git submodule update --init --recursive отключен в run_all.cmd, теперь надо делать вручную. Это чтобы не сбрасывать версию субмодуля при разработке.
+
+запускаем след. ноды:
+run_all.sh --sim
+run_all.sh --planning
+run_all.sh backend:=true
+run_all.sh --rosbridge
+run_all.sh --studio
+
+открываем foxglove в хроме по адресу http://localhost:8080
+на 3d панели включаем визуализацию топиков:
+    /exploration_polygon_marker
+    /planner/debug/clicked_point
+    /planner/debug/path
+
+добавляем панель "Mower" из доступного набора панелей
+
+рисуем полигон инстрментом "точка", последовательно кликая не менее 3х точек. По завершении кликнуть на начальную точку, чтобы полигон стал красным. 
+
+Нажимаем кнопку Go на панели "Mower". Если кнопки Go нет,  открываем настройки панели, прописываем имя топика /cmd_ui в единственный параметр.
