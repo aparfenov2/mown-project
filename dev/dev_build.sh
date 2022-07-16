@@ -2,7 +2,12 @@
 COMMON_DOCKER_IMAGE_NAME=$(cat docker/image)
 DEV_DOCKER_IMAGE_NAME=dev-$COMMON_DOCKER_IMAGE_NAME
 DOCKER_CONTAINER_NAME=$DEV_DOCKER_IMAGE_NAME
+
+echo "###############################"
+echo "## Try to stop container $DOCKER_CONTAINER_NAME"
 docker stop $DOCKER_CONTAINER_NAME || true && docker rm $DOCKER_CONTAINER_NAME || true
+
+echo "## Build container $DOCKER_CONTAINER_NAME"
 
 docker build -t $COMMON_DOCKER_IMAGE_NAME docker/
 docker build -t $DEV_DOCKER_IMAGE_NAME -f docker/Dockerfile:dev docker/
@@ -34,6 +39,7 @@ VOLUMES=()
 PROJECT_VOLUME="$(pwd)/../../mown-project:/$PROJECT_DIR"
 VOLUMES+=("$(pwd)/../../mown-project:/mown-project")
 
+echo "## Run container $DOCKER_CONTAINER_NAME"
 docker run \
 	-d \
 	-it \
@@ -45,8 +51,15 @@ docker run \
 	-e QT_X11_NO_MITSHM=1 \
 	-v $PROJECT_VOLUME \
     $DEV_DOCKER_IMAGE_NAME bash
+echo ""
+echo ""
 
 docker exec $DOCKER_CONTAINER_NAME bash -c $PROJECT_DIR'/dev/run_inside_container.sh'
+
+echo ""
+echo ""
+echo "## Build done "
+echo "###############################"
 # docker start $DOCKER_CONTAINER_NAME
 
 # docker exec $DOCKER_CONTAINER_NAME run_inside_container.sh
