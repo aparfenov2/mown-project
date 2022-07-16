@@ -13,6 +13,10 @@ class DiscreteTrajectory:
         self._s_table = list()
         self._max_s = 0.0
 
+    @property
+    def path(self):
+        return self._points
+
     def set_points(self, points):
         self._points = points
         self._s_table = [0] * len(self._points)

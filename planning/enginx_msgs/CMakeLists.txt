@@ -102,6 +102,7 @@ project(enginx_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
     std_msgs
+    nav_msgs
     geometry_msgs
     message_generation
 )
@@ -109,6 +110,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   DIRECTORY msg
   FILES
+  CoverageTask.msg
   GlobalTask.msg
   Route.msg
   Localization.msg
@@ -128,9 +130,9 @@ add_message_files(
   ControlDebug.msg
 )
 
-generate_messages(DEPENDENCIES std_msgs geometry_msgs)
+generate_messages(DEPENDENCIES std_msgs geometry_msgs nav_msgs)
 
-catkin_package(CATKIN_DEPENDS message_runtime std_msgs geometry_msgs)
+catkin_package(CATKIN_DEPENDS message_runtime std_msgs geometry_msgs nav_msgs)
 
 
 

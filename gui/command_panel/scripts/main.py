@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import rospy
 from rtree import index
-from tkinter import Tk, Label, Button
+from tkinter import Tk, Label, Button, Scale, DoubleVar, Checkbutton, BooleanVar
 
 from geometry_msgs.msg import PointStamped, PolygonStamped, Point32
 from visualization_msgs.msg import Marker
 
-from enginx_msgs.msg import RouteTaskToPoint, RouteTaskPolygon
+from enginx_msgs.msg import RouteTaskToPoint, RouteTaskPolygon, CoverageTask
 
 STATE_NORMAL = 'normal'
 STATE_DISABLE = 'disable'
@@ -37,6 +37,26 @@ class MainWindows(object):
         self.button_publish_2 = Button(
             self.window, text="Publish", command=self.button_publish_2_callback)
         self.button_publish_2.grid(column=1, row=3)
+
+        self.current_value = DoubleVar()
+        self.angle_scale = Scale(
+            self.window,
+            from_=-180,
+            to=180,
+            orient='horizontal',
+            variable=self.current_value
+        )
+        self.angle_scale.grid(column=1, row=4)
+
+        self.aproxamate_var = BooleanVar()
+        self.check_button = Checkbutton(
+            self.window,
+            text='Approximate',
+            onvalue=True,
+            offvalue=False,
+            variable=self.aproxamate_var
+        )
+        self.check_button.grid(column=1, row=5)
 
         self.current_state = TaskPointState(self)
 
@@ -79,6 +99,8 @@ class TaskPointState(object):
         self.main.button_polygon_task['state'] = STATE_NORMAL
         self.main.button_remove_all['state'] = STATE_DISABLE
         self.main.button_publish_2['state'] = STATE_DISABLE
+        self.main.angle_scale['state'] = STATE_DISABLE
+        self.main.check_button['state'] = STATE_DISABLE
 
         self.pub = rospy.Publisher(rospy.get_param('/planner/topics/task_to_point_planning'), RouteTaskToPoint, queue_size=2)
         self.viz_publisher = rospy.Publisher('/debug/rviz/point', PointStamped, queue_size=2)
@@ -129,11 +151,18 @@ class TaskPolygonState(object):
         self.main.button_polygon_task['state'] = STATE_DISABLE
         self.main.button_remove_all['state'] = STATE_NORMAL
         self.main.button_publish_2['state'] = STATE_NORMAL
+        self.main.angle_scale['state'] = STATE_NORMAL
+        self.main.check_button['state'] = STATE_NORMAL
 
         self.pub = rospy.Publisher(rospy.get_param('/planner/topics/task_polygon_planning'), RouteTaskPolygon, queue_size=2)
+        self.pub2 = rospy.Publisher(rospy.get_param('/planner/topics/coverage_task'), CoverageTask, queue_size=2)
         self.viz_publisher = rospy.Publisher('/debug/rviz/polygon', PolygonStamped, queue_size=2)
 
         self.message = RouteTaskPolygon()
+        self.message2 = CoverageTask()
+        self.message2.approximate = True
+        self.message2.auto_angle = False
+        self.message2.angle = 0.0
         self.visualized_poly = PolygonStamped()
         self.visualized_poly.header.frame_id = 'odom'
 
@@ -190,8 +219,11 @@ class TaskPolygonState(object):
             # self.message.target_polygon = []
             # for point in self.visualized_poly:
 
-            self.message.target_polygon = self.visualized_poly.polygon
-            self.pub.publish(self.message)
+            self.message2.target_polygon = self.visualized_poly.polygon
+            self.message2.angle = float(self.main.angle_scale.get())
+            self.message2.approximate = self.main.aproxamate_var.get()
+            # print(f"angle: {self.main.current_value}")
+            self.pub2.publish(self.message2)
 
     def publish_visualization(self):
         # if len(self.visualized_poly.polygon.points) > 0:

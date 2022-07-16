@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import math
 from threading import RLock
 
 import rospy
@@ -42,7 +43,7 @@ class OdometryToLocalizationNode(AbstractNode):
         localization.yaw = euler[2]
         localization.angular_speed = odometry.twist.twist.angular.z
 
-        localization.speed = odometry.twist.twist.linear.x
+        localization.speed = math.hypot(odometry.twist.twist.linear.x, odometry.twist.twist.linear.y)
         if self._last_time is None:
             localization.linear_acceleration = 0.0
         else:

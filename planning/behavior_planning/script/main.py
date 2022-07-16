@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
 import rospy
 import threading
 from task_behavior_engine.branch import Sequencer
@@ -9,10 +10,11 @@ from behavior_planning.common import Frame
 from behavior_planning.node import (TrajectoryPublisher,
                                     AstarPathPlanningNode,
                                     IdleNode, SpeedGeneratorNode,
-                                    CovaragePathGeneratorNode)
+                                    CovaragePathGeneratorNode, CoverageNode,
+                                    TestTrajectoryNode, SimpleSpeedGenerator)
 from behavior_planning.behavior import SelectByMessageNode
 
-from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import OccupancyGrid, Path
 from enginx_msgs.msg import (Route, Localization, RouteTaskPolygon,
                              RouteTaskToPoint, PlanningDebug)
 
@@ -36,6 +38,12 @@ class BehaviorPlanningNode(AbstractNode):
             queue_size=10
         )
 
+        self._debug_coverage_publisher = rospy.Publisher(
+            rospy.get_param('/planner/topics/debug/coverage_path'),
+            Path,
+            queue_size=10
+        )
+
         rospy.Subscriber(rospy.get_param('/planner/topics/task_polygon_planning'),
                          RouteTaskPolygon,
                          self.receive_task_polygon_planning)
@@ -53,8 +61,16 @@ class BehaviorPlanningNode(AbstractNode):
             self._frame.reset_trajectory()
             self._planner.execute()
             self._debug_publisher.publish(self._frame.planning_debug)
-            trajectory = self._frame.trajectory
-            self._trajectory_publisher.publish(trajectory)
+            self.debug_publish()
+            if self._frame.has_trajectory():
+                trajectory = self._frame.trajectory
+                self._trajectory_publisher.publish(trajectory)
+
+    def debug_publish(self):
+        path = self._frame.debug_data.coverage_path
+
+        if path:
+            self._debug_coverage_publisher.publish(path)
 
     def receive_task_polygon_planning(self, message):
         with self._rlock:
@@ -79,13 +95,15 @@ class BehaviorTreeBuilder(object):
     def build(self, frame):
         planning_node = AstarPathPlanningNode(name="planning_node",
                                               frame=frame)
-        speed_generator_node = SpeedGeneratorNode(
+        speed_generator_node = SimpleSpeedGenerator(
             name='speed_generator_node',
-            frame=frame)
+            frame=frame
+        )
         idle_node = IdleNode(name='idle_node', frame=frame)
-        coverage_node = CovaragePathGeneratorNode(
+        coverage_node = CoverageNode(
             name='coverage_path_node',
-            frame=frame)
+            frame=frame
+        )
 
         planning_branche = Sequencer("finish_counts")
         planning_branche.add_child(planning_node)
@@ -105,10 +123,22 @@ class BehaviorTreeBuilder(object):
         return behavior_selector
 
 
+class TestBTreeBuilder(object):
+    def build(self, frame):
+        test_node = TestTrajectoryNode(name="test_node",
+                                       frame=frame)
+
+        planning_branche = Sequencer("finish_counts")
+        planning_branche.add_child(test_node)
+        return planning_branche
+
+
 class BehaviorPlanner(object):
     def __init__(self, frame) -> None:
         self._frame = frame
         self._tree = BehaviorTreeBuilder().build(self._frame)
+
+        # self._tree = TestBTreeBuilder().build(self._frame)
 
     def execute(self):
         return self._tree.tick()

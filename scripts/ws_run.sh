@@ -11,8 +11,9 @@ function run_planning() {
 
 function run_gui() {
     . ws_source.sh
-    cd /catkin_ws/src/gui/command_panel
-    python3 main.py
+    # cd /catkin_ws/src/gui/command_panel
+    # python3 main.py
+    roslaunch command_panel run.launch
 }
 
 function main() {

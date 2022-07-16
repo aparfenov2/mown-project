@@ -35,6 +35,9 @@ class AstarPathPlanningNode(Node):
         self.distance_threshold = 1.0
 
     def run(self, nodedata):
+        if self._frame.get_path_done():
+            return NodeStatus(NodeStatus.SUCCESS)
+
         if self._frame.get_localization() is None:
             return NodeStatus(NodeStatus.FAIL, f"Node {self.name}, NO localization.")
 
@@ -68,6 +71,7 @@ class AstarPathPlanningNode(Node):
         #     route.route.append(pws)
 
         # self._frame.set_trajectory(route)
+        self._frame.set_path_done(True)
         return NodeStatus(NodeStatus.SUCCESS)
 
     def _need_to_replan(self, robot_position):
@@ -93,9 +97,9 @@ class AstarPathPlanningNode(Node):
     def __smooth_trajectory(self, points, target):
         loca = self._frame.get_localization()
         robot_pose = self.__localization2tuple(loca)
-        trajectory = self._smoother.smooth(
-            points, robot_pose, target
-        )
+        # points[0] = robot_pose[:2]
+        points[-1] = target[:2]
+        trajectory = self._smoother.smooth(points, robot_pose)
         new_points = list()
         for i in range(len(trajectory['x'])):
             new_points.append([trajectory['x'][i], trajectory['y'][i]])
@@ -130,121 +134,116 @@ class AstarPathPlanningNode(Node):
 
 
 class TrajectorySmoother:
-    def __init__(self, w: list) -> None:
+    def __init__(self, w: list, raise_exception=True) -> None:
         self._w1 = w[0]
         self._w2 = w[1]
         self._w3 = w[2]
         self._w4 = w[3]
 
-    def smooth(self, points, start_point, target_point):
+        self._raise_exception = raise_exception
+
+    def smooth(self, path, robot_pose):
         opti = casadi.Opti()
 
-        points_count = len(points)
+        W0 = 0.1
+        W1 = 100.0
+        W2 = 10.0
+        # W3 = 1.0
 
-        result = {
-            'x': [0.0] * points_count,
-            'y': [0.0] * points_count
-        }
+        EPS = 10e-6
+        K_MAX = 2.0
 
-        x = opti.variable()
-        y = opti.variable()
+        KNOTS = len(path)
+        X = opti.variable(KNOTS)
+        Y = opti.variable(KNOTS)
+        DX = opti.variable(KNOTS - 1)
+        DY = opti.variable(KNOTS - 1)
+        # DPHI = opti.variable(KNOTS - 1)
+        # THETA = opti.variable()
 
         cost = 0.0
-        # opti.set_initial(s, s_init)
-        # opti.set_initial(ds, ds_init)
-        # opti.set_initial(dds, dds_init)
 
-        opti.subject_to(x == start_point[0])
-        opti.subject_to(y == start_point[1])
-        # opti.minimize(
-        #     + self._w3 * (ds - ds_init)**2
-        #     + self._w4 * (dds - dds_init)**2)
-        # opti.subject_to(opti.bounded(s_min, s, s_max))
-        # opti.subject_to(opti.bounded(ds_min, ds, ds_max))
-        # opti.subject_to(opti.bounded(dds_min, dds, dds_max))
+        opti.subject_to(X[0] == robot_pose[0])
+        opti.subject_to(Y[0] == robot_pose[1])
+        # opti.subject_to(THETA == robot_pose[2])
+        # opti.subject_to(THETA == casadi.atan2(DY[0], DX[0] + 10e-6))
 
-        prev_x = x
-        prev_y = y
+        for i in range(1, KNOTS - 1):
+            opti.set_initial(X[i], path[i][0])
+            opti.set_initial(Y[i], path[i][1])
+            opti.subject_to(X[i] == X[i - 1] + DX[i - 1])
+            opti.subject_to(Y[i] == Y[i - 1] + DY[i - 1])
+            # opti.subject_to(DPHI[i - 1] == casadi.atan2(DY[i], DX[i] + EPS) - casadi.atan2(DY[i - 1], DX[i - 1] + EPS))
 
-        result['x'][0] = x
-        result['y'][0] = y
+            cost0 = W0 * ((X[i] - path[i][0]) ** 2 + (Y[i] - path[i][1]) ** 2)
+            # cost1 = W1 * ((DX[i] - DX[i - 1]) ** 2 + (DY[i] - DY[i - 1]) ** 2)
+            # cost2 = W2 * (DPHI[i] - DPHI[i - 1]) ** 2
+            cost3 = W1 * ((X[i] - (X[i-1] + X[i+1]) / 2.0) ** 2 + (Y[i] - (Y[i-1] + Y[i+1]) / 2.0) ** 2)
+            # cost2 = W2 * ((DPHI[i - 1]) / (casadi.sqrt(DX[i - 1] ** 2 + DY[i - 1] ** 2) + EPS) - K_MAX) ** 2
 
-        for i in range(1, points_count - 1):
-            x_i = opti.variable()
-            y_i = opti.variable()
+            # cost += cost0 + cost1 + cost2
+            cost += cost3 + cost0
 
-            cost += (
-                self._w1 * (x_i - prev_x)**2
-                + self._w2 * (y_i - prev_y)**2
-                + self._w3 * (x_i - points[i][0])**2
-                + self._w4 * (y_i - points[i][1])**2)
-            # opti.minimize(
-            #     self._w1 * (s_target - s_i)**2
-            #     + self._w2 * (casadi.if_else(s >= s_target - 0.01, ds, 0.0))**2
-            #     + self._w2 * (casadi.if_else(ds <= ds_target, ds_target - ds, (ds)))**2
-            #     + self._w3 * (ds_i - prev_ds)**2
-            #     + self._w4 * (dds_i - prev_dds)**2)
-            # opti.subject_to(opti.bounded(s_min, s_i, s_max))
-            # opti.subject_to(opti.bounded(ds_min, ds_i, ds_max))
-            # opti.subject_to(opti.bounded(dds_min, dds_i, dds_max))
-            # opti.subject_to(opti.bounded(ddds_min, (dds_i - prev_ds) / self._dt, ddds_max))
-            # opti.subject_to(prev_s + ds_i * self._dt + dds_i * 0.5 * self._dt ** 2 == s_i)
-            # opti.sutrajectorybject_to(prev_ds + dds_i * self._dt == ds_i)
-            # opti.subject_to(
-            #     ds_i == casadi.if_else(s_i >= s_target * 0.8,
-            #                            opti.bounded(ds_min, ds_i, 0.5),
-            #                            opti.bounded(ds_min, ds_i, ds_max)))
-            # opti.subject_to(opti.bounded(ds_min, ds_i, casadi.if_else(s_i >= s_target * 0.8, ds_max * 0.5, ds_max)))
+        last_index = len(path) - 1
+        delta_last_index = KNOTS - 2
 
-            # opti.subject_to(ds_i == casadi.if_else(s_i >= s_target, 0.0, ds_max))
-            # opti.subject_to(ds_i >= casadi.if_else(s_i >= s_target, 0.0, ds_min))
-            # opti.subject_to(ds_i <= casadi.if_else(s_i >= s_target, 0.0, ds_max))
-            # opti.subject_to(opti.bounded(casadi.if_else(s_i >= s_target, 0.0, ds_min),
-            #                              ds_i,
-            #                              casadi.if_else(s_i >= s_target, 0.0, ds_max)))
-
-            prev_x = x_i
-            prev_y = y_i
-
-            result['x'][i] = prev_x
-            result['y'][i] = prev_y
-
-        x = opti.variable()
-        y = opti.variable()
-
-        opti.subject_to(x == target_point[0])
-        opti.subject_to(y == target_point[1])
-
-        result['x'][-1] = x
-        result['y'][-1] = y
+        opti.subject_to(X[last_index] == path[-1][0])
+        opti.subject_to(Y[last_index] == path[-1][1])
+        opti.subject_to(X[last_index] == X[last_index - 1] + DX[delta_last_index])
+        opti.subject_to(Y[last_index] == Y[last_index - 1] + DY[delta_last_index])
+        # cost += W2 * ((DPHI[last_index - 1]) / (casadi.sqrt(DX[last_index - 1] ** 2 + DY[last_index - 1] ** 2)) - K_MAX) ** 2
 
         opti.minimize(cost)
         opts = {'ipopt.print_level': 0, 'print_time': 0, 'ipopt.sb': 'yes'}
         opti.solver('ipopt', opts)
 
-        sol = opti.solve()
+        # times = [0.0] * KNOTS
 
-        trajectory = {
-            'x': [0.0] * points_count,
-            'y': [0.0] * points_count
-        }
+        try:
+            sol = opti.solve()
 
-        for i in range(points_count):
-            trajectory['x'][i] = sol.value(result['x'][i])
-            trajectory['y'][i] = sol.value(result['y'][i])
+            trajectory = {
+                'x': [0.0] * KNOTS,
+                'y': [0.0] * KNOTS
+            }
 
-        return trajectory
+            for i in range(KNOTS):
+                trajectory['x'][i] = sol.value(X[i])
+                trajectory['y'][i] = sol.value(Y[i])
+
+            return trajectory
+        except Exception as e:
+            if self._raise_exception:
+                save_data = {
+                    "robot_position": robot_pose,
+                    "path": path
+                }
+
+                import json
+                with open('/tmp/json_data.json', 'w') as outfile:
+                    json.dump(save_data, outfile)
+
+                raise Exception()
+            else: 
+                trajectory = {
+                    'x': [0.0] * KNOTS,
+                    'y': [0.0] * KNOTS
+                }
+
+                for i in range(KNOTS):
+                    trajectory['x'][i] = opti.debug.value(X[i])
+                    trajectory['y'][i] = opti.debug.value(Y[i])
+                
+                return trajectory
 
 
-if __name__ == "__main__":
-    smoother = TrajectorySmoother([10.0, 10.0, 10.1, 10.1])
-    points = [[0.5, 0.5], [1.5, 1.5], [2.5, 2.5], [3.5, 3.5], [4.5, 4.5], [5.5, 5.5]] 
-    start_point = [0.25, 0.33]
+def test_smoothier_1():
+    smoother = TrajectorySmoother([10.0, 10.0, 10.1, 10.1], False)
+    points = [[0.5, 0.5], [1.5, 1.8], [2.5, 2.4], [3.5, 3.5], [4.5, 4.5], [5.5, 5.5]] 
+    start_point = [0.25, 0.33, np.deg2rad(-10)]
     target_point = [5.6, 5.2]
 
-    trajectory = smoother.smooth(
-        points, start_point, target_point
-    )
+    trajectory = smoother.smooth(points, start_point)
 
     import matplotlib.pyplot as plt
     fig = plt.figure()
@@ -259,3 +258,43 @@ if __name__ == "__main__":
 
     plt.legend()
     plt.show()
+
+
+def test_smoothier_from_file():
+    import json
+
+    with open('/tmp/json_data.json') as json_file:
+        data = json.load(json_file)
+        print(data)
+
+    smoother = TrajectorySmoother([10.0, 10.0, 10.1, 1.1])
+    points = data['path']
+    # start_point = data['robot_position']
+    # start_point = [data['path'][0][0], data['path'][0][1], data['robot_position'][2]]
+    start_point = [
+        data['path'][0][0],
+        data['path'][0][1],
+        np.arctan2(data['path'][1][1] - data['path'][0][1],
+                   data['path'][1][0] - data['path'][0][0])
+    ]
+
+    trajectory = smoother.smooth(points, start_point)
+
+    import matplotlib.pyplot as plt
+    fig = plt.figure()
+    ax = plt.axes()
+    x, y = [], []
+    for x_, y_ in points:
+        x.append(x_)
+        y.append(y_)
+
+    # ax.plot(trajectory['x'], trajectory['y'], label='x')
+    ax.plot(x, y, label='dx')
+    ax.scatter(start_point[0], start_point[1], label='dx')
+
+    plt.legend()
+    plt.show()
+
+
+if __name__ == "__main__":
+    test_smoothier_from_file()
