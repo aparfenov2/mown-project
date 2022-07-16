@@ -61,6 +61,38 @@ class SpeedGeneratorNode(Node):
             debug_points.append(point)
 
 
+class SimpleSpeedGenerator(Node):
+    def __init__(self, name, frame, *args, **kwargs):
+        super(SimpleSpeedGenerator, self).__init__(name=name,
+                                                   run_cb=self.run,
+                                                   *args, **kwargs)
+        self._frame = frame
+        self._target_speed = 0.5
+
+    def run(self, nodedata):
+        if self._frame.get_path_done():
+            return NodeStatus(NodeStatus.SUCCESS)
+
+        route = Route()
+        route.header.stamp = self._frame.get_localization().header.stamp
+        for x, y in self._frame.discrete_trajectory.path:
+            pws = PointWithSpeed()
+            pws.x = x
+            pws.y = y
+            pws.speed = self._target_speed
+            pws.d_time = 0.0
+            route.route.append(pws)
+
+        if len(route.route) > 0:
+            path_points = min(len(route.route), 20)
+            for i in range(1, path_points + 1):
+                route.route[-i].speed = min(i * 0.05, route.route[-i].speed)
+
+        self._frame.set_trajectory(route)
+
+        return NodeStatus(NodeStatus.SUCCESS)
+
+
 class NonlinearSmootherScipy:
     def __init__(self, knots, dt) -> None:
         self._knots = knots

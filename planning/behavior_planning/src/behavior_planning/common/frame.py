@@ -19,6 +19,11 @@ class PlannerBlackboard(Blackboard):
         return self._frame
 
 
+class DebugData:
+    def __init__(self) -> None:
+        self.coverage_path = None
+
+
 class Frame(object):
     TASK_TYPE_INIT = "init_type"
     TASK_TYPE_PLAN_TO_GOAL = 'plan_to_goal_type'
@@ -47,6 +52,36 @@ class Frame(object):
         self._astar_path_rtree = None
 
         self._planning_debug = PlanningDebug()
+        self._debug_data = DebugData()
+
+        self._path_done = False
+        self._cov_path_done = False
+        self._cov_task = False
+
+    def resete_debug(self):
+        self._debug_data.coverage_path = None
+
+    @property
+    def debug_data(self):
+        return self._debug_data
+
+    def get_cov_task(self):
+        return self._cov_task
+
+    def set_cov_task(self, new_flag):
+        self._cov_task = new_flag
+
+    def get_cov_path_done(self):
+        return self._cov_path_done
+
+    def set_cov_path_done(self, new_flag):
+        self._cov_path_done = new_flag
+
+    def get_path_done(self):
+        return self._path_done
+
+    def set_path_done(self, new_flag):
+        self._path_done = new_flag
 
     def has_astar_path(self):
         return self._astar_path is None
@@ -88,6 +123,7 @@ class Frame(object):
 
     def reset_trajectory(self):
         self._trajectory = None
+        self.resete_debug()
 
     def lock(self):
         return self._rlock
@@ -98,6 +134,7 @@ class Frame(object):
 
     def set_route_task_to_point_message(self, message):
         self._task_plan_to_goal = message
+        self.set_path_done(False)
 
     def has_route_task_to_point_message(self):
         return self._task_plan_to_goal is not None
@@ -111,6 +148,8 @@ class Frame(object):
 
     def set_route_task_polygon_message(self, message):
         self._task_plan_poly = message
+        self.set_cov_path_done(False)
+        self.set_cov_task(True)
 
     def reset_route_task_polygon_message(self):
         self._task_plan_poly = None

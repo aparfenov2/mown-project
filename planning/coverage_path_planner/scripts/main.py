@@ -3,4 +3,4 @@ from coverage_path_planner.coverage_path_planner_service import CoveragePathPlan
 
 
 if __name__ == "__main__":
-    CoveragePathPlannerNode('CoveragePathPlannerNode', 5).run()
+    CoveragePathPlannerNode('CoveragePathPlannerService', 5).run()

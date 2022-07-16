@@ -31,11 +31,11 @@ class AreaPolygon:
             self.rtf = Rtf(angle)  # base on provided angle
         else:
             self.rtf = self.rtf_longest_edge()  # based on longest edge of polygon
-        self.rP = self.rotated_polygon()    
-            
+        self.rP = self.rotated_polygon()
+
         # Determine origin (i.e. closest vertex to current position)
         self.origin = self.get_furthest_point(self.P.exterior.coords, initial_pos)[0]
-        print('Origin: ({}, {}), coords: {}'.format(self.origin[0], self.origin[1], coordinates))
+        # print('Origin: ({}, {}), coords: {}'.format(self.origin[0], self.origin[1], coordinates))
         self.ft = ft
 
     def rtf_longest_edge(self):
@@ -50,7 +50,7 @@ class AreaPolygon:
         dy = float(coords[max_index][1] - coords[max_index + 1][1])
         dx = float(coords[max_index][0] - coords[max_index + 1][0])
 
-        print(dy, dx, coords[max_index], coords[max_index + 1], coords)
+        # print(dy, dx, coords[max_index], coords[max_index + 1], coords)
         
         return Rtf(np.degrees(np.math.atan2(dy, dx)))
 
@@ -209,7 +209,9 @@ if __name__ == '__main__':
     
     polygon_points.append(ext[-1])
     holes = [] #[[(0, 3), (2, 3), (1, 6), (-3, 5)]]
-    polygon = AreaPolygon(polygon_points, (-2, 3.5), interior=holes, ft=1.0)
+    x = 1.8
+    y = 6.5
+    polygon = AreaPolygon(polygon_points, (x, y), interior=holes, ft=1.0, angle=90)
     # print(polygon.rtf.angle)
     ll = polygon.get_area_coverage()
     
@@ -220,6 +222,7 @@ if __name__ == '__main__':
     plot_coords(ax, ll)
     plot_bounds(ax, ll)
     plot_line(ax, ll)
+    plt.plot(x, y, 'ro') 
     plt.plot(*polygon.P.exterior.xy)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.rcParams['figure.figsize'] = [50, 50]

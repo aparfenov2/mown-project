@@ -59,13 +59,11 @@ class SelectByMessageNode(Behavior):
         return result
 
     def tick_pose_planning(self):
-        rospy.logerr("AT tick_pose_planning")
         child = self._children[1]
         result = self.tick_child(child)
         return result
 
     def tick_coverage_planning(self):
-        rospy.logerr("AT tick_coverage_planning")
         child = self._children[2]
         result = self.tick_child(child)
         return result

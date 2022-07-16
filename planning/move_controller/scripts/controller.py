@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from math import cos
 from threading import RLock
+from time import time
 
 import rospy
 import actionlib
@@ -9,7 +10,9 @@ from scipy import optimize
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 from abstractnode import AbstractNode
-from move_controller import PIDController, NonlinearController, NonLinearMPC, Frame, PIDSpeedController, Target, SteerMPC, MoveMPC
+from move_controller import (PIDController, NonlinearController, NonLinearMPC,
+                             Frame, PIDSpeedController, Target, SteerMPC,
+                             MoveMPC, LQRController)
 
 from std_msgs.msg import Float32
 from geometry_msgs.msg import PoseStamped, Pose, Quaternion, TwistStamped, Twist, Vector3
@@ -51,7 +54,19 @@ class ControllerNode(AbstractNode):
         self._frame = Frame()
         self._target = Target(self._frame, controller_params['target_distance'])
 
-        self.nmpc = NonlinearController(self._frame)
+        self._lqr_controller = LQRController(self._frame, 0.1)
+        self.nmpc = NonLinearMPC(
+            self._frame,
+            2, 0.1, [10.0, 1.0, 0.1, 0.1],
+            {
+                "v_lower": 0.0,
+                "v_upper": 2.0,
+                "a_lower": -1.0,
+                "a_upper": 1.0,
+                "w_upper": np.deg2rad(30),
+                "w_lower": -np.deg2rad(30)
+            }
+        )
         self.mpc = MoveMPC(self._frame, 1.0)
         self.speed_controller = PIDSpeedController(self._frame)
         self.speed_control = SpeedController(controller_params.get('speed_params', {}))
@@ -176,15 +191,28 @@ class ControllerNode(AbstractNode):
             # linear_velocity = self.speed_controller.execute(self._target)
             # angular_velocity = self.mpc_steering.execute(self._target)
             # linear_velocity, angular_velocity = self.mpc.execute(self._target)
+            # linear_velocity, angular_velocity = self.nmpc.execute()
+            if not self._frame.path.has_path:
+                self.send_idle_control()
+                return
+
+            start_t = time()
             linear_velocity, angular_velocity = self.nmpc.execute()
+            end_t = time()
+
+            linear_velocity = np.clip(linear_velocity, 0.0, 0.8)
+            angular_velocity = np.clip(angular_velocity,
+                                       -np.rad2deg(1) * 0.1,
+                                       np.rad2deg(1) * 0.1)
+
+            print(f"CONTROLLER {linear_velocity=}, {angular_velocity=}, control time: {end_t - start_t}")
 
             if linear_velocity is None:
                 linear_velocity = 0.0
-            # angular_velocity = self.__calculate_angular_velocity()
-            print("CALCULATE: ", linear_velocity, angular_velocity)
 
             if angular_velocity is None:
                 angular_velocity = 0.0
+
             self.send_control(linear_velocity, angular_velocity)
 
     def __close_to_end(self):
@@ -237,7 +265,7 @@ class ControllerNode(AbstractNode):
         angular_vel = Vector3(x=0.0, y=0.0, z=w)
         self.last_linear_speed = v
         self.last_angular_speed = w
-        return linear_vel, angular_vel      
+        return linear_vel, angular_vel
 
     def send_control(self, linear_velocity, angular_velocity):
         message = Twist()
@@ -550,9 +578,6 @@ class SpeedController(object):
         self.debug_publisher.publish(msg)
 
         return s
-            
-
-         
         # theta = compute_theta(initial_pos, target_point)
 
         # if abs(angles_difference(yaw, theta)) > self.theta_threshold:
@@ -577,6 +602,7 @@ class SpeedController(object):
         #     return s
 
         # return target_speed
+
 
 def main():
     node = ControllerNode('ControllerNode', 10)

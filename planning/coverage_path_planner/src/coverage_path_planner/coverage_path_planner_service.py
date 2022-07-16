@@ -50,7 +50,7 @@ class CoveragePathPlannerNode(AbstractNode):
             ppoint.x = point[0]
             ppoint.y = point[1]
             resp.path.append(ppoint)
-        
+
         # resp.response = resp
 
         return resp
