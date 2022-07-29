@@ -185,8 +185,7 @@ class BackendNode:
         self.publishCurrentPoints()
 
     def main(self):
-        while not rospy.is_shutdown():
-            pass
+        rospy.spin()
 
 if __name__ == '__main__':
     BackendNode().main()

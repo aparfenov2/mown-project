@@ -7,8 +7,9 @@ catkin_simple(ALL_DEPS_REQUIRED)
 catkin_python_setup()
 
 catkin_install_python(PROGRAMS 
-    src/backend.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+src/backend.py
+src/google_map_to_occ_grid.py
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 cs_install()
 cs_export()
