@@ -50,6 +50,7 @@ class ControllerNode(AbstractNode):
         self.__last_trajectory = None
 
         controller_params = rospy.get_param('/planner/move_controller')
+        model_params = rospy.get_param('/planner/model')
 
         self._frame = Frame()
         self._target = Target(self._frame, controller_params['target_distance'])
@@ -59,12 +60,12 @@ class ControllerNode(AbstractNode):
             self._frame,
             2, 0.1, [10.0, 1.0, 0.1, 0.1],
             {
-                "v_lower": 0.0,
-                "v_upper": 2.0,
-                "a_lower": -1.0,
-                "a_upper": 1.0,
-                "w_upper": np.deg2rad(30),
-                "w_lower": -np.deg2rad(30)
+                "v_lower": model_params['min_velocity'],
+                "v_upper": model_params['max_velocity'],
+                "a_lower": model_params['min_acceleration'],
+                "a_upper": model_params['max_acceleration'],
+                "w_upper": model_params['max_angular_velocity'],
+                "w_lower": model_params['min_angular_velocity']
             }
         )
         self.mpc = MoveMPC(self._frame, 1.0)

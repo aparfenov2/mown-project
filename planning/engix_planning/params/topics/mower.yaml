@@ -1,0 +1,20 @@
+route: 
+  control: "/planner/route"
+  path_cutter: "/planner/route/path_cutter"
+  path_planner: "/planner/route/path_planner"
+  coverage_planner: "/planner/route/coverage_planner"
+task_polygon_planning: "/planner/route/task_polygon"
+task_to_point_planning: "/planner/route/task_to_point"
+path_progress: '/planner/route_progress'
+coverage_task: '/planner/coverage_task'
+debug:
+  planning: '/planner/debug/planning'
+  control: '/planner/debug/control'
+  coverage_path: '/planner/debug/coverage_path'
+
+localization: '/planner/localization'
+costmap: '/costmap_node/costmap/costmap'
+lidar: '/velodyne_points/new'
+odometry: '/ground_truth/state'
+
+velocity_commands: '/mobile_base/commands/velocity'

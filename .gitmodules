@@ -28,7 +28,16 @@
 [submodule "3rd_party/frontier_exploration"]
 	path = 3rd_party/frontier_exploration
 	url = git@github.com:paulbovbel/frontier_exploration.git
+[submodule "3rd_party/reach_ros_node"]
+	path = 3rd_party/reach_ros_node
+	url = https://github.com/rpng/reach_ros_node.git
+[submodule "3rd_party/zed_ros_wrapper"]
+	path = 3rd_party/zed_ros_wrapper
+	url = https://github.com/stereolabs/zed-ros-wrapper.git
 [submodule "studio"]
 	path = studio
 	url = git@github.com:kantengri/studio.git
 	branch = aparfenov/control-panel
+[submodule "3rd_party/zed-ros-wrapper"]
+	path = 3rd_party/zed-ros-wrapper
+	url = https://github.com/stereolabs/zed-ros-wrapper.git
