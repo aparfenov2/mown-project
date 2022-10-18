@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="mapping" type="map_server" name="mapping">
+    <node pkg="mapping" type="map_server" name="mapping"   output="screen">
         <param name="fixed_frame_id" type="str"    value="world" />
         <param name="resolution"     type="double" value="0.1"  />
         <param name="max_range"      type="double" value="40.0"  />
@@ -7,12 +7,12 @@
         <param name="miss_logprob"      type="double" value="1"  />
         <param name="max_logprob"       type="double" value="100"  />
         <param name="min_logprob"      type="double" value="0"  />        
-        <param name="lidar" type="str" value="/velodyne_points/new"  />
-        <param name="costmap" type="str" value="/costmap_node/costmap/costmap"  />        
+        <!-- <param name="lidar" type="str" value="/velodyne_points/new"  />
+        <param name="costmap" type="str" value="/costmap_node/costmap/costmap"  />         -->
     </node>
 
 
-    <node pkg="mapping" type="label_server" name="mapping_lab">
+    <!-- <node pkg="mapping" type="label_server" name="mapping_lab">
         <param name="fixed_frame_id" type="str"    value="world" />
         <param name="resolution"     type="double" value="0.1"  />
         <param name="max_range"      type="double" value="5.0"  />
@@ -22,7 +22,7 @@
         <param name="min_logprob"      type="double" value="0"  />        
         <param name="rgbPoints" type="str" value="/pcl_proc/points2"  />
         <param name="labelmap" type="str" value="/costmap_node/costmap/labels"  />        
-    </node>
+    </node> -->
 
     <node name="GroundFilter" pkg="mapping" type="ground_filter.py" respawn="true" respawn_delay="5" output="screen"/>
 </launch>
