@@ -18,6 +18,7 @@ plugins:
   #Can disable sensor layer if gmapping is fast enough to update scans
   - {name: sensor,           type: "costmap_2d::ObstacleLayer"}
   - {name: inflation,        type: "costmap_2d::InflationLayer"}
+  - {name: sonar_layer,            type: "range_sensor_layer::RangeSensorLayer"}
 
 static:
 #Can pull data from gmapping, map_server or a non-rolling costmap
@@ -30,7 +31,12 @@ polygon_layer:
 
 sensor:
   observation_sources: laser
-  laser: {data_type: LaserScan, clearing: true, marking: true, topic: scan, inf_is_valid: true, raytrace_range: 1.0, obstacle_range: 1.0}
+  laser: {sensor_frame: ce30c_lidar, data_type: LaserScan, clearing: true, marking: true, topic: scan, inf_is_valid: true, raytrace_range: 1.0, obstacle_range: 1.0}
 
 inflation:
   inflation_radius: 0.2
+sonar_layer:
+ topics: ["ultrasound_center", "ultrasound_left_top", "ultrasound_left_back", "ultrasound_left_back_back", "ultrasound_right_top", "ultrasound_right_back", "ultrasound_right_back_back"]
+ no_readings_timeout: 2.0
+ clear_threshold: 0.05
+ mark_threshold: 0.15

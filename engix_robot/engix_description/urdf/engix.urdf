@@ -360,12 +360,12 @@
   </gazebo>
  
   
-  <link name="base_footprint"/>
+  <!-- <link name="base_footprint"/>
   <joint name="base_footprint_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <parent link="base_link"/>
     <child link="base_footprint"/>
-  </joint>
+  </joint> -->
   <!--Inertial link stores the robot's inertial information !!!! RE_EDIT-->
   <link name="inertial_link">
     <inertial>

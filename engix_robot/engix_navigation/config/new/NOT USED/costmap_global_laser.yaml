@@ -1,0 +1,18 @@
+#=======================GLOBAL COST MAP PARAMETERS==============================
+# A costmap is a means to figure out the cost to get to a destination (like
+# routing algorithms in networking). These parameters are exclusively for the 
+# global cost map. The purpose of the global costmap is to create long-term plans 
+# over the entire environment. For info on these parameters consult section 2.3.2 
+# on this page: https://wiki.ros.org/navigation/Tutorials/RobotSetup
+#-------------------------------------------------------------------------------
+# NOTE: this yaml file only gets loaded if we are running move_base mapless! To 
+# run mapless lauch move_base via "move_base_mapless_demo.launch". Otherwise it
+# is not used.
+#===============================================================================
+global_frame: odom
+rolling_window: true
+track_unknown_space: true
+
+plugins:
+  - {name: obstacles_laser,           type: "costmap_2d::ObstacleLayer"}
+  - {name: inflation,                 type: "costmap_2d::InflationLayer"}

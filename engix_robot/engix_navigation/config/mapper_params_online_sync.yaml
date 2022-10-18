@@ -11,7 +11,7 @@ odom_frame: odom
 map_frame: map
 base_frame: base_link
 scan_topic: /scan
-mode: mapping #localization
+mode: localization #mapping #localization
 
 # if you'd like to immediately start continuing a map at a given pose
 # or at the dock, but they are mutually exclusive, if pose is given
@@ -25,7 +25,7 @@ throttle_scans: 1
 transform_publish_period: 0.02 #if 0 never publishes odometry
 map_update_interval: 5.0
 resolution: 0.1
-max_laser_range: 12.0 #for rastering images
+max_laser_range: 7.0 #for rastering images
 minimum_time_interval: 0.5
 transform_timeout: 0.2
 tf_buffer_duration: 30.

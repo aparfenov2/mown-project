@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
+
 project(engix_description)
 
-find_package(catkin REQUIRED COMPONENTS roslaunch)
+find_package(catkin REQUIRED)
 
 catkin_package()
 
-roslaunch_add_file_check(launch)
+find_package(roslaunch)
 
-install(
-  DIRECTORY launch mesh urdf
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+foreach(dir config launch meshes urdf)
+	install(DIRECTORY ${dir}/
+		DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
+endforeach(dir)

@@ -2,10 +2,14 @@
     <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
         <param name="freq" value="30.0"/>
         <param name="sensor_timeout" value="1.0"/>
+        <param name="base_link_frame" value="base_link"/>
+        <param name="map_frame" value="world"/>
         <param name="odom_used" value="true"/>
         <param name="imu_used" value="false"/>
         <param name="vo_used" value="false"/>
         <param name="debug" value="false"/>
         <param name="self_diagnose" value="false"/>
+        <param name="publish_tf" value="true"/>
+        <param name="transform_time_offset" value="0.05"/> 
     </node>
 </launch>

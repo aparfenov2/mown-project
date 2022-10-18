@@ -2,7 +2,7 @@
 
 <launch>
 
-  <include file="$(find engix_gazebo)/launch/spawn_engix.launch"/>
+  <!-- <include file="$(find engix_gazebo)/launch/spawn_engix.launch"/> -->
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find engix_gazebo)/worlds/clearpath_playpen.world"/>
@@ -12,5 +12,6 @@
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>
+
 
 </launch>
