@@ -1,7 +1,15 @@
-global_frame: map
-rolling_window: false
-track_unknown_space: true
+global_costmap:
+  global_frame: map
+  rolling_window: false
+  # track_unknown_space: true
+  robot_base_frame: base_footprint
 
-plugins:
-  - {name: static,                  type: "costmap_2d::StaticLayer"}
-  - {name: inflation,               type: "costmap_2d::InflationLayer"}
+  update_frequency: 10.0
+  publish_frequency: 10.0
+  transform_tolerance: 0.5
+
+  static_map: true
+
+  plugins:
+    - {name: static,                  type: "costmap_2d::StaticLayer"}
+    - {name: inflation,               type: "costmap_2d::InflationLayer"}

@@ -8,6 +8,7 @@ plugins:
 #Can disable sensor layer if gmapping is fast enough to update scans
 - {name: obstacles_laser,     type: "costmap_2d::ObstacleLayer"}
 - {name: inflation,           type: "costmap_2d::InflationLayer"}
+- {name: sonar,               type: "range_sensor_layer::RangeSensorLayer"}
 
 explore_boundary:
   resize_to_boundary: false

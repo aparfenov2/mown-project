@@ -11,8 +11,13 @@ Panels:
         - /Navigation1
         - /Navigation1/Exploration1
         - /Camera1
+        - /Range1/Status1
+        - /Range4
+        - /Range5
+        - /Range6
+        - /Range7
       Splitter Ratio: 0.49492400884628296
-    Tree Height: 646
+    Tree Height: 630
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -67,11 +72,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        ZED2_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         base_footprint:
           Alpha: 1
           Show Axes: false
@@ -81,31 +81,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        battery_1:
+        battery:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        camera_depth_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_depth_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_rgb_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_rgb_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         caster_left:
           Alpha: 1
           Show Axes: false
@@ -126,12 +106,12 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        dc_dc_1:
+        deck:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gps_1:
+        gps:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -144,22 +124,7 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        jetson_nano_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        lan_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         laser:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        laser_tof:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -174,7 +139,36 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        usb_hub_1:
+        ultrasound_center:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        ultrasound_left_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_left_back_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_left_top:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_right_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_right_back_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_right_top:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        zed:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -190,6 +184,7 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+      Marker Alpha: 1
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -231,6 +226,7 @@ Visualization Manager:
           Keep: 100
           Name: Odometry
           Position Tolerance: 0.10000000149011612
+          Queue Size: 10
           Shape:
             Alpha: 1
             Axes Length: 1
@@ -259,9 +255,7 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 999999
           Min Color: 0; 0; 0
-          Min Intensity: -1.831010023947112e-36
           Name: LaserScan
           Position Transformer: XYZ
           Queue Size: 10
@@ -289,9 +283,7 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 4096
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: PointCloud2
           Position Transformer: XYZ
           Queue Size: 10
@@ -323,6 +315,7 @@ Visualization Manager:
           Class: rviz_imu_plugin/Imu
           Enabled: false
           Name: Imu
+          Queue Size: 10
           Topic: /imu/data
           Unreliable: false
           Value: false
@@ -400,6 +393,7 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 85; 255
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
@@ -423,19 +417,21 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 85; 255
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
           Topic: /move_base/DWAPlannerROS/local_plan
           Unreliable: false
           Value: true
-      Enabled: false
+      Enabled: true
       Name: Navigation
     - Class: rviz/TF
       Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
+      Marker Alpha: 1
       Marker Scale: 1
       Name: TF
       Show Arrows: false
@@ -468,6 +464,7 @@ Visualization Manager:
           Local Plan: true
           Static Map: true
           Value: true
+        Range: true
         RobotModel: true
         Sensing:
           Imu: true
@@ -479,11 +476,81 @@ Visualization Manager:
         TwistMarker: true
         Value: true
       Zoom Factor: 1
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /ultrasound_center
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /ultrasound_left_top
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /ultrasound_left_back
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /ultrasound_left_back_back
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /ultrasound_right_top
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /ultrasound_right_back
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /ultrasound_right_back_back
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: odom
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -505,12 +572,13 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.498035907745361
+      Distance: 19.17911148071289
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
+      Field of View: 0.7853981852531433
       Focal Point:
         X: -0.12198289483785629
         Y: 0.6991637349128723
@@ -522,7 +590,6 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 0.9097992777824402
       Target Frame: <Fixed Frame>
-      Value: Orbit (rviz)
       Yaw: 4.607215404510498
     Saved: ~
 Window Geometry:
@@ -533,7 +600,7 @@ Window Geometry:
   Height: 1135
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000018c0000042bfc0200000006fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000002700000311000000c900fffffffb0000000c00430061006d006500720061010000033e000001140000001600ffffff000000010000010f000002ddfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000043000002dd000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000004f300fffffffb0000000800540069006d006501000000000000045000000000000000000000053f0000042b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000018400000415fc0200000006fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000301000000c900fffffffb0000000c00430061006d00650072006101000003440000010e0000001600ffffff000000010000010f000002ddfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000043000002dd000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000005470000041500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -543,5 +610,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1745
-  X: 810
-  Y: 38
+  X: 1382
+  Y: 40

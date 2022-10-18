@@ -117,7 +117,7 @@ class Main:
 
         self.pub = rospy.Publisher(rospy.get_param('/planner/topics/task_to_point_planning'), RouteTaskToPoint, queue_size=2)
         self.path_pub = rospy.Publisher('planner/rviz/path', Path, queue_size=2)
-        self.pcl_pub = rospy.Publisher("/velodyne_points/new", PointCloud2, queue_size=10)
+        # self.pcl_pub = rospy.Publisher("/velodyne_points/new", PointCloud2, queue_size=10)
         
         rospy.Subscriber(
             '/move_base_simple/goal', 
@@ -131,11 +131,11 @@ class Main:
             self.route_callback
         ) 
 
-        rospy.Subscriber(
-            '/velodyne_points', 
-            PointCloud2,
-            self.pointcloude_callback
-        )
+        # rospy.Subscriber(
+        #     '/velodyne_points', 
+        #     PointCloud2,
+        #     self.pointcloude_callback
+        # )
 
     def nav_goal_callback(self, msg):
         message = RouteTaskToPoint()

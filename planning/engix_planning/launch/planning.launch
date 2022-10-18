@@ -1,0 +1,33 @@
+<launch>
+    <arg name="robot" />
+
+    <include file="$(find engix_planning)/launch/params.launch"> 
+        <arg name="robot" value="$(arg robot)"/>
+    </include>
+
+    <group if="$(eval robot == 'turtlebot')">
+        <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" />
+        <include file="$(find coverage_path_planner)/launch/run.launch"/>
+        <include file="$(find behavior_planning)/launch/run.launch"/>
+        <include file="$(find move_controller)/launch/run.launch"/>
+
+        <include file="$(find planning_utils)/launch/localization_bridge.launch"/>
+        
+        <node pkg="tf2_ros" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 1 world odom" />
+        <include file="$(find webviz_server)/launch/main.launch"/>
+    </group>
+
+
+    <group if="$(eval robot == 'ya_model')">
+        <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" />
+        <include file="$(find coverage_path_planner)/launch/run.launch"/>
+        <include file="$(find behavior_planning)/launch/run.launch"/>
+        <include file="$(find move_controller)/launch/run.launch"/>
+
+        <include file="$(find planning_utils)/launch/localization_bridge.launch"/>
+        
+        <node pkg="tf2_ros" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 1 world odom" />
+        <include file="$(find webviz_server)/launch/main.launch"/>
+    </group>
+
+</launch>

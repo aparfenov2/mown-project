@@ -26,7 +26,9 @@ class CoveragePlannerNode(AbstractNode):
     def initialization(self):
         self._rlock = RLock()
 
-        self._step_size = 3.0
+        self._step_size = rospy.get_param('/planner/coverage_planner_node/step_size')
+        self._offset_distance = rospy.get_param('/planner/coverage_planner_node/offset_distance')
+        self._offset_resolution = rospy.get_param('/planner/coverage_planner_node/offset_resolution')
         self._robot_position = []
 
         self._debug_publisher = rospy.Publisher('planner/debug/coverage_path', Path, queue_size=2)
@@ -94,6 +96,7 @@ class CoveragePlannerNode(AbstractNode):
     def _create_offset(self, polygon):
         shapely_polygon = Polygon(polygon)
         poly_line_offset = shapely_polygon.buffer(
-            -2.0, resolution=3, join_style=2, mitre_limit=1
+            self._offset_distance, resolution=self._offset_resolution,
+            join_style=2, mitre_limit=1
         ).exterior
         return poly_line_offset.coords

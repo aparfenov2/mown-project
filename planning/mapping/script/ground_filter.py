@@ -9,6 +9,7 @@ from sensor_msgs.msg import PointCloud2
 def cloud_msg_to_numpy(cloud_msg):
     # Convert Ros pointcloud2 msg to numpy array
     pc = ros_numpy.numpify(cloud_msg)
+
     points = np.zeros((pc.shape[0], 4))
     points[:, 0] = pc['x']
     points[:, 1] = pc['y']
@@ -19,20 +20,37 @@ def cloud_msg_to_numpy(cloud_msg):
     return cloud
 
 
+def dense_camera_msg_to_numpy(cloud_msg):
+    # Convert Ros pointcloud2 msg to numpy array
+    pc = ros_numpy.numpify(cloud_msg)
+    w, h = pc.shape
+
+    points_list = list()
+    for i in range(w):
+        for j in range(h):
+            if not np.isnan(pc['x'][i, j]):
+                points_list.append([pc['x'][i, j], pc['y'][i, j], pc['z'][i, j]])
+
+    points = np.array(points_list)
+    cloud = np.array(points, dtype=np.float32)
+
+    return cloud
+
+
 def np2ros_pub_2(points, frame_id, timestamp):
     npoints = points.shape[0]  # Num of points in PointCloud
     points_arr = np.zeros((npoints,), dtype=[
                                         ('x', np.float32),
                                         ('y', np.float32),
-                                        ('z', np.float32),
-                                        ('intensity', np.float32)])
+                                        ('z', np.float32)])
+    # ('intensity', np.float32)])
 
     points = np.transpose(points)
     points_arr['x'] = points[0]
     points_arr['y'] = points[1]
     points_arr['z'] = points[2]
-    points_arr['intensity'] = points[3]
-    
+    # points_arr['intensity'] = points[3]
+
     cloud_msg = ros_numpy.msgify(PointCloud2, points_arr, stamp=timestamp, frame_id=frame_id)
     return cloud_msg
 
@@ -104,33 +122,44 @@ class GroundFiltering(object):
         return distance > threshold
 
 
-
 class Main:
     def __init__(self):
         rospy.init_node('ground_filter')
 
-        self.pcl_pub = rospy.Publisher("/velodyne_points/new", PointCloud2, queue_size=10)
+        input_topic = rospy.get_param('/planner/topics/ground_filter/input_topic')
+        output_topic = rospy.get_param('/planner/topics/ground_filter/output_topic')
+
+        self.pcl_pub = rospy.Publisher(output_topic, PointCloud2, queue_size=10)
+
+        # dense or regular
+        if (rospy.get_param('/planner/ground_filter/pc_converter') == 'dense'):
+            self.pc_converter = dense_camera_msg_to_numpy
+        else:
+            self.pc_converter = cloud_msg_to_numpy
 
         rospy.Subscriber(
-            '/velodyne_points', 
+            input_topic,
             PointCloud2,
             self.pointcloude_callback
         )
 
     def pointcloude_callback(self, message):
-        cloud = cloud_msg_to_numpy(message)
+        if len(message.data) == 0:
+            self.pcl_pub.publish(message)
+            return
+
+        cloud = self.pc_converter(message)
+
         plane_filter = GroundFiltering()
         idx = plane_filter.filter_point_cloud(cloud[:, :3], 0.5, 40, 100)
         cloud = cloud[idx]
-        # cloud = cloud[np.where(cloud[:, 2] > 1.25 - 1.733)]
-        # cloud = cloud[np.where(cloud[:, 2] < 2.0 + 1.25 - 1.733)]
-        # rospy.logwarn(f"{np.max(cloud[:, 2])}, {np.min(cloud[:, 2])}")
 
         cloud_msg = np2ros_pub_2(cloud, message.header.frame_id, message.header.stamp)
         self.pcl_pub.publish(cloud_msg)
 
     def main(self):
         rospy.spin()
+
 
 if __name__ == '__main__':
     Main().main()

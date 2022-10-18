@@ -12,12 +12,13 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from abstractnode import AbstractNode
 from move_controller import (PIDController, NonlinearController, NonLinearMPC,
                              Frame, PIDSpeedController, Target, SteerMPC,
-                             MoveMPC, LQRController)
+                             MoveMPC, LQRController, LeonardoController)
 
 from std_msgs.msg import Float32
 from geometry_msgs.msg import PoseStamped, Pose, Quaternion, TwistStamped, Twist, Vector3
 # from move_base_mod.msg import TrajectoryControllerAction, TrajectoryControllerGoal
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Range
 
 from enginx_msgs.msg import LocalTrajectoryStamped, Localization, ControlDebug, Route
 # from enginx_debug_msgs.msg import ControlDebug
@@ -34,7 +35,7 @@ def angles_difference(a1, a2):
     #     a -= 2*np.pi
     # elif a < -np.pi:
     #     a += 2*np.pi
-    
+
     return convert_orientation(a2-a1)
 
 
@@ -43,13 +44,15 @@ def compute_theta(p1, p2):
 
 
 class ControllerNode(AbstractNode):
-    
     def initialization(self):
         self.__lock = RLock()
         self.__last_loc = None
         self.__last_trajectory = None
 
         controller_params = rospy.get_param('/planner/move_controller')
+        nonlinear_mpc_params = rospy.get_param('/planner/move_controller/nonlinear_mpc')
+        leonardo_params = rospy.get_param('/planner/move_controller/leonardo_params')
+        model_params = rospy.get_param('/planner/model')
 
         self._frame = Frame()
         self._target = Target(self._frame, controller_params['target_distance'])
@@ -57,14 +60,16 @@ class ControllerNode(AbstractNode):
         self._lqr_controller = LQRController(self._frame, 0.1)
         self.nmpc = NonLinearMPC(
             self._frame,
-            2, 0.1, [10.0, 1.0, 0.1, 0.1],
+            nonlinear_mpc_params['horizon'],
+            nonlinear_mpc_params['dt'],
+            nonlinear_mpc_params['weights'],
             {
-                "v_lower": 0.0,
-                "v_upper": 2.0,
-                "a_lower": -1.0,
-                "a_upper": 1.0,
-                "w_upper": np.deg2rad(30),
-                "w_lower": -np.deg2rad(30)
+                "v_lower": model_params['min_velocity'],
+                "v_upper": model_params['max_velocity'],
+                "a_lower": model_params['min_acceleration'],
+                "a_upper": model_params['max_acceleration'],
+                "w_upper": model_params['max_angular_velocity'],
+                "w_lower": model_params['min_angular_velocity']
             }
         )
         self.mpc = MoveMPC(self._frame, 1.0)
@@ -73,6 +78,7 @@ class ControllerNode(AbstractNode):
 
         self.steering_pid = PIDController(controller_params.get('steer_params', {}))
         self.mpc_steering = SteerMPC(self._frame)
+        self.leonardo_controller = LeonardoController(self._frame, leonardo_params)
 
         self.control_publisher = rospy.Publisher(
             rospy.get_param('/planner/topics/velocity_commands'),
@@ -97,6 +103,11 @@ class ControllerNode(AbstractNode):
 
         self.speed = 0.0
         self.last_idx = -1
+
+        if controller_params['use_range_sensor']:
+            rospy.Subscriber(rospy.get_param('/planner/topics/range_sensor'),
+                             Range,
+                             self._frame.receive_range_sensor)
 
         # rospy.Subscriber('/local_trajectory_plan', LocalTrajectoryStamped, self.__route_callback)
         rospy.Subscriber(rospy.get_param('/planner/topics/route/control'),
@@ -197,13 +208,13 @@ class ControllerNode(AbstractNode):
                 return
 
             start_t = time()
-            linear_velocity, angular_velocity = self.nmpc.execute()
+            linear_velocity, angular_velocity = self.leonardo_controller.execute()
             end_t = time()
 
-            linear_velocity = np.clip(linear_velocity, 0.0, 0.8)
-            angular_velocity = np.clip(angular_velocity,
-                                       -np.rad2deg(1) * 0.1,
-                                       np.rad2deg(1) * 0.1)
+            # linear_velocity = np.clip(linear_velocity, 0.0, 0.8)
+            # angular_velocity = np.clip(angular_velocity,
+            #                            -np.rad2deg(1) * 0.1,
+            #                            np.rad2deg(1) * 0.1)
 
             print(f"CONTROLLER {linear_velocity=}, {angular_velocity=}, control time: {end_t - start_t}")
 

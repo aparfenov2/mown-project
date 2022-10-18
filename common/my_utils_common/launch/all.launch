@@ -41,17 +41,19 @@
 
 
         <group if="$(eval robot == 'ya_model')">
-            <arg name="robot_namespace" default="/"/>
+            <!-- <arg name="robot_namespace" default="/"/> -->
             <include file="$(find engix_description)/launch/description.launch" />
+
+            <!-- <include file="$(find engix_gazebo)/launch/spawn_engix.launch"/> -->
 
             <!-- Load controller configuration -->
             <!-- <rosparam command="load" file="$(find engix_control)/config/controller.yaml" /> -->
 
             <!-- Spawn controllers -->
-            <!-- <node name="base_controller_spawner" pkg="controller_manager" type="spawner" args="engix_joint_publisher engix_velocity_controller">
+            <node name="base_controller_spawner" pkg="controller_manager" type="spawner" args="engix_joint_publisher engix_velocity_controller">
             </node>
 
-            <node name="message_to_tf" pkg="message_to_tf" type="message_to_tf">
+            <!-- <node name="message_to_tf" pkg="message_to_tf" type="message_to_tf">
                 <param name="odometry_topic" value="ground_truth/state"/>
                 <param name="frame_id" value="odom"/>
                 <param name="child_frame_id" value="base_link"/>
@@ -64,7 +66,7 @@
         </group>
 
         <group if="$(eval robot == 'turtlebot3')">
-            <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro" />
+            <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro publish_tf:=$(arg publish_tf)" />
         </group>
 
         <!-- Gazebo model spawner -->
@@ -75,7 +77,7 @@
             <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'agriculture')">
-            <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+            <node args="-urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
         </group>
         <group if="$(eval world == 'yosemite')">
             <node args="-urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
@@ -257,16 +259,20 @@
 
     <!-- planning system -->
     <group if="$(arg planning)">
-        <!-- <node pkg="exploration_server" type="plugin_client" name="plugin_client" output="screen"/> -->
-        <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" />
-        <param name="planner/topics/velocity_commands" value="$(arg cmd_vel_topic)"/>
+        <!-- <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" /> -->
+
         <!-- <include file="$(find move_base_mod)/launch/move_base.launch">
             <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
             <arg name="odom_topic" value="odom" />
         </include> -->
 
-        <include file="$(find my_utils_common)/launch/planning.launch"/>
-        <include file="$(find my_utils_common)/launch/map.launch"/>
+        <include file="$(find engix_planning)/launch/planning.launch">
+            <arg name="robot" value="$(arg robot)" />
+        </include>
+
+        <include file="$(find my_utils_common)/launch/map.launch"/>        
+        
+        <param name="planner/topics/velocity_commands" value="$(arg cmd_vel_topic)"/>
         <!-- <include file="$(find route_util)/launch/utils.launch"/> -->
         <!-- <include file="$(find mapping)/launch/run.launch"/> -->
 

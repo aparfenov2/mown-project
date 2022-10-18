@@ -7,3 +7,4 @@ from .steer_mpc_controller import SteerMPC
 from .target import Target
 from .move_nmpc import NonLinearMPC, NonlinearController
 from .lqr_controller import LQRController
+from .leonardo_controller import LeonardoController
