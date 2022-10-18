@@ -84,18 +84,20 @@ class CoveragePath:
             pose_stamped.pose.position.y = y
 
             path.poses.append(pose_stamped)
-        
         return path
 
 
 class CoverageNode(Node):
-    def __init__(self, name, frame, *args, **kwargs):
+    def __init__(self, name, frame, params, *args, **kwargs):
         super(CoverageNode, self).__init__(name=name,
                                            run_cb=self.run,
                                            *args, **kwargs)
         self._frame = frame
         self._smoother = TrajectorySmoother([10.0, 10.0, 10.1, 10.1])
         self._coverage_path = None
+        self._target_speed = params['target_speed']
+        self._turning_radius = params['dubins']['turning_radius']
+        self._step_size = params['dubins']['step_size']
 
     def run(self, nodedata):
         # if self._is_path_sent():
@@ -137,7 +139,7 @@ class CoverageNode(Node):
         return path_1 + path_2
 
     def _save_full_path(self, new_coverage_path):
-        self._coverage_path = CoveragePath(new_coverage_path, 30, 0.8)
+        self._coverage_path = CoveragePath(new_coverage_path, 30, self._target_speed)
 
     def _find_sub_path(self) -> list:
         localization_message = self._frame.get_localization()
@@ -155,8 +157,8 @@ class CoverageNode(Node):
             path[0][1],
             np.arctan2(path[1][1] - path[0][1], path[1][0] - path[0][0])
         )
-        turning_radius = 2.0
-        step_size = 0.1
+        turning_radius = self._turning_radius
+        step_size = self._step_size
         path = dubins.shortest_path(robot_pose, start_pose, turning_radius)
         configurations, _ = path.sample_many(step_size)
 

@@ -34,26 +34,29 @@ public:
         // MISS_PROB = std::max(0.0, std::min(MISS_PROB, 1.0));
         // map_(std::vector<std::string>({"occupancy"}));
         std::string lidar_topic_name;
-        std::string ocupancy_grid_topic_name;
+        std::string occupancy_grid_topic_name;
 
-        ROS_ASSERT(pnh.getParam("/planner/topics/lidar", lidar_topic_name));
-        ROS_ASSERT(pnh.getParam("/planner/topics/costmap", ocupancy_grid_topic_name));
-        ROS_ASSERT(!lidar_topic_name.empty() && !ocupancy_grid_topic_name.empty());
+        ROS_ASSERT(pnh.getParam("/planner/topics/mapping_server/lidar", lidar_topic_name));
+        ROS_ASSERT(pnh.getParam("/planner/topics/mapping_server/costmap", occupancy_grid_topic_name));
+        ROS_ASSERT(!lidar_topic_name.empty() && !occupancy_grid_topic_name.empty());
 
         occupied_cells_publisher = 
-            nh.advertise<nav_msgs::OccupancyGrid>(ocupancy_grid_topic_name, 1);
+            nh.advertise<nav_msgs::OccupancyGrid>(occupancy_grid_topic_name, 1);
 
-        pointcloud_subscriber =
-            new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidar_topic_name, 1);
 
-        tf_pointcloud_subscriber =
-            new tf::MessageFilter<sensor_msgs::PointCloud2>(*pointcloud_subscriber,
-                                                            tf_listener,
-                                                            FIXED_FRAME_ID,
-                                                            1);
+        point_cloud_subscriber_ = nh.subscribe<sensor_msgs::PointCloud2>(lidar_topic_name, 10, &MappingServer::update_occupancy_map, this);
 
-        tf_pointcloud_subscriber->registerCallback(boost::bind(&MappingServer::update_occupancy_map,
-                                                               this, _1));
+        // pointcloud_subscriber =
+        //     new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidar_topic_name, 1);
+
+        // tf_pointcloud_subscriber =
+        //     new tf::MessageFilter<sensor_msgs::PointCloud2>(*pointcloud_subscriber,
+        //                                                     tf_listener,
+        //                                                     FIXED_FRAME_ID,
+        //                                                     1);
+
+        // tf_pointcloud_subscriber->registerCallback(boost::bind(&MappingServer::update_occupancy_map,
+        //                                                        this, _1));
 
         map_.setGeometry(grid_map::Length(MAXIMUM_RANGE, MAXIMUM_RANGE), RESOLUTION, grid_map::Position(0.0, 0.0));
         map_.add("occupancy", MIN_LOGPROB);
@@ -115,6 +118,7 @@ protected:
     double MAX_LOGPROB;
     double MIN_LOGPROB;
     ros::Publisher occupied_cells_publisher;
+    ros::Subscriber point_cloud_subscriber_;
 
     //! Grid map data.
     grid_map::GridMap map_;

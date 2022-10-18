@@ -126,7 +126,10 @@ class Main:
     def __init__(self):
         rospy.init_node('ground_filter')
 
-        self.pcl_pub = rospy.Publisher("/velodyne_points/new", PointCloud2, queue_size=10)
+        input_topic = rospy.get_param('/planner/topics/ground_filter/input_topic')
+        output_topic = rospy.get_param('/planner/topics/ground_filter/output_topic')
+
+        self.pcl_pub = rospy.Publisher(output_topic, PointCloud2, queue_size=10)
 
         # dense or regular
         if (rospy.get_param('/planner/ground_filter/pc_converter') == 'dense'):
@@ -135,20 +138,21 @@ class Main:
             self.pc_converter = cloud_msg_to_numpy
 
         rospy.Subscriber(
-            '/velodyne_points',
+            input_topic,
             PointCloud2,
             self.pointcloude_callback
         )
 
     def pointcloude_callback(self, message):
+        if len(message.data) == 0:
+            self.pcl_pub.publish(message)
+            return
+
         cloud = self.pc_converter(message)
+
         plane_filter = GroundFiltering()
         idx = plane_filter.filter_point_cloud(cloud[:, :3], 0.5, 40, 100)
         cloud = cloud[idx]
-
-        # cloud = cloud[np.where(cloud[:, 2] > 1.25 - 1.733)]
-        # cloud = cloud[np.where(cloud[:, 2] < 2.0 + 1.25 - 1.733)]
-        # rospy.logwarn(f"{np.max(cloud[:, 2])}, {np.min(cloud[:, 2])}")
 
         cloud_msg = np2ros_pub_2(cloud, message.header.frame_id, message.header.stamp)
         self.pcl_pub.publish(cloud_msg)

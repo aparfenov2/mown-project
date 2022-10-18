@@ -11,7 +11,8 @@ from behavior_planning.node import (TrajectoryPublisher,
                                     AstarPathPlanningNode,
                                     IdleNode, SpeedGeneratorNode,
                                     CovaragePathGeneratorNode, CoverageNode,
-                                    TestTrajectoryNode, SimpleSpeedGenerator)
+                                    TestTrajectoryNode, SimpleSpeedGenerator,
+                                    TestStraightLineNode, TestCirclesNode)
 from behavior_planning.behavior import SelectByMessageNode
 
 from nav_msgs.msg import OccupancyGrid, Path
@@ -93,6 +94,7 @@ class BehaviorPlanningNode(AbstractNode):
 
 class BehaviorTreeBuilder(object):
     def build(self, frame):
+        params = rospy.get_param('/planner/behavior_planning_node')
         planning_node = AstarPathPlanningNode(name="planning_node",
                                               frame=frame)
         speed_generator_node = SimpleSpeedGenerator(
@@ -102,7 +104,8 @@ class BehaviorTreeBuilder(object):
         idle_node = IdleNode(name='idle_node', frame=frame)
         coverage_node = CoverageNode(
             name='coverage_path_node',
-            frame=frame
+            frame=frame,
+            params=params
         )
 
         planning_branche = Sequencer("finish_counts")
@@ -125,8 +128,13 @@ class BehaviorTreeBuilder(object):
 
 class TestBTreeBuilder(object):
     def build(self, frame):
-        test_node = TestTrajectoryNode(name="test_node",
-                                       frame=frame)
+        # test_node = TestCirclesNode(name="test_node",
+        #                             target_speed=0.6,
+        #                             left_distance=6.0,
+        #                             frame=frame)
+        test_node = TestStraightLineNode(name="test_node",
+                                         line_len=5.0,
+                                         frame=frame)
 
         planning_branche = Sequencer("finish_counts")
         planning_branche.add_child(test_node)
@@ -136,9 +144,9 @@ class TestBTreeBuilder(object):
 class BehaviorPlanner(object):
     def __init__(self, frame) -> None:
         self._frame = frame
-        self._tree = BehaviorTreeBuilder().build(self._frame)
+        # self._tree = BehaviorTreeBuilder().build(self._frame)
 
-        # self._tree = TestBTreeBuilder().build(self._frame)
+        self._tree = TestBTreeBuilder().build(self._frame)
 
     def execute(self):
         return self._tree.tick()

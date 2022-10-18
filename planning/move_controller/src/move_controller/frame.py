@@ -19,6 +19,8 @@ class Frame(object):
         self._path = Path()
         self._state = State()
 
+        self._sonar_range = 10000000.0
+
     def reset_debug(self):
         self._debug = ControlDebug()
 
@@ -94,6 +96,13 @@ class Frame(object):
     def get_robot_angular_speed(self):
         return self._localization.angular_speed
 
+    def receive_range_sensor(self, message):
+        self._sonar_range = message.range
+
+    @property
+    def range_data(self):
+        return self._sonar_range
+
 
 class State:
     def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, w=0.0):
@@ -115,6 +124,10 @@ class Path:
         self._has_path = False
 
         self._epsilon = 10e-6
+
+    @property
+    def path_len(self):
+        return len(self._x)
 
     @property
     def has_path(self):

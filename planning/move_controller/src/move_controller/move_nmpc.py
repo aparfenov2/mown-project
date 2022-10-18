@@ -141,7 +141,9 @@ class NonLinearMPC:
             s, cropped_x, cropped_y, speed[ind:],
             state.x, state.y, state.yaw, state.v
         )
-        return (state.v + self._dt * a, w)
+        # print(f"OPTIMIZATION PREP {state.v=}")
+        # print(f"OPTIMIZATION RESULAT {a=}, {w=}")
+        return (np.clip(state.v + self._dt * a, self.v_lower, self.v_upper), w)
 
     def _calc_nearest_index(self):
         state = self._frame.state
@@ -174,7 +176,7 @@ class NonLinearMPC:
         speed_interp = casadi.interpolant('speed', 'linear', [s], speed_profile[:len(s)])
         DT = self._dt
         KNOTS = int(self._horizon / DT)
-        path_len = len(x)
+        path_len = len(s)
 
         # # Speed
         # v_upper = constraints.v_upper
@@ -219,17 +221,17 @@ class NonLinearMPC:
             opti.set_initial(X[i], x[min(i, path_len - 1)])
             opti.set_initial(Y[i], y[min(i, path_len - 1)])
             # opti.set_initial(ALPHA[i], casadi.atan2(y[i] - y[i - 1], x[i] - x[i - 1] + eps))
-            opti.set_initial(ALPHA[i], 0.0)
+            opti.set_initial(ALPHA[i], robot_yaw)
             opti.set_initial(V[i], speed_profile[min(i, path_len - 1)])
 
             v_target = speed_interp(S[i - 1])
 
             # opti.subject_to(S[i] == S[i - 1] + V[i] * DT + A[i - 1] * DT ** 2 / 2.0)
             opti.subject_to(S[i] == S[i - 1] + v_target * DT)
-            opti.subject_to(X[i] == X[i - 1] + V[i] * casadi.cos(ALPHA[i - 1]) * DT + A[i] * casadi.cos(ALPHA[i - 1]) * DT ** 2 / 2.0)
-            opti.subject_to(Y[i] == Y[i - 1] + V[i] * casadi.sin(ALPHA[i - 1]) * DT + A[i] * casadi.sin(ALPHA[i - 1]) * DT ** 2 / 2.0)
+            opti.subject_to(X[i] == X[i - 1] + V[i - 1] * casadi.cos(ALPHA[i - 1]) * DT + A[i - 1] * casadi.cos(ALPHA[i - 1]) * DT ** 2 / 2.0)
+            opti.subject_to(Y[i] == Y[i - 1] + V[i - 1] * casadi.sin(ALPHA[i - 1]) * DT + A[i - 1] * casadi.sin(ALPHA[i - 1]) * DT ** 2 / 2.0)
             opti.subject_to(ALPHA[i] == ALPHA[i - 1] + W[i] * DT)
-            opti.subject_to(V[i] == V[i - 1] + A[i] * DT)
+            opti.subject_to(V[i] == V[i - 1] + A[i - 1] * DT)
 
         cost_1 = 0.0
         cost_2 = 0.0
@@ -240,6 +242,8 @@ class NonLinearMPC:
             x_target = x_interp(S[i])
             y_target = y_interp(S[i])
             v_target = speed_interp(S[i])
+
+            print()
 
             cost_1 += self._w1 * ((X[i] - x_target)**2 + (Y[i] - y_target)**2)
             cost_2 += self._w2 * (V[i] - v_target)**2
@@ -258,11 +262,15 @@ class NonLinearMPC:
             a_res = sol.value(A[1])
             v_res = sol.value(W[1])
 
+            print(f"RESULT CHECK: [{sol.value(A[0])}, {sol.value(A[1])}] [{sol.value(V[0])}, {sol.value(V[1])}]")
+
             self.last_a = a_res
             self.last_w = v_res
         except:
             a_res = opti.debug.value(A[1])
             v_res = opti.debug.value(W[1])
+
+            print(f"RESULT FAILD: [{opti.debug.value(S[0])}, {opti.debug.value(S[1])}] [{opti.debug.value(V[0])}, {opti.debug.value(V[1])}]")
 
             self.last_a = a_res
             self.last_w = v_res

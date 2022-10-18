@@ -3,6 +3,9 @@ path_cutter:
 
 move_controller:
   target_distance: 0.3
+
+  use_range_sensor: True
+
   speed_controller:
     speed_coefs:
       p: 0.1
@@ -27,6 +30,46 @@ move_controller:
 
     max_val: 2.0
     max_integrator: 1.0
+  
+  nonlinear_mpc:
+    horizon: 1.2
+    dt: 0.1
+    weights: [1.0, 0.01, 0.01, 0.01]
+  
+  leonardo_params:
+    range_sensor_threshold: 1.4
+
+    speed_pid:
+      p: 0.5
+      i: 0.0
+      d: 20.0
+      min_value: -2.0
+      max_value: 2.0
+      min_integral_error: -1.0
+      max_integral_error: 1.0
+
+    position_pid:
+      p: 1.0
+      i: 0.0
+      d: 1.0
+      min_value: -1.0
+      max_value: 1.0
+      min_integral_error: -1.0
+      max_integral_error: 1.0
+
+    dt: 0.1
+    carrot: 4
+
+coverage_planner_node:
+  step_size: 2.0
+  offset_distance: -2.0
+  offset_resolution: 3
+
+behavior_planning_node:
+  target_speed: 0.2
+  dubins:
+    turning_radius: 3.0
+    step_size: 0.1
 
 ground_filter:
-  pc_converter: "dense" # regular or dense
+  pc_converter: "regular" # regular or dense

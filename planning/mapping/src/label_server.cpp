@@ -40,9 +40,10 @@ public:
 
         occupied_cells_publisher = nh.advertise<nav_msgs::OccupancyGrid>(ocupancy_grid_topic_name, 1);
 
-        pointcloud_subscriber = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidar_topic_name, 1);
-        tf_pointcloud_subscriber = new tf::MessageFilter<sensor_msgs::PointCloud2>(*pointcloud_subscriber, tf_listener, FIXED_FRAME_ID, 1);
-        tf_pointcloud_subscriber->registerCallback(boost::bind(&MappingServer::update_occupancy_map, this, _1));
+        nh.subscribe<sensor_msgs::PointCloud2>(lidar_topic_name, 1, &MappingServer::update_occupancy_map, this);
+        // pointcloud_subscriber = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidar_topic_name, 1);
+        // tf_pointcloud_subscriber = new tf::MessageFilter<sensor_msgs::PointCloud2>(*pointcloud_subscriber, tf_listener, FIXED_FRAME_ID, 1);
+        // tf_pointcloud_subscriber->registerCallback(boost::bind(&MappingServer::update_occupancy_map, this, _1));
 
         map_.setGeometry(grid_map::Length(MAXIMUM_RANGE, MAXIMUM_RANGE), RESOLUTION, grid_map::Position(0.0, 0.0));
         map_.setFrameId(FIXED_FRAME_ID);

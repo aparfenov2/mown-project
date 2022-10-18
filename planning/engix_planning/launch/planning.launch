@@ -1,5 +1,5 @@
 <launch>
-    <arg name="robot" default="turtlebot" />
+    <arg name="robot" />
 
     <include file="$(find engix_planning)/launch/params.launch"> 
         <arg name="robot" value="$(arg robot)"/>
