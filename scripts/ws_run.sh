@@ -1,12 +1,12 @@
 
 function run_sim() {
     . ws_source.sh
-    roslaunch my_utils_common all.launch rviz:=false sim:=true rosbridge:=true #robot:=ya_model
+    roslaunch my_utils_common all.launch rviz:=false sim:=true rosbridge:=true robot:=ya_model
 }
 
 function run_planning() {
     . ws_source.sh
-    roslaunch my_utils_common all.launch planning:=true
+    roslaunch my_utils_common all.launch planning:=true robot:=ya_model
 }
 
 function run_gui() {
