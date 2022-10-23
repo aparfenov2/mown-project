@@ -42,7 +42,7 @@ done
     set -ex
     [ -n "${BUILD}" ] && {
         pushd $PWD
-        cd /cdir/ws 
+        cd /cdir/ws
         # catkin_make
         catkin config \
         --extend /opt/ros/$ROS_DISTRO \
@@ -107,8 +107,10 @@ done
 }
 
 [ -n "$STUDIO" ] && {
-cd studio
-docker build -t foxglove:my .
+[ -n "${BUILD}" ] && {
+    cd studio
+    docker build -t foxglove:my .
+}
 docker run --rm \
     ${VOLUMES[@]} \
     --name ${CONTAINER_NAME} \
