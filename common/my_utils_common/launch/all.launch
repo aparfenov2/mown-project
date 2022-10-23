@@ -127,19 +127,19 @@
 
         <!-- registered depth to pcl rgb -->
         <node pkg="nodelet" type="nodelet" name="point_cloud2_pcl" args="load depth_image_proc/point_cloud_xyzrgb pcl_proc" respawn="false" output="screen">
-
+            <!-- depth input: depth_registered/image_rect -->
             <remap from="/rgb/image_rect_color" to="/segmentation_node/mask_color" />
             <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
 
             <remap from="depth_registered/points" to="/pcl_proc/points2" />
         </node>
-        <!-- 
+        <!--
         <node name="color_filter" pkg="simpcl" type="color_filter" output="screen">
             <remap from="points_in" to="/pcl_proc/points2"/>
             <remap from="points_out" to="/pcl_proc/filtered"/>
-            
+
             <param name="use_hsi" type="int" value="0"/>
-            
+
             <param name="r_min" type="double" value="32"/>
             <param name="r_max" type="double" value="32"/>
 
@@ -154,9 +154,9 @@
             <param name="min_height" type="double" value="0.1"/>
             <param name="max_height" type="double" value="2.0"/>
             <param name="target_frame" type="str" value="base_link"/>
-            
+
             <remap from="cloud_in" to="/pcl_proc/filtered" />
-            <remap from="scan" to="/pcl_proc/scan" />            
+            <remap from="scan" to="/pcl_proc/scan" />
         </node>
  -->
     </group>
@@ -270,8 +270,8 @@
             <arg name="robot" value="$(arg robot)" />
         </include>
 
-        <include file="$(find my_utils_common)/launch/map.launch"/>        
-        
+        <include file="$(find my_utils_common)/launch/map.launch"/>
+
         <param name="planner/topics/velocity_commands" value="$(arg cmd_vel_topic)"/>
         <!-- <include file="$(find route_util)/launch/utils.launch"/> -->
         <!-- <include file="$(find mapping)/launch/run.launch"/> -->

@@ -1,4 +1,4 @@
-route: 
+route:
   control: "/planner/route"
   path_cutter: "/planner/route/path_cutter"
   path_planner: "/planner/route/path_planner"
@@ -17,8 +17,10 @@ ground_filter:
   output_topic: "/velodyne_points/new"
 
 mapping_server:
+  segm_points: '/pcl_proc/points2'
   lidar: '/velodyne_points/new'
   costmap: '/costmap_node/costmap/costmap'
+  gridmap: '/costmap_node/costmap/gridmap'
 
 localization: '/planner/localization'
 # costmap: '/costmap_node/costmap/costmap'
