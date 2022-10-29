@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(dwa_local_planner)
+project(dwa_local_planner_my)
 
 find_package(catkin REQUIRED
         COMPONENTS
             angles
-            base_local_planner
+            base_local_planner_my
             cmake_modules
             costmap_2d
             dynamic_reconfigure
@@ -34,9 +34,9 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
     INCLUDE_DIRS include
-    LIBRARIES dwa_local_planner
+    LIBRARIES dwa_local_planner_my
     CATKIN_DEPENDS
-        base_local_planner
+        base_local_planner_my
         dynamic_reconfigure
         nav_msgs
         pluginlib
@@ -46,11 +46,11 @@ catkin_package(
         tf2_ros
 )
 
-add_library(dwa_local_planner src/dwa_planner.cpp src/dwa_planner_ros.cpp)
-add_dependencies(dwa_local_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(dwa_local_planner ${catkin_LIBRARIES})
+add_library(dwa_local_planner_my src/dwa_planner.cpp src/dwa_planner_ros.cpp)
+add_dependencies(dwa_local_planner_my ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(dwa_local_planner_my ${catkin_LIBRARIES})
 
-install(TARGETS dwa_local_planner
+install(TARGETS dwa_local_planner_my
        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
