@@ -419,7 +419,7 @@ void ObstacleLayer::updateFootprint(double robot_x, double robot_y, double robot
     }
 }
 
-void ObstacleLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
+void ObstacleLayer::updateCosts(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   if (footprint_clearing_enabled_)
   {

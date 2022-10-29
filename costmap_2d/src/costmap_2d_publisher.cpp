@@ -39,12 +39,14 @@
 #include <costmap_2d/costmap_2d_publisher.h>
 #include <costmap_2d/cost_values.h>
 
+#include <grid_map_ros/grid_map_ros.hpp>
+
 namespace costmap_2d
 {
 
 char* Costmap2DPublisher::cost_translation_table_ = NULL;
 
-Costmap2DPublisher::Costmap2DPublisher(ros::NodeHandle * ros_node, Costmap2D* costmap, std::string global_frame,
+Costmap2DPublisher::Costmap2DPublisher(ros::NodeHandle * ros_node, GridCostmap2D* costmap, std::string global_frame,
                                        std::string topic_name, bool always_send_full_costmap) :
     node(ros_node), costmap_(costmap), global_frame_(global_frame), active_(false),
     always_send_full_costmap_(always_send_full_costmap)
@@ -90,6 +92,13 @@ void Costmap2DPublisher::onNewSubscription(const ros::SingleSubscriberPublisher&
 void Costmap2DPublisher::prepareGrid()
 {
   boost::unique_lock<Costmap2D::mutex_t> lock(*(costmap_->getMutex()));
+
+grid_map::GridMapRosConverter::toOccupancyGrid(costmap_->getGridMap(),
+                                                "occupancy",
+                                                1 /*MIN_LOGPROB */,
+                                                100 /*MAX_LOGPROB*/,
+                                                grid_);
+
   double resolution = costmap_->getResolution();
 
   grid_.header.frame_id = global_frame_;
@@ -99,22 +108,22 @@ void Costmap2DPublisher::prepareGrid()
   grid_.info.width = costmap_->getSizeInCellsX();
   grid_.info.height = costmap_->getSizeInCellsY();
 
-  double wx, wy;
-  costmap_->mapToWorld(0, 0, wx, wy);
-  grid_.info.origin.position.x = wx - resolution / 2;
-  grid_.info.origin.position.y = wy - resolution / 2;
-  grid_.info.origin.position.z = 0.0;
-  grid_.info.origin.orientation.w = 1.0;
-  saved_origin_x_ = costmap_->getOriginX();
-  saved_origin_y_ = costmap_->getOriginY();
+//   double wx, wy;
+//   costmap_->mapToWorld(0, 0, wx, wy);
+//   grid_.info.origin.position.x = wx - resolution / 2;
+//   grid_.info.origin.position.y = wy - resolution / 2;
+//   grid_.info.origin.position.z = 0.0;
+//   grid_.info.origin.orientation.w = 1.0;
+//   saved_origin_x_ = costmap_->getOriginX();
+//   saved_origin_y_ = costmap_->getOriginY();
 
-  grid_.data.resize(grid_.info.width * grid_.info.height);
+//   grid_.data.resize(grid_.info.width * grid_.info.height);
 
-  unsigned char* data = costmap_->getCharMap();
-  for (unsigned int i = 0; i < grid_.data.size(); i++)
-  {
-    grid_.data[i] = cost_translation_table_[ data[ i ]];
-  }
+//   unsigned char* data = costmap_->getCharMap();
+//   for (unsigned int i = 0; i < grid_.data.size(); i++)
+//   {
+//     grid_.data[i] = cost_translation_table_[ data[ i ]];
+//   }
 }
 
 void Costmap2DPublisher::publishCostmap()
@@ -128,38 +137,38 @@ void Costmap2DPublisher::publishCostmap()
   boost::unique_lock<Costmap2D::mutex_t> lock(*(costmap_->getMutex()));
   float resolution = costmap_->getResolution();
 
-  if (always_send_full_costmap_ || grid_.info.resolution != resolution ||
-      grid_.info.width != costmap_->getSizeInCellsX() ||
-      grid_.info.height != costmap_->getSizeInCellsY() ||
-      saved_origin_x_ != costmap_->getOriginX() ||
-      saved_origin_y_ != costmap_->getOriginY())
+//   if (always_send_full_costmap_ || grid_.info.resolution != resolution ||
+//       grid_.info.width != costmap_->getSizeInCellsX() ||
+//       grid_.info.height != costmap_->getSizeInCellsY() ||
+//       saved_origin_x_ != costmap_->getOriginX() ||
+//       saved_origin_y_ != costmap_->getOriginY())
   {
     prepareGrid();
     costmap_pub_.publish(grid_);
   }
-  else if (x0_ < xn_)
-  {
-    // Publish Just an Update
-    map_msgs::OccupancyGridUpdate update;
-    update.header.stamp = ros::Time::now();
-    update.header.frame_id = global_frame_;
-    update.x = x0_;
-    update.y = y0_;
-    update.width = xn_ - x0_;
-    update.height = yn_ - y0_;
-    update.data.resize(update.width * update.height);
+//   else if (x0_ < xn_)
+//   {
+//     // Publish Just an Update
+//     map_msgs::OccupancyGridUpdate update;
+//     update.header.stamp = ros::Time::now();
+//     update.header.frame_id = global_frame_;
+//     update.x = x0_;
+//     update.y = y0_;
+//     update.width = xn_ - x0_;
+//     update.height = yn_ - y0_;
+//     update.data.resize(update.width * update.height);
 
-    unsigned int i = 0;
-    for (unsigned int y = y0_; y < yn_; y++)
-    {
-      for (unsigned int x = x0_; x < xn_; x++)
-      {
-        unsigned char cost = costmap_->getCost(x, y);
-        update.data[i++] = cost_translation_table_[ cost ];
-      }
-    }
-    costmap_update_pub_.publish(update);
-  }
+//     unsigned int i = 0;
+//     for (unsigned int y = y0_; y < yn_; y++)
+//     {
+//       for (unsigned int x = x0_; x < xn_; x++)
+//       {
+//         unsigned char cost = costmap_->getCost(x, y);
+//         update.data[i++] = cost_translation_table_[ cost ];
+//       }
+//     }
+//     costmap_update_pub_.publish(update);
+//   }
 
   xn_ = yn_ = 0;
   x0_ = costmap_->getSizeInCellsX();

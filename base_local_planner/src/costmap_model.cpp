@@ -42,7 +42,7 @@ using namespace std;
 using namespace costmap_2d;
 
 namespace base_local_planner {
-  CostmapModel::CostmapModel(const Costmap2D& ma) : costmap_(ma) {}
+  CostmapModel::CostmapModel(const GridCostmap2D& ma) : costmap_(ma) {}
 
   double CostmapModel::footprintCost(const geometry_msgs::Point& position, const std::vector<geometry_msgs::Point>& footprint,
       double inscribed_radius, double circumscribed_radius){

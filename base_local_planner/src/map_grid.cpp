@@ -42,7 +42,7 @@ namespace base_local_planner{
   {
   }
 
-  MapGrid::MapGrid(unsigned int size_x, unsigned int size_y) 
+  MapGrid::MapGrid(unsigned int size_x, unsigned int size_y)
     : size_x_(size_x), size_y_(size_y)
   {
     commonInit();
@@ -101,7 +101,7 @@ namespace base_local_planner{
 
 
   inline bool MapGrid::updatePathCell(MapCell* current_cell, MapCell* check_cell,
-      const costmap_2d::Costmap2D& costmap){
+      const costmap_2d::GridCostmap2D& costmap){
 
     //if the cell is an obstacle set the max path distance
     unsigned char cost = costmap.getCost(check_cell->cx, check_cell->cy);
@@ -168,7 +168,7 @@ namespace base_local_planner{
   }
 
   //update what map cells are considered path based on the global_plan
-  void MapGrid::setTargetCells(const costmap_2d::Costmap2D& costmap,
+  void MapGrid::setTargetCells(const costmap_2d::GridCostmap2D& costmap,
       const std::vector<geometry_msgs::PoseStamped>& global_plan) {
     sizeCheck(costmap.getSizeInCellsX(), costmap.getSizeInCellsY());
 
@@ -207,7 +207,7 @@ namespace base_local_planner{
   }
 
   //mark the point of the costmap as local goal where global_plan first leaves the area (or its last point)
-  void MapGrid::setLocalGoal(const costmap_2d::Costmap2D& costmap,
+  void MapGrid::setLocalGoal(const costmap_2d::GridCostmap2D& costmap,
       const std::vector<geometry_msgs::PoseStamped>& global_plan) {
     sizeCheck(costmap.getSizeInCellsX(), costmap.getSizeInCellsY());
 
@@ -252,7 +252,7 @@ namespace base_local_planner{
 
 
 
-  void MapGrid::computeTargetDistance(queue<MapCell*>& dist_queue, const costmap_2d::Costmap2D& costmap){
+  void MapGrid::computeTargetDistance(queue<MapCell*>& dist_queue, const costmap_2d::GridCostmap2D& costmap){
     MapCell* current_cell;
     MapCell* check_cell;
     unsigned int last_col = size_x_ - 1;

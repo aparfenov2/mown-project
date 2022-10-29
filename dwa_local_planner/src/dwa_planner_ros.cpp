@@ -108,7 +108,7 @@ namespace dwa_local_planner {
       costmap_ros_->getRobotPose(current_pose_);
 
       // make sure to update the costmap we'll use for this cycle
-      costmap_2d::Costmap2D* costmap = costmap_ros_->getCostmap();
+      costmap_2d::GridCostmap2D* costmap = costmap_ros_->getCostmap();
 
       planner_util_.initialize(tf, costmap, costmap_ros_->getGlobalFrameID());
 
@@ -119,7 +119,7 @@ namespace dwa_local_planner {
       {
         odom_helper_.setOdomTopic( odom_topic_ );
       }
-      
+
       initialized_ = true;
 
       // Warn about deprecated parameters -- remove this block in N-turtle
@@ -138,7 +138,7 @@ namespace dwa_local_planner {
       ROS_WARN("This planner has already been initialized, doing nothing.");
     }
   }
-  
+
   bool DWAPlannerROS::setPlan(const std::vector<geometry_msgs::PoseStamped>& orig_global_plan) {
     if (! isInitialized()) {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
@@ -204,7 +204,7 @@ namespace dwa_local_planner {
     //compute what trajectory to drive along
     geometry_msgs::PoseStamped drive_cmds;
     drive_cmds.header.frame_id = costmap_ros_->getBaseFrameID();
-    
+
     // call with updated footprint
     base_local_planner::Trajectory path = dp_->findBestPath(global_pose, robot_vel, drive_cmds);
     //ROS_ERROR("Best: %.2f, %.2f, %.2f, %.2f", path.xv_, path.yv_, path.thetav_, path.cost_);
@@ -232,7 +232,7 @@ namespace dwa_local_planner {
       return false;
     }
 
-    ROS_DEBUG_NAMED("dwa_local_planner", "A valid velocity command of (%.2f, %.2f, %.2f) was found for this cycle.", 
+    ROS_DEBUG_NAMED("dwa_local_planner", "A valid velocity command of (%.2f, %.2f, %.2f) was found for this cycle.",
                     cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z);
 
     // Fill out the local plan

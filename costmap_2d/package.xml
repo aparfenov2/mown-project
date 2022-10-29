@@ -45,6 +45,8 @@
     <depend>tf2_ros</depend>
     <depend>visualization_msgs</depend>
     <depend>voxel_grid</depend>
+    <depend>grid_map_core</depend>
+    <depend>grid_map_ros</depend>
 
     <exec_depend>message_runtime</exec_depend>
     <exec_depend>rosconsole</exec_depend>

@@ -70,7 +70,7 @@ namespace base_local_planner{
 
       max_vel_x_ = config.max_vel_x;
       min_vel_x_ = config.min_vel_x;
-      
+
       max_vel_th_ = config.max_vel_theta;
       min_vel_th_ = config.min_vel_theta;
       min_in_place_vel_th_ = config.min_in_place_vel_theta;
@@ -111,7 +111,7 @@ namespace base_local_planner{
       heading_lookahead_ = config.heading_lookahead;
 
       holonomic_robot_ = config.holonomic_robot;
-      
+
       backup_vel_ = config.escape_vel;
 
       dwa_ = config.dwa;
@@ -136,11 +136,11 @@ namespace base_local_planner{
       }
 
       y_vels_ = y_vels;
-      
+
   }
 
   TrajectoryPlanner::TrajectoryPlanner(WorldModel& world_model,
-      const Costmap2D& costmap,
+      const GridCostmap2D& costmap,
       std::vector<geometry_msgs::Point> footprint_spec,
       double acc_lim_x, double acc_lim_y, double acc_lim_theta,
       double sim_time, double sim_granularity,

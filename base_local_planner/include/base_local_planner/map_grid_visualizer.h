@@ -36,7 +36,7 @@
 
 #include <ros/ros.h>
 #include <base_local_planner/map_grid.h>
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d/grid_costmap.h>
 
 namespace base_local_planner {
     class MapGridVisualizer {
@@ -57,7 +57,7 @@ namespace base_local_planner {
             /**
               * @brief Build and publish a PointCloud if the publish_cost_grid_pc parameter was true. Only include points for which the cost_function at (cx,cy) returns true.
               */
-            void publishCostCloud(const costmap_2d::Costmap2D* costmap_p_);
+            void publishCostCloud(const costmap_2d::GridCostmap2D* costmap_p_);
 
         private:
             std::string name_; ///< @brief The name to get parameters relative to.

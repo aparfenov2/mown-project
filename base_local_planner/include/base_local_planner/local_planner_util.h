@@ -42,7 +42,7 @@
 
 #include <boost/thread.hpp>
 
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d/grid_costmap.h>
 #include <tf2_ros/buffer.h>
 
 #include <base_local_planner/local_planner_limits.h>
@@ -61,7 +61,7 @@ private:
   std::string name_;
   std::string global_frame_;
 
-  costmap_2d::Costmap2D* costmap_;
+  costmap_2d::GridCostmap2D* costmap_;
   tf2_ros::Buffer* tf_;
 
 
@@ -87,7 +87,7 @@ public:
   }
 
   void initialize(tf2_ros::Buffer* tf,
-      costmap_2d::Costmap2D* costmap,
+      costmap_2d::GridCostmap2D* costmap,
       std::string global_frame);
 
   bool getGoal(geometry_msgs::PoseStamped& goal_pose);
@@ -96,7 +96,7 @@ public:
 
   bool getLocalPlan(const geometry_msgs::PoseStamped& global_pose, std::vector<geometry_msgs::PoseStamped>& transformed_plan);
 
-  costmap_2d::Costmap2D* getCostmap();
+  costmap_2d::GridCostmap2D* getCostmap();
 
   LocalPlannerLimits getCurrentLimits();
 

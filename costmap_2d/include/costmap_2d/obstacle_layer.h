@@ -71,7 +71,7 @@ public:
   virtual void onInitialize();
   virtual void updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y,
                             double* max_x, double* max_y);
-  virtual void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
+  virtual void updateCosts(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
 
   virtual void activate();
   virtual void deactivate();
@@ -146,7 +146,7 @@ protected:
 
   std::vector<geometry_msgs::Point> transformed_footprint_;
   bool footprint_clearing_enabled_;
-  void updateFootprint(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y, 
+  void updateFootprint(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y,
                        double* max_x, double* max_y);
 
   std::string global_frame_;  ///< @brief The global frame for the costmap

@@ -39,7 +39,7 @@
 
 #include <base_local_planner/world_model.h>
 // For obstacle data access
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d/grid_costmap.h>
 
 namespace base_local_planner {
   /**
@@ -54,7 +54,7 @@ namespace base_local_planner {
        * @param costmap The costmap that should be used
        * @return
        */
-      CostmapModel(const costmap_2d::Costmap2D& costmap);
+      CostmapModel(const costmap_2d::GridCostmap2D& costmap);
 
       /**
        * @brief  Destructor for the world model
@@ -95,7 +95,7 @@ namespace base_local_planner {
       double pointCost(int x, int y) const;
 
     private:
-      const costmap_2d::Costmap2D& costmap_; ///< @brief Allows access of costmap obstacle information
+      const costmap_2d::GridCostmap2D& costmap_; ///< @brief Allows access of costmap obstacle information
 
   };
 };

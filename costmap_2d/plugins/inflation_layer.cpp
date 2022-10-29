@@ -114,7 +114,7 @@ void InflationLayer::reconfigureCB(costmap_2d::InflationPluginConfig &config, ui
 void InflationLayer::matchSize()
 {
   boost::unique_lock < boost::recursive_mutex > lock(*inflation_access_);
-  costmap_2d::Costmap2D* costmap = layered_costmap_->getCostmap();
+  costmap_2d::GridCostmap2D* costmap = layered_costmap_->getCostmap();
   resolution_ = costmap->getResolution();
   cell_inflation_radius_ = cellDistance(inflation_radius_);
   computeCaches();

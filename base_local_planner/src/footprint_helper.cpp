@@ -180,7 +180,7 @@ void FootprintHelper::getFillCells(std::vector<base_local_planner::Position2DInt
 std::vector<base_local_planner::Position2DInt> FootprintHelper::getFootprintCells(
     Eigen::Vector3f pos,
     std::vector<geometry_msgs::Point> footprint_spec,
-    const costmap_2d::Costmap2D& costmap,
+    const costmap_2d::GridCostmap2D& costmap,
     bool fill){
   double x_i = pos[0];
   double y_i = pos[1];

@@ -49,7 +49,7 @@
 #include <cmath>
 
 #include <angles/angles.h>
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d/grid_costmap.h>
 
 namespace base_local_planner {
 
@@ -100,7 +100,7 @@ namespace base_local_planner {
   bool transformGlobalPlan(const tf2_ros::Buffer& tf,
       const std::vector<geometry_msgs::PoseStamped>& global_plan,
       const geometry_msgs::PoseStamped& global_robot_pose,
-      const costmap_2d::Costmap2D& costmap,
+      const costmap_2d::GridCostmap2D& costmap,
       const std::string& global_frame,
       std::vector<geometry_msgs::PoseStamped>& transformed_plan);
 
@@ -132,7 +132,7 @@ namespace base_local_planner {
    */
   bool isGoalReached(const tf2_ros::Buffer& tf,
       const std::vector<geometry_msgs::PoseStamped>& global_plan,
-      const costmap_2d::Costmap2D& costmap,
+      const costmap_2d::GridCostmap2D& costmap,
       const std::string& global_frame,
       geometry_msgs::PoseStamped& global_pose,
       const nav_msgs::Odometry& base_odom,
@@ -146,7 +146,7 @@ namespace base_local_planner {
    * @param trans_stopped_velocity The translational velocity below which the robot is considered stopped
    * @return True if the robot is stopped, false otherwise
    */
-  bool stopped(const nav_msgs::Odometry& base_odom, 
+  bool stopped(const nav_msgs::Odometry& base_odom,
       const double& rot_stopped_velocity,
       const double& trans_stopped_velocity);
 };

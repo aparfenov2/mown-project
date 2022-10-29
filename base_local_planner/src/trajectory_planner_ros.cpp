@@ -174,7 +174,7 @@ namespace base_local_planner {
                                                                   "goal_distance_bias",
                                                                   "gdist_scale",
                                                                   0.6);
-      // values of the deprecated params need to be applied to the current params, as defaults 
+      // values of the deprecated params need to be applied to the current params, as defaults
       // of defined for dynamic reconfigure will override them otherwise.
       if (private_nh.hasParam("pdist_scale") & !private_nh.hasParam("path_distance_bias"))
       {
@@ -350,7 +350,7 @@ namespace base_local_planner {
     v_theta_samp = sign(v_theta_samp) * std::min(std::max(fabs(v_theta_samp), min_acc_vel), max_acc_vel);
 
     //we also want to make sure to send a velocity that allows us to stop when we reach the goal given our acceleration limits
-    double max_speed_to_stop = sqrt(2 * acc_lim_theta_ * fabs(ang_diff)); 
+    double max_speed_to_stop = sqrt(2 * acc_lim_theta_ * fabs(ang_diff));
 
     v_theta_samp = sign(v_theta_samp) * std::min(max_speed_to_stop, fabs(v_theta_samp));
 
@@ -384,7 +384,7 @@ namespace base_local_planner {
     //reset the global plan
     global_plan_.clear();
     global_plan_ = orig_global_plan;
-    
+
     //when we get a new plan, we also want to clear any latch we may have on goal tolerances
     xy_tolerance_latch_ = false;
     //reset the at goal flag
@@ -612,6 +612,6 @@ namespace base_local_planner {
       return false;
     }
     //return flag set in controller
-    return reached_goal_; 
+    return reached_goal_;
   }
 };

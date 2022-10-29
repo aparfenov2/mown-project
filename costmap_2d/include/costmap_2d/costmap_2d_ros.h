@@ -147,7 +147,7 @@ public:
   /** @brief Return a pointer to the "master" costmap which receives updates from all the layers.
    *
    * Same as calling getLayeredCostmap()->getCostmap(). */
-  Costmap2D* getCostmap() const
+  GridCostmap2D* getCostmap() const
     {
       return layered_costmap_->getCostmap();
     }

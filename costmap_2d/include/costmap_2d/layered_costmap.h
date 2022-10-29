@@ -44,6 +44,8 @@
 #include <vector>
 #include <string>
 
+#include <costmap_2d/grid_costmap.h>
+
 namespace costmap_2d
 {
 class Layer;
@@ -89,7 +91,7 @@ public:
 
   bool isCurrent();
 
-  Costmap2D* getCostmap()
+  GridCostmap2D* getCostmap()
   {
     return &costmap_;
   }
@@ -155,7 +157,7 @@ public:
   double getInscribedRadius() { return inscribed_radius_; }
 
 private:
-  Costmap2D costmap_;
+  GridCostmap2D costmap_;
   std::string global_frame_;
 
   bool rolling_window_;  /// < @brief Whether or not the costmap should roll with the robot

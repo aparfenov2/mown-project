@@ -41,7 +41,7 @@
 #include <base_local_planner/trajectory_cost_function.h>
 
 #include <base_local_planner/costmap_model.h>
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d/grid_costmap.h>
 
 namespace base_local_planner {
 
@@ -53,7 +53,7 @@ namespace base_local_planner {
 class ObstacleCostFunction : public TrajectoryCostFunction {
 
 public:
-  ObstacleCostFunction(costmap_2d::Costmap2D* costmap);
+  ObstacleCostFunction(costmap_2d::GridCostmap2D* costmap);
   ~ObstacleCostFunction();
 
   bool prepare();
@@ -72,11 +72,11 @@ public:
       const double& th,
       double scale,
       std::vector<geometry_msgs::Point> footprint_spec,
-      costmap_2d::Costmap2D* costmap,
+      costmap_2d::GridCostmap2D* costmap,
       base_local_planner::WorldModel* world_model);
 
 private:
-  costmap_2d::Costmap2D* costmap_;
+  costmap_2d::GridCostmap2D* costmap_;
   std::vector<geometry_msgs::Point> footprint_spec_;
   base_local_planner::WorldModel* world_model_;
   double max_trans_vel_;

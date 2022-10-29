@@ -51,7 +51,7 @@ namespace base_local_planner {
     pub_ = ns_nh_.advertise<sensor_msgs::PointCloud2>("cost_cloud", 1);
   }
 
-  void MapGridVisualizer::publishCostCloud(const costmap_2d::Costmap2D* costmap_p_) {
+  void MapGridVisualizer::publishCostCloud(const costmap_2d::GridCostmap2D* costmap_p_) {
     sensor_msgs::PointCloud2 cost_cloud;
     cost_cloud.header.frame_id = frame_id_;
     cost_cloud.header.stamp = ros::Time::now();

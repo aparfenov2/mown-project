@@ -42,6 +42,8 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <map_msgs/OccupancyGridUpdate.h>
 
+#include <costmap_2d/grid_costmap.h>
+
 namespace costmap_2d
 {
 /**
@@ -54,7 +56,7 @@ public:
   /**
    * @brief  Constructor for the Costmap2DPublisher
    */
-  Costmap2DPublisher(ros::NodeHandle * ros_node, Costmap2D* costmap, std::string global_frame,
+  Costmap2DPublisher(ros::NodeHandle * ros_node, GridCostmap2D* costmap, std::string global_frame,
                      std::string topic_name, bool always_send_full_costmap = false);
 
   /**
@@ -93,7 +95,7 @@ private:
   void onNewSubscription(const ros::SingleSubscriberPublisher& pub);
 
   ros::NodeHandle* node;
-  Costmap2D* costmap_;
+  GridCostmap2D* costmap_;
   std::string global_frame_;
   unsigned int x0_, xn_, y0_, yn_;
   double saved_origin_x_, saved_origin_y_;

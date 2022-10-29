@@ -447,7 +447,7 @@ void Costmap2DROS::mapUpdateLoop(double frequency)
     double start_t, end_t, t_diff;
     gettimeofday(&start, NULL);
     #endif
-    
+
     updateMap();
 
     #ifdef HAVE_SYS_TIME_H
@@ -457,7 +457,7 @@ void Costmap2DROS::mapUpdateLoop(double frequency)
     t_diff = end_t - start_t;
     ROS_DEBUG("Map update time: %.9f", t_diff);
     #endif
-    
+
     if (publish_cycle.toSec() > 0 && layered_costmap_->isInitialized())
     {
       unsigned int x0, y0, xn, yn;
@@ -560,7 +560,7 @@ void Costmap2DROS::resume()
 
 void Costmap2DROS::resetLayers()
 {
-  Costmap2D* top = layered_costmap_->getCostmap();
+  GridCostmap2D* top = layered_costmap_->getCostmap();
   top->resetMap(0, 0, top->getSizeInCellsX(), top->getSizeInCellsY());
   std::vector < boost::shared_ptr<Layer> > *plugins = layered_costmap_->getPlugins();
   for (vector<boost::shared_ptr<Layer> >::iterator plugin = plugins->begin(); plugin != plugins->end();

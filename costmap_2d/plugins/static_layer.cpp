@@ -141,7 +141,7 @@ void StaticLayer::matchSize()
   //   unrelated to the size of the layered costmap
   if (!layered_costmap_->isRolling())
   {
-    Costmap2D* master = layered_costmap_->getCostmap();
+    GridCostmap2D* master = layered_costmap_->getCostmap();
     resizeMap(master->getSizeInCellsX(), master->getSizeInCellsY(), master->getResolution(),
               master->getOriginX(), master->getOriginY());
   }
@@ -170,7 +170,7 @@ void StaticLayer::incomingMap(const nav_msgs::OccupancyGridConstPtr& new_map)
   ROS_DEBUG("Received a %d X %d map at %f m/pix", size_x, size_y, new_map->info.resolution);
 
   // resize costmap if size, resolution or origin do not match
-  Costmap2D* master = layered_costmap_->getCostmap();
+  GridCostmap2D* master = layered_costmap_->getCostmap();
   if (!layered_costmap_->isRolling() &&
       (master->getSizeInCellsX() != size_x ||
        master->getSizeInCellsY() != size_y ||
@@ -291,7 +291,7 @@ void StaticLayer::updateBounds(double robot_x, double robot_y, double robot_yaw,
   has_updated_data_ = false;
 }
 
-void StaticLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
+void StaticLayer::updateCosts(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   if (!map_received_)
     return;

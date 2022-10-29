@@ -79,7 +79,7 @@ protected:
    * TrueOverwrite means every value from this layer
    * is written into the master grid.
    */
-  void updateWithTrueOverwrite(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
+  void updateWithTrueOverwrite(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
 
   /*
    * Updates the master_grid within the specified
@@ -88,7 +88,7 @@ protected:
    * Overwrite means every valid value from this layer
    * is written into the master grid (does not copy NO_INFORMATION)
    */
-  void updateWithOverwrite(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
+  void updateWithOverwrite(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
 
   /*
    * Updates the master_grid within the specified
@@ -99,7 +99,7 @@ protected:
    * it is overwritten. If the layer's value is NO_INFORMATION,
    * the master value does not change.
    */
-  void updateWithMax(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
+  void updateWithMax(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
 
   /*
    * Updates the master_grid within the specified
@@ -113,7 +113,7 @@ protected:
    * If the sum value is larger than INSCRIBED_INFLATED_OBSTACLE,
    * the master value is set to (INSCRIBED_INFLATED_OBSTACLE - 1).
    */
-  void updateWithAddition(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
+  void updateWithAddition(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
 
   /**
    * Updates the bounding box specified in the parameters to include

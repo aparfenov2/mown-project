@@ -43,7 +43,7 @@ namespace base_local_planner {
 
 void LocalPlannerUtil::initialize(
     tf2_ros::Buffer* tf,
-    costmap_2d::Costmap2D* costmap,
+    costmap_2d::GridCostmap2D* costmap,
     std::string global_frame) {
   if(!initialized_) {
     tf_ = tf;
@@ -70,7 +70,7 @@ void LocalPlannerUtil::reconfigureCB(LocalPlannerLimits &config, bool restore_de
   limits_ = LocalPlannerLimits(config);
 }
 
-costmap_2d::Costmap2D* LocalPlannerUtil::getCostmap() {
+costmap_2d::GridCostmap2D* LocalPlannerUtil::getCostmap() {
   return costmap_;
 }
 

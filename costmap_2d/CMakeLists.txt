@@ -21,6 +21,8 @@ find_package(catkin REQUIRED
             tf2_sensor_msgs
             visualization_msgs
             voxel_grid
+            grid_map_core
+            grid_map_ros
         )
 
 find_package(Eigen3 REQUIRED)
@@ -77,6 +79,8 @@ catkin_package(
         tf2_ros
         visualization_msgs
         voxel_grid
+        grid_map_core
+        grid_map_ros
     DEPENDS
         EIGEN3
         Boost
@@ -85,6 +89,7 @@ catkin_package(
 add_library(costmap_2d_my
   src/array_parser.cpp
   src/costmap_2d.cpp
+  src/grid_costmap.cpp
   src/observation_buffer.cpp
   src/layer.cpp
   src/layered_costmap.cpp

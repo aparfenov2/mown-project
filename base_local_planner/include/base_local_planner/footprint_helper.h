@@ -40,7 +40,7 @@
 
 #include <vector>
 
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d/grid_costmap.h>
 #include <geometry_msgs/Point.h>
 #include <Eigen/Core>
 #include <base_local_planner/Position2DInt.h>
@@ -63,7 +63,7 @@ public:
   std::vector<base_local_planner::Position2DInt> getFootprintCells(
       Eigen::Vector3f pos,
       std::vector<geometry_msgs::Point> footprint_spec,
-      const costmap_2d::Costmap2D&,
+      const costmap_2d::GridCostmap2D&,
       bool fill);
 
   /**

@@ -42,6 +42,8 @@
 #include <string>
 #include <tf2_ros/buffer.h>
 
+#include <costmap_2d/grid_costmap.h>
+
 namespace costmap_2d
 {
 class LayeredCostmap;
@@ -68,7 +70,7 @@ public:
    * @brief Actually update the underlying costmap, only within the bounds
    *        calculated during UpdateBounds().
    */
-  virtual void updateCosts(Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j) {}
+  virtual void updateCosts(GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j) {}
 
   /** @brief Stop publishers. */
   virtual void deactivate() {}

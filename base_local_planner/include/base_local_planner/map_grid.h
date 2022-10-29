@@ -36,12 +36,14 @@
 
 #include <vector>
 #include <iostream>
+#include <queue>
+
 #include <base_local_planner/trajectory_inc.h>
 #include <ros/console.h>
 #include <ros/ros.h>
 
 #include <base_local_planner/map_cell.h>
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d/grid_costmap.h>
 #include <geometry_msgs/PoseStamped.h>
 
 namespace base_local_planner{
@@ -58,16 +60,16 @@ namespace base_local_planner{
 
       /**
        * @brief  Creates a map of size_x by size_y
-       * @param size_x The width of the map 
-       * @param size_y The height of the map 
+       * @param size_x The width of the map
+       * @param size_y The height of the map
        */
       MapGrid(unsigned int size_x, unsigned int size_y);
 
 
       /**
        * @brief  Returns a map cell accessed by (col, row)
-       * @param x The x coordinate of the cell 
-       * @param y The y coordinate of the cell 
+       * @param x The x coordinate of the cell
+       * @param y The y coordinate of the cell
        * @return A reference to the desired cell
        */
       inline MapCell& operator() (unsigned int x, unsigned int y){
@@ -76,8 +78,8 @@ namespace base_local_planner{
 
       /**
        * @brief  Returns a map cell accessed by (col, row)
-       * @param x The x coordinate of the cell 
-       * @param y The y coordinate of the cell 
+       * @param x The x coordinate of the cell
+       * @param y The y coordinate of the cell
        * @return A copy of the desired cell
        */
       inline MapCell operator() (unsigned int x, unsigned int y) const {
@@ -95,13 +97,13 @@ namespace base_local_planner{
 
       /**
        * @brief  Copy constructor for a MapGrid
-       * @param mg The MapGrid to copy 
+       * @param mg The MapGrid to copy
        */
       MapGrid(const MapGrid& mg);
 
       /**
        * @brief  Assignment operator for a MapGrid
-       * @param mg The MapGrid to assign from 
+       * @param mg The MapGrid to assign from
        */
       MapGrid& operator= (const MapGrid& mg);
 
@@ -126,7 +128,7 @@ namespace base_local_planner{
        * @brief  Returns a 1D index into the MapCell array for a 2D index
        * @param x The desired x coordinate
        * @param y The desired y coordinate
-       * @return The associated 1D index 
+       * @return The associated 1D index
        */
       size_t getIndex(int x, int y);
 
@@ -147,11 +149,11 @@ namespace base_local_planner{
 
       /**
        * @brief  Used to update the distance of a cell in path distance computation
-       * @param  current_cell The cell we're currently in 
+       * @param  current_cell The cell we're currently in
        * @param  check_cell The cell to be updated
        */
       inline bool updatePathCell(MapCell* current_cell, MapCell* check_cell,
-          const costmap_2d::Costmap2D& costmap);
+          const costmap_2d::GridCostmap2D& costmap);
 
       /**
        * increase global plan resolution to match that of the costmap by adding points linearly between global plan points
@@ -165,25 +167,25 @@ namespace base_local_planner{
 
       /**
        * @brief  Compute the distance from each cell in the local map grid to the planned path
-       * @param dist_queue A queue of the initial cells on the path 
+       * @param dist_queue A queue of the initial cells on the path
        */
-      void computeTargetDistance(std::queue<MapCell*>& dist_queue, const costmap_2d::Costmap2D& costmap);
+      void computeTargetDistance(std::queue<MapCell*>& dist_queue, const costmap_2d::GridCostmap2D& costmap);
 
       /**
        * @brief  Compute the distance from each cell in the local map grid to the local goal point
-       * @param goal_queue A queue containing the local goal cell 
+       * @param goal_queue A queue containing the local goal cell
        */
-      void computeGoalDistance(std::queue<MapCell*>& dist_queue, const costmap_2d::Costmap2D& costmap);
+      void computeGoalDistance(std::queue<MapCell*>& dist_queue, const costmap_2d::GridCostmap2D& costmap);
 
       /**
-       * @brief Update what cells are considered path based on the global plan 
+       * @brief Update what cells are considered path based on the global plan
        */
-      void setTargetCells(const costmap_2d::Costmap2D& costmap, const std::vector<geometry_msgs::PoseStamped>& global_plan);
+      void setTargetCells(const costmap_2d::GridCostmap2D& costmap, const std::vector<geometry_msgs::PoseStamped>& global_plan);
 
       /**
        * @brief Update what cell is considered the next local goal
        */
-      void setLocalGoal(const costmap_2d::Costmap2D& costmap,
+      void setLocalGoal(const costmap_2d::GridCostmap2D& costmap,
             const std::vector<geometry_msgs::PoseStamped>& global_plan);
 
       double goal_x_, goal_y_; /**< @brief The goal distance was last computed from */

@@ -97,7 +97,7 @@ namespace base_local_planner {
       const tf2_ros::Buffer& tf,
       const std::vector<geometry_msgs::PoseStamped>& global_plan,
       const geometry_msgs::PoseStamped& global_pose,
-      const costmap_2d::Costmap2D& costmap,
+      const costmap_2d::GridCostmap2D& costmap,
       const std::string& global_frame,
       std::vector<geometry_msgs::PoseStamped>& transformed_plan){
     transformed_plan.clear();
@@ -208,7 +208,7 @@ namespace base_local_planner {
 
   bool isGoalReached(const tf2_ros::Buffer& tf,
       const std::vector<geometry_msgs::PoseStamped>& global_plan,
-      const costmap_2d::Costmap2D& costmap GOAL_ATTRIBUTE_UNUSED,
+      const costmap_2d::GridCostmap2D& costmap GOAL_ATTRIBUTE_UNUSED,
       const std::string& global_frame,
       geometry_msgs::PoseStamped& global_pose,
       const nav_msgs::Odometry& base_odom,
@@ -236,9 +236,9 @@ namespace base_local_planner {
     return false;
   }
 
-  bool stopped(const nav_msgs::Odometry& base_odom, 
+  bool stopped(const nav_msgs::Odometry& base_odom,
       const double& rot_stopped_velocity, const double& trans_stopped_velocity){
-    return fabs(base_odom.twist.twist.angular.z) <= rot_stopped_velocity 
+    return fabs(base_odom.twist.twist.angular.z) <= rot_stopped_velocity
       && fabs(base_odom.twist.twist.linear.x) <= trans_stopped_velocity
       && fabs(base_odom.twist.twist.linear.y) <= trans_stopped_velocity;
   }
