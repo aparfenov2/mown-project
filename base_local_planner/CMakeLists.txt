@@ -7,7 +7,7 @@ find_package(catkin REQUIRED
         COMPONENTS
             angles
             cmake_modules
-            costmap_2d
+            costmap_2d_my
             dynamic_reconfigure
             geometry_msgs
             message_generation
@@ -64,7 +64,7 @@ catkin_package(
         trajectory_planner_ros_my
     CATKIN_DEPENDS
         angles
-        costmap_2d
+        costmap_2d_my
         dynamic_reconfigure
         geometry_msgs
         message_runtime

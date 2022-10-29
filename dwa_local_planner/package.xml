@@ -29,7 +29,7 @@
     <build_depend>cmake_modules</build_depend>
 
     <depend>base_local_planner_my</depend>
-    <depend>costmap_2d</depend>
+    <depend>costmap_2d_my</depend>
     <depend>dynamic_reconfigure</depend>
     <depend>eigen</depend>
     <depend>nav_core</depend>

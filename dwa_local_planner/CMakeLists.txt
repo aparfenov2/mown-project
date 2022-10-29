@@ -6,7 +6,7 @@ find_package(catkin REQUIRED
             angles
             base_local_planner_my
             cmake_modules
-            costmap_2d
+            costmap_2d_my
             dynamic_reconfigure
             nav_core
             nav_msgs
