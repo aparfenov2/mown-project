@@ -162,6 +162,8 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   publisher_ = new Costmap2DPublisher(&private_nh, layered_costmap_->getCostmap(), global_frame_, "costmap",
                                       always_send_full_costmap);
 
+  grid_sub_ = private_nh.subscribe("gridmap", 1, &Costmap2DROS::onGridMapUpdate, this);
+
   // create a thread to handle updating the map
   stop_updates_ = false;
   initialized_ = true;
@@ -175,6 +177,24 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   dynamic_reconfigure::Server<Costmap2DConfig>::CallbackType cb = boost::bind(&Costmap2DROS::reconfigureCB, this, _1,
                                                                               _2);
   dsrv_->setCallback(cb);
+}
+
+void Costmap2DROS::onGridMapUpdate(const grid_map_msgs::GridMap& message) {
+    auto &map = layered_costmap_->getCostmap()->getGridMap();
+
+    if (message.info.header.frame_id != map.getFrameId()) {
+        ROS_ERROR_STREAM("grid_map update rejected: expected frame_id: " << map.getFrameId()
+                << "incoming msg frame id:  " << message.info.header.frame_id);
+                return;
+    }
+
+    boost::unique_lock<Costmap2D::mutex_t> lock(*(layered_costmap_->getCostmap()->getMutex()));
+
+    if (!grid_map::GridMapRosConverter::fromMessage(message, map)) {
+        ROS_WARN("failed to read grid_map_msgs::GridMap");
+        return;
+    }
+    ROS_INFO_THROTTLE(5.0, "received GridMap update");
 }
 
 void Costmap2DROS::setUnpaddedRobotFootprintPolygon(const geometry_msgs::Polygon& footprint)

@@ -69,6 +69,8 @@ LayeredCostmap::LayeredCostmap(std::string global_frame, bool rolling_window, bo
     costmap_.setDefaultValue(NO_INFORMATION);
   else
     costmap_.setDefaultValue(FREE_SPACE);
+
+  costmap_.getGridMap().setFrameId(global_frame);
 }
 
 LayeredCostmap::~LayeredCostmap()

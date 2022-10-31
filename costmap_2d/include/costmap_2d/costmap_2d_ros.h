@@ -50,6 +50,8 @@
 #include <pluginlib/class_loader.hpp>
 #include <tf2/LinearMath/Transform.h>
 
+#include <grid_map_ros/grid_map_ros.hpp>
+
 class SuperValue : public XmlRpc::XmlRpcValue
 {
 public:
@@ -258,6 +260,7 @@ private:
   void reconfigureCB(costmap_2d::Costmap2DConfig &config, uint32_t level);
   void movementCB(const ros::TimerEvent &event);
   void mapUpdateLoop(double frequency);
+  void onGridMapUpdate(const grid_map_msgs::GridMap& message);
   bool map_update_thread_shutdown_;
   bool stop_updates_, initialized_, stopped_, robot_stopped_;
   boost::thread* map_update_thread_;  ///< @brief A thread for updating the map
@@ -267,6 +270,7 @@ private:
   pluginlib::ClassLoader<Layer> plugin_loader_;
   geometry_msgs::PoseStamped old_pose_;
   Costmap2DPublisher* publisher_;
+  ros::Subscriber grid_sub_;
   dynamic_reconfigure::Server<costmap_2d::Costmap2DConfig> *dsrv_;
 
   boost::recursive_mutex configuration_mutex_;

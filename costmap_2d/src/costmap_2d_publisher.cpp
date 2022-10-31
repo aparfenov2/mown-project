@@ -39,8 +39,6 @@
 #include <costmap_2d/costmap_2d_publisher.h>
 #include <costmap_2d/cost_values.h>
 
-#include <grid_map_ros/grid_map_ros.hpp>
-
 namespace costmap_2d
 {
 
@@ -54,6 +52,8 @@ Costmap2DPublisher::Costmap2DPublisher(ros::NodeHandle * ros_node, GridCostmap2D
   costmap_pub_ = ros_node->advertise<nav_msgs::OccupancyGrid>(topic_name, 1,
                                                     boost::bind(&Costmap2DPublisher::onNewSubscription, this, _1));
   costmap_update_pub_ = ros_node->advertise<map_msgs::OccupancyGridUpdate>(topic_name + "_updates", 1);
+
+  gridmap_pub_ = ros_node->advertise<grid_map_msgs::GridMap>(topic_name + "_grid", 1);
 
   if (cost_translation_table_ == NULL)
   {
@@ -93,7 +93,13 @@ void Costmap2DPublisher::prepareGrid()
 {
   boost::unique_lock<Costmap2D::mutex_t> lock(*(costmap_->getMutex()));
 
-grid_map::GridMapRosConverter::toOccupancyGrid(costmap_->getGridMap(),
+    auto &map = costmap_->getGridMap();
+    ros::Time now = ros::Time::now();
+    map.setTimestamp(now.toNSec());
+    map.setFrameId(global_frame_);
+    grid_map::GridMapRosConverter::toMessage(map, grid_msg_);
+
+    grid_map::GridMapRosConverter::toOccupancyGrid(costmap_->getGridMap(),
                                                 "occupancy",
                                                 1 /*MIN_LOGPROB */,
                                                 100 /*MAX_LOGPROB*/,
@@ -128,7 +134,7 @@ grid_map::GridMapRosConverter::toOccupancyGrid(costmap_->getGridMap(),
 
 void Costmap2DPublisher::publishCostmap()
 {
-  if (costmap_pub_.getNumSubscribers() == 0)
+  if (costmap_pub_.getNumSubscribers() == 0 && gridmap_pub_.getNumSubscribers() == 0)
   {
     // No subscribers, so why do any work?
     return;
@@ -145,6 +151,7 @@ void Costmap2DPublisher::publishCostmap()
   {
     prepareGrid();
     costmap_pub_.publish(grid_);
+    gridmap_pub_.publish(grid_msg_);
   }
 //   else if (x0_ < xn_)
 //   {

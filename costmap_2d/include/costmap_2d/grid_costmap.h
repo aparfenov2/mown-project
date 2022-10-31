@@ -33,7 +33,7 @@ public:
     return access_;
   }
 
-  const grid_map::GridMap & getGridMap() const {
+  grid_map::GridMap & getGridMap() {
     return costmap_;
   }
 

@@ -43,6 +43,7 @@
 #include <map_msgs/OccupancyGridUpdate.h>
 
 #include <costmap_2d/grid_costmap.h>
+#include <grid_map_ros/grid_map_ros.hpp>
 
 namespace costmap_2d
 {
@@ -102,8 +103,10 @@ private:
   bool active_;
   bool always_send_full_costmap_;
   ros::Publisher costmap_pub_;
+  ros::Publisher gridmap_pub_;
   ros::Publisher costmap_update_pub_;
   nav_msgs::OccupancyGrid grid_;
+  grid_map_msgs::GridMap grid_msg_;
   static char* cost_translation_table_;  ///< Translate from 0-255 values in costmap to -1 to 100 values in message.
 };
 }  // namespace costmap_2d
