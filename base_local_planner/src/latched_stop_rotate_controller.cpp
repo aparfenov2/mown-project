@@ -5,7 +5,7 @@
  *      Author: tkruse
  */
 
-#include <base_local_planner/latched_stop_rotate_controller.h>
+#include <base_local_planner_my/latched_stop_rotate_controller.h>
 
 #include <cmath>
 
@@ -14,12 +14,12 @@
 #include <angles/angles.h>
 #include <nav_msgs/Odometry.h>
 
-#include <base_local_planner/goal_functions.h>
-#include <base_local_planner/local_planner_limits.h>
+#include <base_local_planner_my/goal_functions.h>
+#include <base_local_planner_my/local_planner_limits.h>
 
 #include <tf2/utils.h>
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
 LatchedStopRotateController::LatchedStopRotateController(const std::string& name) {
   ros::NodeHandle private_nh("~/" + name);
@@ -51,7 +51,7 @@ bool LatchedStopRotateController::isPositionReached(LocalPlannerUtil* planner_ut
 
   //check to see if we've reached the goal position
   if ((latch_xy_goal_tolerance_ && xy_tolerance_latch_) ||
-      base_local_planner::getGoalPositionDistance(global_pose, goal_x, goal_y) <= xy_goal_tolerance) {
+      base_local_planner_my::getGoalPositionDistance(global_pose, goal_x, goal_y) <= xy_goal_tolerance) {
     xy_tolerance_latch_ = true;
     return true;
   }
@@ -83,11 +83,11 @@ bool LatchedStopRotateController::isGoalReached(LocalPlannerUtil* planner_util,
   double goal_x = goal_pose.pose.position.x;
   double goal_y = goal_pose.pose.position.y;
 
-  base_local_planner::LocalPlannerLimits limits = planner_util->getCurrentLimits();
+  base_local_planner_my::LocalPlannerLimits limits = planner_util->getCurrentLimits();
 
   //check to see if we've reached the goal position
   if ((latch_xy_goal_tolerance_ && xy_tolerance_latch_) ||
-      base_local_planner::getGoalPositionDistance(global_pose, goal_x, goal_y) <= xy_goal_tolerance) {
+      base_local_planner_my::getGoalPositionDistance(global_pose, goal_x, goal_y) <= xy_goal_tolerance) {
     //if the user wants to latch goal tolerance, if we ever reach the goal location, we'll
     //just rotate in place
     if (latch_xy_goal_tolerance_ && ! xy_tolerance_latch_) {
@@ -95,11 +95,11 @@ bool LatchedStopRotateController::isGoalReached(LocalPlannerUtil* planner_util,
       xy_tolerance_latch_ = true;
     }
     double goal_th = tf2::getYaw(goal_pose.pose.orientation);
-    double angle = base_local_planner::getGoalOrientationAngleDifference(global_pose, goal_th);
+    double angle = base_local_planner_my::getGoalOrientationAngleDifference(global_pose, goal_th);
     //check to see if the goal orientation has been reached
     if (fabs(angle) <= limits.yaw_goal_tolerance) {
       //make sure that we're actually stopped before returning success
-      if (base_local_planner::stopped(base_odom, theta_stopped_vel, trans_stopped_vel)) {
+      if (base_local_planner_my::stopped(base_odom, theta_stopped_vel, trans_stopped_vel)) {
         return true;
       }
     }
@@ -152,7 +152,7 @@ bool LatchedStopRotateController::rotateToGoal(
     geometry_msgs::Twist& cmd_vel,
     Eigen::Vector3f acc_lim,
     double sim_period,
-    base_local_planner::LocalPlannerLimits& limits,
+    base_local_planner_my::LocalPlannerLimits& limits,
     boost::function<bool (Eigen::Vector3f pos,
                           Eigen::Vector3f vel,
                           Eigen::Vector3f vel_samples)> obstacle_check) {
@@ -212,7 +212,7 @@ bool LatchedStopRotateController::computeVelocityCommandsStopRotate(geometry_msg
     return false;
   }
 
-  base_local_planner::LocalPlannerLimits limits = planner_util->getCurrentLimits();
+  base_local_planner_my::LocalPlannerLimits limits = planner_util->getCurrentLimits();
 
   //if the user wants to latch goal tolerance, if we ever reach the goal location, we'll
   //just rotate in place
@@ -222,7 +222,7 @@ bool LatchedStopRotateController::computeVelocityCommandsStopRotate(geometry_msg
   }
   //check to see if the goal orientation has been reached
   double goal_th = tf2::getYaw(goal_pose.pose.orientation);
-  double angle = base_local_planner::getGoalOrientationAngleDifference(global_pose, goal_th);
+  double angle = base_local_planner_my::getGoalOrientationAngleDifference(global_pose, goal_th);
   if (fabs(angle) <= limits.yaw_goal_tolerance) {
     //set the velocity command to zero
     cmd_vel.linear.x = 0.0;
@@ -237,7 +237,7 @@ bool LatchedStopRotateController::computeVelocityCommandsStopRotate(geometry_msg
     odom_helper_.getOdom(base_odom);
 
     //if we're not stopped yet... we want to stop... taking into account the acceleration limits of the robot
-    if ( ! rotating_to_goal_ && !base_local_planner::stopped(base_odom, limits.theta_stopped_vel, limits.trans_stopped_vel)) {
+    if ( ! rotating_to_goal_ && !base_local_planner_my::stopped(base_odom, limits.theta_stopped_vel, limits.trans_stopped_vel)) {
       if ( ! stopWithAccLimits(
           global_pose,
           robot_vel,
@@ -275,4 +275,4 @@ bool LatchedStopRotateController::computeVelocityCommandsStopRotate(geometry_msg
 }
 
 
-} /* namespace base_local_planner */
+} /* namespace base_local_planner_my */

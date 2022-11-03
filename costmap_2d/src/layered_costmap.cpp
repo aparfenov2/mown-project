@@ -35,8 +35,8 @@
  * Author: Eitan Marder-Eppstein
  *         David V. Lu!!
  *********************************************************************/
-#include <costmap_2d/layered_costmap.h>
-#include <costmap_2d/footprint.h>
+#include <costmap_2d_my/layered_costmap.h>
+#include <costmap_2d_my/footprint.h>
 #include <cstdio>
 #include <string>
 #include <algorithm>
@@ -44,7 +44,7 @@
 
 using std::vector;
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 
 LayeredCostmap::LayeredCostmap(std::string global_frame, bool rolling_window, bool track_unknown) :
@@ -179,7 +179,7 @@ bool LayeredCostmap::isCurrent()
 void LayeredCostmap::setFootprint(const std::vector<geometry_msgs::Point>& footprint_spec)
 {
   footprint_ = footprint_spec;
-  costmap_2d::calculateMinAndMaxDistances(footprint_spec, inscribed_radius_, circumscribed_radius_);
+  costmap_2d_my::calculateMinAndMaxDistances(footprint_spec, inscribed_radius_, circumscribed_radius_);
 
   for (vector<boost::shared_ptr<Layer> >::iterator plugin = plugins_.begin(); plugin != plugins_.end();
       ++plugin)
@@ -188,4 +188,4 @@ void LayeredCostmap::setFootprint(const std::vector<geometry_msgs::Point>& footp
   }
 }
 
-}  // namespace costmap_2d
+}  // namespace costmap_2d_my

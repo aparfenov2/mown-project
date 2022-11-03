@@ -34,7 +34,7 @@
 #include <sstream>
 #include <vector>
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 
 /** @brief Parse a vector of vector of floats from a string.
@@ -112,4 +112,4 @@ std::vector<std::vector<float> > parseVVF(const std::string& input, std::string&
   return result;
 }
 
-}  // end namespace costmap_2d
+}  // end namespace costmap_2d_my

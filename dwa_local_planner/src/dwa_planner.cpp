@@ -34,8 +34,8 @@
 *
 * Author: Eitan Marder-Eppstein
 *********************************************************************/
-#include <dwa_local_planner/dwa_planner.h>
-#include <base_local_planner/goal_functions.h>
+#include <dwa_local_planner_my/dwa_planner.h>
+#include <base_local_planner_my/goal_functions.h>
 #include <cmath>
 
 //for computing path distance
@@ -48,7 +48,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 
-namespace dwa_local_planner {
+namespace dwa_local_planner_my {
   void DWAPlanner::reconfigure(DWAPlannerConfig &config)
   {
 
@@ -115,7 +115,7 @@ namespace dwa_local_planner {
 
   }
 
-  DWAPlanner::DWAPlanner(std::string name, base_local_planner::LocalPlannerUtil *planner_util) :
+  DWAPlanner::DWAPlanner(std::string name, base_local_planner_my::LocalPlannerUtil *planner_util) :
       planner_util_(planner_util),
       obstacle_costs_(planner_util->getCostmap()),
       path_costs_(planner_util->getCostmap()),
@@ -163,7 +163,7 @@ namespace dwa_local_planner {
 
     // set up all the cost functions that will be applied in order
     // (any function returning negative values will abort scoring, so the order can improve performance)
-    std::vector<base_local_planner::TrajectoryCostFunction*> critics;
+    std::vector<base_local_planner_my::TrajectoryCostFunction*> critics;
     critics.push_back(&oscillation_costs_); // discards oscillating motions (assisgns cost -1)
     critics.push_back(&obstacle_costs_); // discards trajectories that move into obstacles
     critics.push_back(&goal_front_costs_); // prefers trajectories that make the nose go towards (local) nose goal
@@ -173,10 +173,10 @@ namespace dwa_local_planner {
     critics.push_back(&twirling_costs_); // optionally prefer trajectories that don't spin
 
     // trajectory generators
-    std::vector<base_local_planner::TrajectorySampleGenerator*> generator_list;
+    std::vector<base_local_planner_my::TrajectorySampleGenerator*> generator_list;
     generator_list.push_back(&generator_);
 
-    scored_sampling_planner_ = base_local_planner::SimpleScoredSamplingPlanner(generator_list, critics);
+    scored_sampling_planner_ = base_local_planner_my::SimpleScoredSamplingPlanner(generator_list, critics);
 
     private_nh.param("cheat_factor", cheat_factor_, 1.0);
   }
@@ -189,7 +189,7 @@ namespace dwa_local_planner {
     occ_cost = planner_util_->getCostmap()->getCost(cx, cy);
     if (path_cost == path_costs_.obstacleCosts() ||
         path_cost == path_costs_.unreachableCellCosts() ||
-        occ_cost >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE) {
+        occ_cost >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE) {
       return false;
     }
 
@@ -214,10 +214,10 @@ namespace dwa_local_planner {
       Eigen::Vector3f vel,
       Eigen::Vector3f vel_samples){
     oscillation_costs_.resetOscillationFlags();
-    base_local_planner::Trajectory traj;
+    base_local_planner_my::Trajectory traj;
     geometry_msgs::PoseStamped goal_pose = global_plan_.back();
     Eigen::Vector3f goal(goal_pose.pose.position.x, goal_pose.pose.position.y, tf2::getYaw(goal_pose.pose.orientation));
-    base_local_planner::LocalPlannerLimits limits = planner_util_->getCurrentLimits();
+    base_local_planner_my::LocalPlannerLimits limits = planner_util_->getCurrentLimits();
     generator_.initialise(pos,
         vel,
         goal,
@@ -290,7 +290,7 @@ namespace dwa_local_planner {
   /*
    * given the current state of the robot, find a good trajectory
    */
-  base_local_planner::Trajectory DWAPlanner::findBestPath(
+  base_local_planner_my::Trajectory DWAPlanner::findBestPath(
       const geometry_msgs::PoseStamped& global_pose,
       const geometry_msgs::PoseStamped& global_vel,
       geometry_msgs::PoseStamped& drive_velocities) {
@@ -302,7 +302,7 @@ namespace dwa_local_planner {
     Eigen::Vector3f vel(global_vel.pose.position.x, global_vel.pose.position.y, tf2::getYaw(global_vel.pose.orientation));
     geometry_msgs::PoseStamped goal_pose = global_plan_.back();
     Eigen::Vector3f goal(goal_pose.pose.position.x, goal_pose.pose.position.y, tf2::getYaw(goal_pose.pose.orientation));
-    base_local_planner::LocalPlannerLimits limits = planner_util_->getCurrentLimits();
+    base_local_planner_my::LocalPlannerLimits limits = planner_util_->getCurrentLimits();
 
     // prepare cost functions and generators for this run
     generator_.initialise(pos,
@@ -313,7 +313,7 @@ namespace dwa_local_planner {
 
     result_traj_.cost_ = -7;
     // find best trajectory by sampling and scoring the samples
-    std::vector<base_local_planner::Trajectory> all_explored;
+    std::vector<base_local_planner_my::Trajectory> all_explored;
     scored_sampling_planner_.findBestTrajectory(result_traj_, &all_explored);
 
     if(publish_traj_pc_)
@@ -330,7 +330,7 @@ namespace dwa_local_planner {
                                           "cost", 1, sensor_msgs::PointField::FLOAT32);
 
         unsigned int num_points = 0;
-        for(std::vector<base_local_planner::Trajectory>::iterator t=all_explored.begin(); t != all_explored.end(); ++t)
+        for(std::vector<base_local_planner_my::Trajectory>::iterator t=all_explored.begin(); t != all_explored.end(); ++t)
         {
             if (t->cost_<0)
               continue;
@@ -339,7 +339,7 @@ namespace dwa_local_planner {
 
         cloud_mod.resize(num_points);
         sensor_msgs::PointCloud2Iterator<float> iter_x(traj_cloud, "x");
-        for(std::vector<base_local_planner::Trajectory>::iterator t=all_explored.begin(); t != all_explored.end(); ++t)
+        for(std::vector<base_local_planner_my::Trajectory>::iterator t=all_explored.begin(); t != all_explored.end(); ++t)
         {
             if(t->cost_<0)
                 continue;

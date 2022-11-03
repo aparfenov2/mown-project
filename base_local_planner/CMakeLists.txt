@@ -11,7 +11,7 @@ find_package(catkin REQUIRED
             dynamic_reconfigure
             geometry_msgs
             message_generation
-            nav_core
+            nav_core_my
             nav_msgs
             pluginlib
             roscpp
@@ -68,7 +68,7 @@ catkin_package(
         dynamic_reconfigure
         geometry_msgs
         message_runtime
-        nav_core
+        nav_core_my
         nav_msgs
         pluginlib
         roscpp

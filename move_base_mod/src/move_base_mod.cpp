@@ -52,7 +52,7 @@ namespace move_base_mod {
         tf_(tf),
         as_(NULL),
         controller_costmap_ros_(NULL),
-        blp_loader_("nav_core", "nav_core::BaseLocalPlanner"),
+        blp_loader_("nav_core_my", "nav_core_my::BaseLocalPlanner"),
         new_global_plan_(false) {
 
             as_ = new MoveBaseActionServer(ros::NodeHandle(), "move_base_mod", boost::bind( & MoveBase::executeCb, this, _1), false);
@@ -62,7 +62,7 @@ namespace move_base_mod {
 
             //get some parameters that will be global to the move base node
             std::string local_planner;
-            private_nh.param("base_local_planner", local_planner, std::string("base_local_planner/TrajectoryPlannerROS"));
+            private_nh.param("base_local_planner", local_planner, std::string("base_local_planner_my/TrajectoryPlannerROS"));
             private_nh.param("global_costmap/robot_base_frame", robot_base_frame_, std::string("base_link"));
             private_nh.param("global_costmap/global_frame", global_frame_, std::string("map"));
             private_nh.param("controller_frequency", controller_frequency_, 20.0);
@@ -81,13 +81,13 @@ namespace move_base_mod {
             // goal_sub_ = simple_nh.subscribe < geometry_msgs::PoseStamped > ("goal", 1, boost::bind( & MoveBase::goalCB, this, _1));
 
             //create the ros wrapper for the controller's costmap... and initializer a pointer we'll use with the underlying map
-            controller_costmap_ros_ = new costmap_2d::Costmap2DROS("local_costmap", tf_);
+            controller_costmap_ros_ = new costmap_2d_my::Costmap2DROS("local_costmap", tf_);
             controller_costmap_ros_->pause();
 
             //create a local planner
             try {
                 tc_ = blp_loader_.createInstance(local_planner);
-                ROS_INFO("Created local_planner %s", local_planner.c_str());
+                ROS_INFO("Created my local_planner %s", local_planner.c_str());
                 tc_->initialize(blp_loader_.getName(local_planner), & tf_, controller_costmap_ros_);
             } catch (const pluginlib::PluginlibException & ex) {
                 ROS_FATAL("Failed to create the %s planner, are you sure it is properly registered and that the containing library is built? Exception: %s", local_planner.c_str(), ex.what());
@@ -312,7 +312,7 @@ namespace move_base_mod {
         }
 
         {
-            boost::unique_lock < costmap_2d::Costmap2D::mutex_t > lock( * (controller_costmap_ros_->getCostmap()->getMutex()));
+            boost::unique_lock < costmap_2d_my::Costmap2D::mutex_t > lock( * (controller_costmap_ros_->getCostmap()->getMutex()));
 
             if (tc_->computeVelocityCommands(cmd_vel)) {
                 ROS_DEBUG_NAMED("move_base", "Got a valid command from the local planner: %.3lf, %.3lf, %.3lf",
@@ -338,7 +338,7 @@ namespace move_base_mod {
         publishZeroVelocity();
     }
 
-    bool MoveBase::getRobotPose(geometry_msgs::PoseStamped & global_pose, costmap_2d::Costmap2DROS * costmap) {
+    bool MoveBase::getRobotPose(geometry_msgs::PoseStamped & global_pose, costmap_2d_my::Costmap2DROS * costmap) {
         tf2::toMsg(tf2::Transform::getIdentity(), global_pose.pose);
         geometry_msgs::PoseStamped robot_pose;
         tf2::toMsg(tf2::Transform::getIdentity(), robot_pose.pose);

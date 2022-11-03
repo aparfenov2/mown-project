@@ -9,9 +9,9 @@
 
 #include <vector>
 
-#include <base_local_planner/simple_trajectory_generator.h>
+#include <base_local_planner_my/simple_trajectory_generator.h>
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
 class TrajectoryGeneratorTest : public testing::Test {
 public:

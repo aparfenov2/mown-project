@@ -35,19 +35,19 @@
  * Author: TKruse
  *********************************************************************/
 
-#include <base_local_planner/simple_trajectory_generator.h>
+#include <base_local_planner_my/simple_trajectory_generator.h>
 
 #include <cmath>
 
-#include <base_local_planner/velocity_iterator.h>
+#include <base_local_planner_my/velocity_iterator.h>
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
 void SimpleTrajectoryGenerator::initialise(
     const Eigen::Vector3f& pos,
     const Eigen::Vector3f& vel,
     const Eigen::Vector3f& goal,
-    base_local_planner::LocalPlannerLimits* limits,
+    base_local_planner_my::LocalPlannerLimits* limits,
     const Eigen::Vector3f& vsamples,
     std::vector<Eigen::Vector3f> additional_samples,
     bool discretize_by_time) {
@@ -61,7 +61,7 @@ void SimpleTrajectoryGenerator::initialise(
     const Eigen::Vector3f& pos,
     const Eigen::Vector3f& vel,
     const Eigen::Vector3f& goal,
-    base_local_planner::LocalPlannerLimits* limits,
+    base_local_planner_my::LocalPlannerLimits* limits,
     const Eigen::Vector3f& vsamples,
     bool discretize_by_time) {
   /*
@@ -181,7 +181,7 @@ bool SimpleTrajectoryGenerator::generateTrajectory(
       Eigen::Vector3f pos,
       Eigen::Vector3f vel,
       Eigen::Vector3f sample_target_vel,
-      base_local_planner::Trajectory& traj) {
+      base_local_planner_my::Trajectory& traj) {
   double vmag = hypot(sample_target_vel[0], sample_target_vel[1]);
   double eps = 1e-4;
   traj.cost_   = -1.0; // placed here in case we return early
@@ -279,4 +279,4 @@ Eigen::Vector3f SimpleTrajectoryGenerator::computeNewVelocities(const Eigen::Vec
   return new_vel;
 }
 
-} /* namespace base_local_planner */
+} /* namespace base_local_planner_my */

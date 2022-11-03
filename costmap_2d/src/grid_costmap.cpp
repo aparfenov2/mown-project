@@ -1,7 +1,7 @@
 
-#include <costmap_2d/grid_costmap.h>
+#include <costmap_2d_my/grid_costmap.h>
 
-using namespace costmap_2d;
+using namespace costmap_2d_my;
 
 unsigned int GridCostmap2D::getSizeInCellsX() const
 {

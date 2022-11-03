@@ -35,15 +35,15 @@
  * Author: Eitan Marder-Eppstein
  *********************************************************************/
 
-#include <base_local_planner/local_planner_util.h>
+#include <base_local_planner_my/local_planner_util.h>
 
-#include <base_local_planner/goal_functions.h>
+#include <base_local_planner_my/goal_functions.h>
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
 void LocalPlannerUtil::initialize(
     tf2_ros::Buffer* tf,
-    costmap_2d::GridCostmap2D* costmap,
+    costmap_2d_my::GridCostmap2D* costmap,
     std::string global_frame) {
   if(!initialized_) {
     tf_ = tf;
@@ -70,7 +70,7 @@ void LocalPlannerUtil::reconfigureCB(LocalPlannerLimits &config, bool restore_de
   limits_ = LocalPlannerLimits(config);
 }
 
-costmap_2d::GridCostmap2D* LocalPlannerUtil::getCostmap() {
+costmap_2d_my::GridCostmap2D* LocalPlannerUtil::getCostmap() {
   return costmap_;
 }
 
@@ -82,7 +82,7 @@ LocalPlannerLimits LocalPlannerUtil::getCurrentLimits() {
 
 bool LocalPlannerUtil::getGoal(geometry_msgs::PoseStamped& goal_pose) {
   //we assume the global goal is the last point in the global plan
-  return base_local_planner::getGoalPose(*tf_,
+  return base_local_planner_my::getGoalPose(*tf_,
         global_plan_,
         global_frame_,
         goal_pose);
@@ -104,7 +104,7 @@ bool LocalPlannerUtil::setPlan(const std::vector<geometry_msgs::PoseStamped>& or
 
 bool LocalPlannerUtil::getLocalPlan(const geometry_msgs::PoseStamped& global_pose, std::vector<geometry_msgs::PoseStamped>& transformed_plan) {
   //get the global plan in our frame
-  if(!base_local_planner::transformGlobalPlan(
+  if(!base_local_planner_my::transformGlobalPlan(
       *tf_,
       global_plan_,
       global_pose,
@@ -117,7 +117,7 @@ bool LocalPlannerUtil::getLocalPlan(const geometry_msgs::PoseStamped& global_pos
 
   //now we'll prune the plan based on the position of the robot
   if(limits_.prune_plan) {
-    base_local_planner::prunePlan(global_pose, transformed_plan, global_plan_);
+    base_local_planner_my::prunePlan(global_pose, transformed_plan, global_plan_);
   }
   return true;
 }

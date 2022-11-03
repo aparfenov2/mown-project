@@ -8,12 +8,12 @@
 
 #include <gtest/gtest.h>
 
-#include <base_local_planner/map_grid.h>
-#include <base_local_planner/map_cell.h>
+#include <base_local_planner_my/map_grid.h>
+#include <base_local_planner_my/map_cell.h>
 
 #include "wavefront_map_accessor.h"
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
 TEST(MapGridTest, initNull){
   MapGrid map_grid;

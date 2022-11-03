@@ -15,7 +15,7 @@
     <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
     <maintainer email="ahoy@fetchrobotics.com">Aaron Hoy</maintainer>
     <license>BSD</license>
-    <url>http://wiki.ros.org/base_local_planner</url>
+    <url>http://wiki.ros.org/base_local_planner_my</url>
 
     <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
 
@@ -28,7 +28,7 @@
     <depend>dynamic_reconfigure</depend>
     <depend>eigen</depend>
     <depend>geometry_msgs</depend>
-    <depend>nav_core</depend>
+    <depend>nav_core_my</depend>
     <depend>nav_msgs</depend>
     <depend>pluginlib</depend>
     <depend>sensor_msgs</depend>

@@ -35,9 +35,9 @@
 // Tests ripped from https://github.com/locusrobotics/robot_navigation/blob/master/nav_grid/test/utest.cpp
 
 #include <gtest/gtest.h>
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d_my/costmap_2d.h>
 
-using namespace costmap_2d;
+using namespace costmap_2d_my;
 
 TEST(CostmapCoordinates, easy_coordinates_test)
 {

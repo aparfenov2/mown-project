@@ -20,7 +20,7 @@
     <maintainer email="mfergs7@gmail.com">Michael Ferguson</maintainer>
     <maintainer email="ahoy@fetchrobotics.com">Aaron Hoy</maintainer>
     <license>BSD</license>
-    <url>http://wiki.ros.org/costmap_2d</url>
+    <url>http://wiki.ros.org/costmap_2d_my</url>
 
     <buildtool_depend>catkin</buildtool_depend>
 

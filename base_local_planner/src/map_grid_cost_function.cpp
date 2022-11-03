@@ -35,11 +35,11 @@
  * Author: TKruse
  *********************************************************************/
 
-#include <base_local_planner/map_grid_cost_function.h>
+#include <base_local_planner_my/map_grid_cost_function.h>
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
-MapGridCostFunction::MapGridCostFunction(costmap_2d::GridCostmap2D* costmap,
+MapGridCostFunction::MapGridCostFunction(costmap_2d_my::GridCostmap2D* costmap,
     double xshift,
     double yshift,
     bool is_local_goal_function,
@@ -128,4 +128,4 @@ double MapGridCostFunction::scoreTrajectory(Trajectory &traj) {
   return cost;
 }
 
-} /* namespace base_local_planner */
+} /* namespace base_local_planner_my */

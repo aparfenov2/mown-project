@@ -31,14 +31,14 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#include <base_local_planner/map_grid_visualizer.h>
-#include <base_local_planner/map_cell.h>
+#include <base_local_planner_my/map_grid_visualizer.h>
+#include <base_local_planner_my/map_cell.h>
 #include <vector>
 
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 
-namespace base_local_planner {
+namespace base_local_planner_my {
   MapGridVisualizer::MapGridVisualizer() {}
 
 
@@ -51,7 +51,7 @@ namespace base_local_planner {
     pub_ = ns_nh_.advertise<sensor_msgs::PointCloud2>("cost_cloud", 1);
   }
 
-  void MapGridVisualizer::publishCostCloud(const costmap_2d::GridCostmap2D* costmap_p_) {
+  void MapGridVisualizer::publishCostCloud(const costmap_2d_my::GridCostmap2D* costmap_p_) {
     sensor_msgs::PointCloud2 cost_cloud;
     cost_cloud.header.frame_id = frame_id_;
     cost_cloud.header.stamp = ros::Time::now();

@@ -35,7 +35,7 @@
 * Author: Eitan Marder-Eppstein
 *********************************************************************/
 
-#include <base_local_planner/trajectory_planner_ros.h>
+#include <base_local_planner_my/trajectory_planner_ros.h>
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -50,16 +50,16 @@
 
 #include <pluginlib/class_list_macros.h>
 
-#include <base_local_planner/goal_functions.h>
+#include <base_local_planner_my/goal_functions.h>
 #include <nav_msgs/Path.h>
 
-#include <nav_core/parameter_magic.h>
+#include <nav_core_my/parameter_magic.h>
 #include <tf2/utils.h>
 
 //register this planner as a BaseLocalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, nav_core::BaseLocalPlanner)
+PLUGINLIB_EXPORT_CLASS(base_local_planner_my::TrajectoryPlannerROS, nav_core_my::BaseLocalPlanner)
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
   void TrajectoryPlannerROS::reconfigureCB(BaseLocalPlannerConfig &config, uint32_t level) {
       if (setup_ && config.restore_defaults) {
@@ -78,7 +78,7 @@ namespace base_local_planner {
   TrajectoryPlannerROS::TrajectoryPlannerROS() :
       world_model_(NULL), tc_(NULL), costmap_ros_(NULL), tf_(NULL), setup_(false), initialized_(false), odom_helper_("odom") {}
 
-  TrajectoryPlannerROS::TrajectoryPlannerROS(std::string name, tf2_ros::Buffer* tf, costmap_2d::Costmap2DROS* costmap_ros) :
+  TrajectoryPlannerROS::TrajectoryPlannerROS(std::string name, tf2_ros::Buffer* tf, costmap_2d_my::Costmap2DROS* costmap_ros) :
       world_model_(NULL), tc_(NULL), costmap_ros_(NULL), tf_(NULL), setup_(false), initialized_(false), odom_helper_("odom") {
 
       //initialize the planner
@@ -88,7 +88,7 @@ namespace base_local_planner {
   void TrajectoryPlannerROS::initialize(
       std::string name,
       tf2_ros::Buffer* tf,
-      costmap_2d::Costmap2DROS* costmap_ros){
+      costmap_2d_my::Costmap2DROS* costmap_ros){
     if (! isInitialized()) {
 
       ros::NodeHandle private_nh("~/" + name);
@@ -166,11 +166,11 @@ namespace base_local_planner {
       private_nh.param("vx_samples", vx_samples, 3);
       private_nh.param("vtheta_samples", vtheta_samples, 20);
 
-      path_distance_bias = nav_core::loadParameterWithDeprecation(private_nh,
+      path_distance_bias = nav_core_my::loadParameterWithDeprecation(private_nh,
                                                                   "path_distance_bias",
                                                                   "pdist_scale",
                                                                   0.6);
-      goal_distance_bias = nav_core::loadParameterWithDeprecation(private_nh,
+      goal_distance_bias = nav_core_my::loadParameterWithDeprecation(private_nh,
                                                                   "goal_distance_bias",
                                                                   "gdist_scale",
                                                                   0.6);
@@ -216,7 +216,7 @@ namespace base_local_planner {
       max_vel_th_ = max_rotational_vel;
       min_vel_th_ = -1.0 * max_rotational_vel;
 
-      min_in_place_vel_th_ = nav_core::loadParameterWithDeprecation(private_nh,
+      min_in_place_vel_th_ = nav_core_my::loadParameterWithDeprecation(private_nh,
                                                                     "min_in_place_vel_theta",
                                                                     "min_in_place_rotational_vel", 0.4);
       reached_goal_ = false;
@@ -471,7 +471,7 @@ namespace base_local_planner {
         odom_helper_.getOdom(base_odom);
 
         //if we're not stopped yet... we want to stop... taking into account the acceleration limits of the robot
-        if ( ! rotating_to_goal_ && !base_local_planner::stopped(base_odom, rot_stopped_velocity_, trans_stopped_velocity_)) {
+        if ( ! rotating_to_goal_ && !base_local_planner_my::stopped(base_odom, rot_stopped_velocity_, trans_stopped_velocity_)) {
           if ( ! stopWithAccLimits(global_pose, robot_vel, cmd_vel)) {
             return false;
           }

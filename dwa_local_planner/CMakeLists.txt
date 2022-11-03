@@ -8,7 +8,7 @@ find_package(catkin REQUIRED
             cmake_modules
             costmap_2d_my
             dynamic_reconfigure
-            nav_core
+            nav_core_my
             nav_msgs
             pluginlib
             sensor_msgs

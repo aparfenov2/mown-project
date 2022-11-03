@@ -1,5 +1,5 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package dwa_local_planner
+Changelog for package dwa_local_planner_my
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1.17.1 (2020-08-27)
@@ -41,7 +41,7 @@ Changelog for package dwa_local_planner
 -------------------
 * Merge pull request `#773 <https://github.com/ros-planning/navigation/issues/773>`_ from ros-planning/packaging_fixes
   packaging fixes
-* fix depends for dwa_local_planner
+* fix depends for dwa_local_planner_my
   * add tf2_geometry_msgs (due to https://github.com/ros/geometry2/issues/275)
   * add missing depends on angles, sensor_msgs, tf2
 * Contributors: Michael Ferguson
@@ -52,11 +52,11 @@ Changelog for package dwa_local_planner
 1.16.0 (2018-07-25)
 -------------------
 * Merge pull request `#765 <https://github.com/ros-planning/navigation/issues/765>`_ from ros-planning/remove_pcl
-  remove left over PCL depends in dwa_local_planner
+  remove left over PCL depends in dwa_local_planner_my
 * Remove PCL from local planners
 * Switch to TF2 `#755 <https://github.com/ros-planning/navigation/issues/755>`_
 * Make trajectory scoring scales consistent.
-* unify parameter names between base_local_planner and dwa_local_planner
+* unify parameter names between base_local_planner_my and dwa_local_planner_my
   addresses parts of `#90 <https://github.com/ros-planning/navigation/issues/90>`_
 * Contributors: David V. Lu, Michael Ferguson, Pavlo Kolomiiets, Vincent Rabaud, moriarty
 

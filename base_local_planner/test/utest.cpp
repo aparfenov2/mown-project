@@ -36,26 +36,26 @@
 #include <vector>
 #include <utility>
 
-#include <base_local_planner/map_cell.h>
-#include <base_local_planner/map_grid.h>
-#include <base_local_planner/trajectory.h>
-#include <base_local_planner/trajectory_planner.h>
-#include <base_local_planner/costmap_model.h>
-#include <costmap_2d/costmap_2d.h>
+#include <base_local_planner_my/map_cell.h>
+#include <base_local_planner_my/map_grid.h>
+#include <base_local_planner_my/trajectory.h>
+#include <base_local_planner_my/trajectory_planner.h>
+#include <base_local_planner_my/costmap_model.h>
+#include <costmap_2d_my/costmap_2d.h>
 #include <math.h>
 
 #include <geometry_msgs/Point.h>
-#include <base_local_planner/Position2DInt.h>
+#include <base_local_planner_my/Position2DInt.h>
 
 #include "wavefront_map_accessor.h"
 
 using namespace std;
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
 class TrajectoryPlannerTest : public testing::Test {
   public:
-    TrajectoryPlannerTest(MapGrid* g, WavefrontMapAccessor* wave, const costmap_2d::Costmap2D& map, std::vector<geometry_msgs::Point> footprint_spec);
+    TrajectoryPlannerTest(MapGrid* g, WavefrontMapAccessor* wave, const costmap_2d_my::Costmap2D& map, std::vector<geometry_msgs::Point> footprint_spec);
     void correctFootprint();
     void footprintObstacles();
     void checkGoalDistance();
@@ -68,7 +68,7 @@ class TrajectoryPlannerTest : public testing::Test {
     TrajectoryPlanner tc;
 };
 
-TrajectoryPlannerTest::TrajectoryPlannerTest(MapGrid* g, WavefrontMapAccessor* wave, const costmap_2d::Costmap2D& map, std::vector<geometry_msgs::Point> footprint_spec)
+TrajectoryPlannerTest::TrajectoryPlannerTest(MapGrid* g, WavefrontMapAccessor* wave, const costmap_2d_my::Costmap2D& map, std::vector<geometry_msgs::Point> footprint_spec)
 : map_(g), wa(wave), cm(map), tc(cm, map, footprint_spec, 0.0, 1.0, 1.0, 1.0, 1.0, 2.0)
 {}
 
@@ -78,7 +78,7 @@ void TrajectoryPlannerTest::footprintObstacles(){
   //place an obstacle
   map_->operator ()(4, 6).target_dist = 1;
   wa->synchronize();
-  EXPECT_EQ(wa->getCost(4,6), costmap_2d::LETHAL_OBSTACLE);
+  EXPECT_EQ(wa->getCost(4,6), costmap_2d_my::LETHAL_OBSTACLE);
   Trajectory traj(0, 0, 0, 0.1, 30);
   //tc->generateTrajectory(4.5, 4.5, M_PI_2, 0, 0, 0, 4, 0, 0, 4, 0, 0, DBL_MAX, traj, 2, 30);
   tc.generateTrajectory(4.5, 4.5, M_PI_2, 0, 0, 0, 4, 0, 0, 4, 0, 0, DBL_MAX, traj);
@@ -172,7 +172,7 @@ TrajectoryPlannerTest* setup_testclass_singleton() {
   if (tct == NULL) {
     MapGrid* mg = new MapGrid (10, 10);
     WavefrontMapAccessor* wa = new WavefrontMapAccessor(mg, .25);
-    const costmap_2d::Costmap2D& map = *wa;
+    const costmap_2d_my::Costmap2D& map = *wa;
     std::vector<geometry_msgs::Point> footprint_spec;
     geometry_msgs::Point pt;
     //create a square footprint
@@ -189,7 +189,7 @@ TrajectoryPlannerTest* setup_testclass_singleton() {
     pt.y = 2;
     footprint_spec.push_back(pt);
 
-    tct = new base_local_planner::TrajectoryPlannerTest(mg, wa, map, footprint_spec);
+    tct = new base_local_planner_my::TrajectoryPlannerTest(mg, wa, map, footprint_spec);
   }
   return tct;
 }

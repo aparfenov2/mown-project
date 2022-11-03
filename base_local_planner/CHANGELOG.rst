@@ -1,5 +1,5 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package base_local_planner
+Changelog for package base_local_planner_my
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1.17.1 (2020-08-27)
@@ -16,7 +16,7 @@ Changelog for package base_local_planner
 
 1.16.6 (2020-03-18)
 -------------------
-* Fix Unknown CMake command check_include_file (navfn & base_local_planner) (`#975 <https://github.com/ros-planning/navigation/issues/975>`_)
+* Fix Unknown CMake command check_include_file (navfn & base_local_planner_my) (`#975 <https://github.com/ros-planning/navigation/issues/975>`_)
 * Contributors: Sam Pfeiffer
 
 1.16.5 (2020-03-15)
@@ -31,7 +31,7 @@ Changelog for package base_local_planner
   names in the cfg file in order to actually make the parameters
   used by the trajectory planner changeable.
   Fixes `#935 <https://github.com/cobalt-robotics/navigation/issues/935>`_
-* don't include a main() function in base_local_planner library (`#969 <https://github.com/cobalt-robotics/navigation/issues/969>`_)
+* don't include a main() function in base_local_planner_my library (`#969 <https://github.com/cobalt-robotics/navigation/issues/969>`_)
 * [Windows][melodic] Navigation (except for map_server and amcl) Windows build bring up (`#851 <https://github.com/cobalt-robotics/navigation/issues/851>`_)
 * Contributors: David Leins, Sean Yen, ipa-fez
 
@@ -51,7 +51,7 @@ Changelog for package base_local_planner
 -------------------
 * Merge pull request `#773 <https://github.com/ros-planning/navigation/issues/773>`_ from ros-planning/packaging_fixes
   packaging fixes
-* add explicit sensor_msgs, tf2 depends for base_local_planner
+* add explicit sensor_msgs, tf2 depends for base_local_planner_my
 * Contributors: Michael Ferguson
 
 1.16.1 (2018-07-28)
@@ -63,13 +63,13 @@ Changelog for package base_local_planner
 * Switch to TF2 `#755 <https://github.com/ros-planning/navigation/issues/755>`_
 * Fix trajectory obstacle scoring in dwa_local_planner.
 * Make trajectory scoring scales consistent.
-* unify parameter names between base_local_planner and dwa_local_planner
+* unify parameter names between base_local_planner_my and dwa_local_planner
   addresses parts of `#90 <https://github.com/ros-planning/navigation/issues/90>`_
 * fix param to min_in_place_vel_theta, closes `#487 <https://github.com/ros-planning/navigation/issues/487>`_
 * add const to getLocalPlane, fixes `#709 <https://github.com/ros-planning/navigation/issues/709>`_
 * Merge pull request `#732 <https://github.com/ros-planning/navigation/issues/732>`_ from marting87/small_typo_fixes
   Small typo fixes in ftrajectory_planner_ros and robot_pose_ekf
-* Fixed typos for base_local_planner
+* Fixed typos for base_local_planner_my
 * Contributors: Alexander Moriarty, David V. Lu, Martin Ganeff, Michael Ferguson, Pavlo Kolomiiets, Rein Appeldoorn, Vincent Rabaud, moriarty
 
 1.15.2 (2018-03-22)
@@ -108,7 +108,7 @@ Changelog for package base_local_planner
 
 1.13.1 (2015-10-29)
 -------------------
-* base_local_planner: some fixes in goal_functions
+* base_local_planner_my: some fixes in goal_functions
 * Merge pull request `#348 <https://github.com/ros-planning/navigation/issues/348>`_ from mikeferguson/trajectory_planner_fixes
 * fix stuck_left/right calculation
 * fix calculation of heading diff
@@ -131,7 +131,7 @@ Changelog for package base_local_planner
 
 1.11.14 (2014-12-05)
 --------------------
-* Fixed setting child_frame_id in base_local_planner::OdometryHelperRos
+* Fixed setting child_frame_id in base_local_planner_my::OdometryHelperRos
 * Contributors: Mani Monajjemi
 
 1.11.13 (2014-10-02)
@@ -141,7 +141,7 @@ Changelog for package base_local_planner
 --------------------
 * Bugfix uninitialised occ_cost variable usage
   This fixes `#256 <https://github.com/ros-planning/navigation/issues/256>`_.
-* base_local_planner: adds waitForTransform
+* base_local_planner_my: adds waitForTransform
 * Fixed issue causing trajectory planner returning false to isGoalReach ed even when it's control thread finishes executing
 * Contributors: Daniel Stonier, Marcus Liebhardt, hes3pal
 

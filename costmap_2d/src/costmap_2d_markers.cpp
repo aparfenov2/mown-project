@@ -38,7 +38,7 @@
 
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <costmap_2d/VoxelGrid.h>
+#include <costmap_2d_my/VoxelGrid.h>
 #include <voxel_grid/voxel_grid.h>
 
 struct Cell
@@ -57,7 +57,7 @@ float g_colors_a[] = {0.0f, 0.5f, 1.0f};
 
 std::string g_marker_ns;
 V_Cell g_cells;
-void voxelCallback(const ros::Publisher& pub, const costmap_2d::VoxelGridConstPtr& grid)
+void voxelCallback(const ros::Publisher& pub, const costmap_2d_my::VoxelGridConstPtr& grid)
 {
   if (grid->data.empty())
   {
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
   ROS_DEBUG("Startup");
 
   ros::Publisher pub = n.advertise < visualization_msgs::Marker > ("visualization_marker", 1);
-  ros::Subscriber sub = n.subscribe < costmap_2d::VoxelGrid > ("voxel_grid", 1, boost::bind(voxelCallback, pub, _1));
+  ros::Subscriber sub = n.subscribe < costmap_2d_my::VoxelGrid > ("voxel_grid", 1, boost::bind(voxelCallback, pub, _1));
   g_marker_ns = n.resolveName("voxel_grid");
 
   ros::spin();

@@ -36,10 +36,10 @@
  *         David V. Lu!!
  *********************************************************************/
 #include <boost/bind.hpp>
-#include <costmap_2d/costmap_2d_publisher.h>
-#include <costmap_2d/cost_values.h>
+#include <costmap_2d_my/costmap_2d_publisher.h>
+#include <costmap_2d_my/cost_values.h>
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 
 char* Costmap2DPublisher::cost_translation_table_ = NULL;
@@ -182,4 +182,4 @@ void Costmap2DPublisher::publishCostmap()
   y0_ = costmap_->getSizeInCellsY();
 }
 
-}  // end namespace costmap_2d
+}  // end namespace costmap_2d_my

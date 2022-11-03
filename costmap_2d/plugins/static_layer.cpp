@@ -36,19 +36,19 @@
  * Author: Eitan Marder-Eppstein
  *         David V. Lu!!
  *********************************************************************/
-#include <costmap_2d/static_layer.h>
-#include <costmap_2d/costmap_math.h>
+#include <costmap_2d_my/static_layer.h>
+#include <costmap_2d_my/costmap_math.h>
 #include <pluginlib/class_list_macros.h>
 #include <tf2/convert.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-PLUGINLIB_EXPORT_CLASS(costmap_2d::StaticLayer, costmap_2d::Layer)
+PLUGINLIB_EXPORT_CLASS(costmap_2d_my::StaticLayer, costmap_2d_my::Layer)
 
-using costmap_2d::NO_INFORMATION;
-using costmap_2d::LETHAL_OBSTACLE;
-using costmap_2d::FREE_SPACE;
+using costmap_2d_my::NO_INFORMATION;
+using costmap_2d_my::LETHAL_OBSTACLE;
+using costmap_2d_my::FREE_SPACE;
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 
 StaticLayer::StaticLayer() : dsrv_(NULL) {}
@@ -117,13 +117,13 @@ void StaticLayer::onInitialize()
     delete dsrv_;
   }
 
-  dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
-  dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb = boost::bind(
+  dsrv_ = new dynamic_reconfigure::Server<costmap_2d_my::GenericPluginConfig>(nh);
+  dynamic_reconfigure::Server<costmap_2d_my::GenericPluginConfig>::CallbackType cb = boost::bind(
       &StaticLayer::reconfigureCB, this, _1, _2);
   dsrv_->setCallback(cb);
 }
 
-void StaticLayer::reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level)
+void StaticLayer::reconfigureCB(costmap_2d_my::GenericPluginConfig &config, uint32_t level)
 {
   if (config.enabled != enabled_)
   {
@@ -291,7 +291,7 @@ void StaticLayer::updateBounds(double robot_x, double robot_y, double robot_yaw,
   has_updated_data_ = false;
 }
 
-void StaticLayer::updateCosts(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
+void StaticLayer::updateCosts(costmap_2d_my::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   if (!map_received_)
     return;
@@ -345,4 +345,4 @@ void StaticLayer::updateCosts(costmap_2d::GridCostmap2D& master_grid, int min_i,
   }
 }
 
-}  // namespace costmap_2d
+}  // namespace costmap_2d_my

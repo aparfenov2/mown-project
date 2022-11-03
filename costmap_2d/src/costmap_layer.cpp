@@ -1,6 +1,6 @@
-#include<costmap_2d/costmap_layer.h>
+#include<costmap_2d_my/costmap_layer.h>
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 
 void CostmapLayer::touch(double x, double y, double* min_x, double* min_y, double* max_x, double* max_y)
@@ -60,7 +60,7 @@ void CostmapLayer::useExtraBounds(double* min_x, double* min_y, double* max_x, d
     has_extra_bounds_ = false;
 }
 
-void CostmapLayer::updateWithMax(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
+void CostmapLayer::updateWithMax(costmap_2d_my::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   if (!enabled_)
     return;
@@ -86,7 +86,7 @@ void CostmapLayer::updateWithMax(costmap_2d::GridCostmap2D& master_grid, int min
   }
 }
 
-void CostmapLayer::updateWithTrueOverwrite(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j,
+void CostmapLayer::updateWithTrueOverwrite(costmap_2d_my::GridCostmap2D& master_grid, int min_i, int min_j,
                                            int max_i, int max_j)
 {
   if (!enabled_)
@@ -105,7 +105,7 @@ void CostmapLayer::updateWithTrueOverwrite(costmap_2d::GridCostmap2D& master_gri
   }
 }
 
-void CostmapLayer::updateWithOverwrite(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
+void CostmapLayer::updateWithOverwrite(costmap_2d_my::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   if (!enabled_)
     return;
@@ -124,7 +124,7 @@ void CostmapLayer::updateWithOverwrite(costmap_2d::GridCostmap2D& master_grid, i
   }
 }
 
-void CostmapLayer::updateWithAddition(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
+void CostmapLayer::updateWithAddition(costmap_2d_my::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   if (!enabled_)
     return;
@@ -147,8 +147,8 @@ void CostmapLayer::updateWithAddition(costmap_2d::GridCostmap2D& master_grid, in
     //   else
     //   {
     //     int sum = old_cost + costmap_[it];
-    //     if (sum >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE)
-    //         master_array[it] = costmap_2d::INSCRIBED_INFLATED_OBSTACLE - 1;
+    //     if (sum >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE)
+    //         master_array[it] = costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE - 1;
     //     else
     //         master_array[it] = sum;
     //   }
@@ -156,4 +156,4 @@ void CostmapLayer::updateWithAddition(costmap_2d::GridCostmap2D& master_grid, in
     }
   }
 }
-}  // namespace costmap_2d
+}  // namespace costmap_2d_my

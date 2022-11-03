@@ -34,13 +34,13 @@
 *
 * Author: Eitan Marder-Eppstein
 *********************************************************************/
-#include <base_local_planner/voxel_grid_model.h>
+#include <base_local_planner_my/voxel_grid_model.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 
 using namespace std;
-using namespace costmap_2d;
+using namespace costmap_2d_my;
 
-namespace base_local_planner {
+namespace base_local_planner_my {
   VoxelGridModel::VoxelGridModel(double size_x, double size_y, double size_z, double xy_resolution, double z_resolution,
           double origin_x, double origin_y, double origin_z, double max_z, double obstacle_range) :
     obstacle_grid_(size_x, size_y, size_z), xy_resolution_(xy_resolution), z_resolution_(z_resolution), 

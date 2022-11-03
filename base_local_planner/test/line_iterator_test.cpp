@@ -29,11 +29,11 @@
 
 #include <gtest/gtest.h>
 
-#include "base_local_planner/line_iterator.h"
+#include "base_local_planner_my/line_iterator.h"
 
 TEST( LineIterator, south )
 {
-  base_local_planner::LineIterator line( 1, 2, 1, 4 );
+  base_local_planner_my::LineIterator line( 1, 2, 1, 4 );
   EXPECT_TRUE( line.isValid() );
   EXPECT_EQ( 1, line.getX() );
   EXPECT_EQ( 2, line.getY() );
@@ -51,7 +51,7 @@ TEST( LineIterator, south )
 
 TEST( LineIterator, north_north_west )
 {
-  base_local_planner::LineIterator line( 0, 0, -2, -4 );
+  base_local_planner_my::LineIterator line( 0, 0, -2, -4 );
   EXPECT_TRUE( line.isValid() );
   EXPECT_EQ( 0, line.getX() );
   EXPECT_EQ( 0, line.getY() );

@@ -45,12 +45,12 @@
 #include <actionlib/server/simple_action_server.h>
 #include <move_base_mod/TrajectoryControllerAction.h>
 
-#include <nav_core/base_local_planner.h>
+#include <nav_core_my/base_local_planner.h>
 // #include <nav_core/base_global_planner.h>
 // #include <nav_core/recovery_behavior.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <costmap_2d/costmap_2d_ros.h>
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d_my/costmap_2d_ros.h>
+#include <costmap_2d_my/costmap_2d.h>
 #include <nav_msgs/GetPlan.h>
 
 #include <pluginlib/class_loader.hpp>
@@ -80,7 +80,7 @@ private:
 
     bool isQuaternionValid(const geometry_msgs::Quaternion& q);
 
-    bool getRobotPose(geometry_msgs::PoseStamped& global_pose, costmap_2d::Costmap2DROS* costmap);
+    bool getRobotPose(geometry_msgs::PoseStamped& global_pose, costmap_2d_my::Costmap2DROS* costmap);
 
       // double distance(const geometry_msgs::PoseStamped& p1, const geometry_msgs::PoseStamped& p2);
 
@@ -91,15 +91,15 @@ private:
 
     MoveBaseActionServer* as_;
 
-    boost::shared_ptr<nav_core::BaseLocalPlanner> tc_;
-    costmap_2d::Costmap2DROS* controller_costmap_ros_;
+    boost::shared_ptr<nav_core_my::BaseLocalPlanner> tc_;
+    costmap_2d_my::Costmap2DROS* controller_costmap_ros_;
 
     std::string robot_base_frame_, global_frame_;
 
     double controller_frequency_;
     ros::Publisher vel_pub_;
     // ros::Subscriber goal_sub_;
-    pluginlib::ClassLoader<nav_core::BaseLocalPlanner> blp_loader_;
+    pluginlib::ClassLoader<nav_core_my::BaseLocalPlanner> blp_loader_;
     bool new_global_plan_;
 };
 };

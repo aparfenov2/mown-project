@@ -94,6 +94,7 @@ VOLUMES=()
 for f in $(find ws/src -type l); do
     VOLUMES+=("-v $(readlink -f $f):/cdir/$f")
 done
+VOLUMES+=("-v $(readlink -f all.launch):/cdir/all.launch")
 
 [ -n "$JETSON" ] && {
     JETSON_ARGS="--ws docker_jetson"

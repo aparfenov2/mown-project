@@ -36,19 +36,19 @@
  *         David V. Lu!!
  *********************************************************************/
 #include <algorithm>
-#include <costmap_2d/inflation_layer.h>
-#include <costmap_2d/costmap_math.h>
-#include <costmap_2d/footprint.h>
+#include <costmap_2d_my/inflation_layer.h>
+#include <costmap_2d_my/costmap_math.h>
+#include <costmap_2d_my/footprint.h>
 #include <boost/thread.hpp>
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(costmap_2d::InflationLayer, costmap_2d::Layer)
+PLUGINLIB_EXPORT_CLASS(costmap_2d_my::InflationLayer, costmap_2d_my::Layer)
 
-using costmap_2d::LETHAL_OBSTACLE;
-using costmap_2d::INSCRIBED_INFLATED_OBSTACLE;
-using costmap_2d::NO_INFORMATION;
+using costmap_2d_my::LETHAL_OBSTACLE;
+using costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE;
+using costmap_2d_my::NO_INFORMATION;
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 
 InflationLayer::InflationLayer()
@@ -83,7 +83,7 @@ void InflationLayer::onInitialize()
     seen_size_ = 0;
     need_reinflation_ = false;
 
-    dynamic_reconfigure::Server<costmap_2d::InflationPluginConfig>::CallbackType cb = boost::bind(
+    dynamic_reconfigure::Server<costmap_2d_my::InflationPluginConfig>::CallbackType cb = boost::bind(
         &InflationLayer::reconfigureCB, this, _1, _2);
 
     if (dsrv_ != NULL){
@@ -92,7 +92,7 @@ void InflationLayer::onInitialize()
     }
     else
     {
-      dsrv_ = new dynamic_reconfigure::Server<costmap_2d::InflationPluginConfig>(ros::NodeHandle("~/" + name_));
+      dsrv_ = new dynamic_reconfigure::Server<costmap_2d_my::InflationPluginConfig>(ros::NodeHandle("~/" + name_));
       dsrv_->setCallback(cb);
     }
   }
@@ -100,7 +100,7 @@ void InflationLayer::onInitialize()
   matchSize();
 }
 
-void InflationLayer::reconfigureCB(costmap_2d::InflationPluginConfig &config, uint32_t level)
+void InflationLayer::reconfigureCB(costmap_2d_my::InflationPluginConfig &config, uint32_t level)
 {
   setInflationParameters(config.inflation_radius, config.cost_scaling_factor);
 
@@ -114,7 +114,7 @@ void InflationLayer::reconfigureCB(costmap_2d::InflationPluginConfig &config, ui
 void InflationLayer::matchSize()
 {
   boost::unique_lock < boost::recursive_mutex > lock(*inflation_access_);
-  costmap_2d::GridCostmap2D* costmap = layered_costmap_->getCostmap();
+  costmap_2d_my::GridCostmap2D* costmap = layered_costmap_->getCostmap();
   resolution_ = costmap->getResolution();
   cell_inflation_radius_ = cellDistance(inflation_radius_);
   computeCaches();
@@ -173,7 +173,7 @@ void InflationLayer::onFootprintChanged()
             layered_costmap_->getFootprint().size(), inscribed_radius_, inflation_radius_);
 }
 
-void InflationLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
+void InflationLayer::updateCosts(costmap_2d_my::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   boost::unique_lock < boost::recursive_mutex > lock(*inflation_access_);
   if (cell_inflation_radius_ == 0)
@@ -382,4 +382,4 @@ void InflationLayer::setInflationParameters(double inflation_radius, double cost
   }
 }
 
-}  // namespace costmap_2d
+}  // namespace costmap_2d_my

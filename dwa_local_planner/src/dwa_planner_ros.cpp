@@ -35,7 +35,7 @@
 * Author: Eitan Marder-Eppstein
 *********************************************************************/
 
-#include <dwa_local_planner/dwa_planner_ros.h>
+#include <dwa_local_planner_my/dwa_planner_ros.h>
 #include <Eigen/Core>
 #include <cmath>
 
@@ -43,16 +43,16 @@
 
 #include <pluginlib/class_list_macros.h>
 
-#include <base_local_planner/goal_functions.h>
+#include <base_local_planner_my/goal_functions.h>
 #include <nav_msgs/Path.h>
 #include <tf2/utils.h>
 
-#include <nav_core/parameter_magic.h>
+#include <nav_core_my/parameter_magic.h>
 
 //register this planner as a BaseLocalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(dwa_local_planner::DWAPlannerROS, nav_core::BaseLocalPlanner)
+PLUGINLIB_EXPORT_CLASS(dwa_local_planner_my::DWAPlannerROS, nav_core_my::BaseLocalPlanner)
 
-namespace dwa_local_planner {
+namespace dwa_local_planner_my {
 
   void DWAPlannerROS::reconfigureCB(DWAPlannerConfig &config, uint32_t level) {
       if (setup_ && config.restore_defaults) {
@@ -65,7 +65,7 @@ namespace dwa_local_planner {
       }
 
       // update generic local planner params
-      base_local_planner::LocalPlannerLimits limits;
+      base_local_planner_my::LocalPlannerLimits limits;
       limits.max_vel_trans = config.max_vel_trans;
       limits.min_vel_trans = config.min_vel_trans;
       limits.max_vel_x = config.max_vel_x;
@@ -97,7 +97,7 @@ namespace dwa_local_planner {
   void DWAPlannerROS::initialize(
       std::string name,
       tf2_ros::Buffer* tf,
-      costmap_2d::Costmap2DROS* costmap_ros) {
+      costmap_2d_my::Costmap2DROS* costmap_ros) {
     if (! isInitialized()) {
 
       ros::NodeHandle private_nh("~/" + name);
@@ -108,7 +108,7 @@ namespace dwa_local_planner {
       costmap_ros_->getRobotPose(current_pose_);
 
       // make sure to update the costmap we'll use for this cycle
-      costmap_2d::GridCostmap2D* costmap = costmap_ros_->getCostmap();
+      costmap_2d_my::GridCostmap2D* costmap = costmap_ros_->getCostmap();
 
       planner_util_.initialize(tf, costmap, costmap_ros_->getGlobalFrameID());
 
@@ -123,16 +123,17 @@ namespace dwa_local_planner {
       initialized_ = true;
 
       // Warn about deprecated parameters -- remove this block in N-turtle
-      nav_core::warnRenamedParameter(private_nh, "max_vel_trans", "max_trans_vel");
-      nav_core::warnRenamedParameter(private_nh, "min_vel_trans", "min_trans_vel");
-      nav_core::warnRenamedParameter(private_nh, "max_vel_theta", "max_rot_vel");
-      nav_core::warnRenamedParameter(private_nh, "min_vel_theta", "min_rot_vel");
-      nav_core::warnRenamedParameter(private_nh, "acc_lim_trans", "acc_limit_trans");
-      nav_core::warnRenamedParameter(private_nh, "theta_stopped_vel", "rot_stopped_vel");
+      nav_core_my::warnRenamedParameter(private_nh, "max_vel_trans", "max_trans_vel");
+      nav_core_my::warnRenamedParameter(private_nh, "min_vel_trans", "min_trans_vel");
+      nav_core_my::warnRenamedParameter(private_nh, "max_vel_theta", "max_rot_vel");
+      nav_core_my::warnRenamedParameter(private_nh, "min_vel_theta", "min_rot_vel");
+      nav_core_my::warnRenamedParameter(private_nh, "acc_lim_trans", "acc_limit_trans");
+      nav_core_my::warnRenamedParameter(private_nh, "theta_stopped_vel", "rot_stopped_vel");
 
       dsrv_ = new dynamic_reconfigure::Server<DWAPlannerConfig>(private_nh);
       dynamic_reconfigure::Server<DWAPlannerConfig>::CallbackType cb = boost::bind(&DWAPlannerROS::reconfigureCB, this, _1, _2);
       dsrv_->setCallback(cb);
+      ROS_INFO("my dwa_local_planner_my initialized");
     }
     else{
       ROS_WARN("This planner has already been initialized, doing nothing.");
@@ -170,12 +171,12 @@ namespace dwa_local_planner {
   }
 
   void DWAPlannerROS::publishLocalPlan(std::vector<geometry_msgs::PoseStamped>& path) {
-    base_local_planner::publishPlan(path, l_plan_pub_);
+    base_local_planner_my::publishPlan(path, l_plan_pub_);
   }
 
 
   void DWAPlannerROS::publishGlobalPlan(std::vector<geometry_msgs::PoseStamped>& path) {
-    base_local_planner::publishPlan(path, g_plan_pub_);
+    base_local_planner_my::publishPlan(path, g_plan_pub_);
   }
 
   DWAPlannerROS::~DWAPlannerROS(){
@@ -206,7 +207,7 @@ namespace dwa_local_planner {
     drive_cmds.header.frame_id = costmap_ros_->getBaseFrameID();
 
     // call with updated footprint
-    base_local_planner::Trajectory path = dp_->findBestPath(global_pose, robot_vel, drive_cmds);
+    base_local_planner_my::Trajectory path = dp_->findBestPath(global_pose, robot_vel, drive_cmds);
     //ROS_ERROR("Best: %.2f, %.2f, %.2f, %.2f", path.xv_, path.yv_, path.thetav_, path.cost_);
 
     /* For timing uncomment
@@ -225,14 +226,14 @@ namespace dwa_local_planner {
     //if we cannot move... tell someone
     std::vector<geometry_msgs::PoseStamped> local_plan;
     if(path.cost_ < 0) {
-      ROS_DEBUG_NAMED("dwa_local_planner",
+      ROS_DEBUG_NAMED("dwa_local_planner_my",
           "The dwa local planner failed to find a valid plan, cost functions discarded all candidates. This can mean there is an obstacle too close to the robot.");
       local_plan.clear();
       publishLocalPlan(local_plan);
       return false;
     }
 
-    ROS_DEBUG_NAMED("dwa_local_planner", "A valid velocity command of (%.2f, %.2f, %.2f) was found for this cycle.",
+    ROS_DEBUG_NAMED("dwa_local_planner_my", "A valid velocity command of (%.2f, %.2f, %.2f) was found for this cycle.",
                     cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z);
 
     // Fill out the local plan
@@ -275,10 +276,10 @@ namespace dwa_local_planner {
 
     //if the global plan passed in is empty... we won't do anything
     if(transformed_plan.empty()) {
-      ROS_WARN_NAMED("dwa_local_planner", "Received an empty transformed plan.");
+      ROS_WARN_NAMED("dwa_local_planner_my", "Received an empty transformed plan.");
       return false;
     }
-    ROS_DEBUG_NAMED("dwa_local_planner", "Received a transformed plan with %zu points.", transformed_plan.size());
+    ROS_DEBUG_NAMED("dwa_local_planner_my", "Received a transformed plan with %zu points.", transformed_plan.size());
 
     // update plan in dwa_planner even if we just stop and rotate, to allow checkTrajectory
     dp_->updatePlanAndLocalCosts(current_pose_, transformed_plan, costmap_ros_->getRobotFootprint());
@@ -289,7 +290,7 @@ namespace dwa_local_planner {
       std::vector<geometry_msgs::PoseStamped> transformed_plan;
       publishGlobalPlan(transformed_plan);
       publishLocalPlan(local_plan);
-      base_local_planner::LocalPlannerLimits limits = planner_util_.getCurrentLimits();
+      base_local_planner_my::LocalPlannerLimits limits = planner_util_.getCurrentLimits();
       return latchedStopRotateController_.computeVelocityCommandsStopRotate(
           cmd_vel,
           limits.getAccLimits(),
@@ -303,7 +304,7 @@ namespace dwa_local_planner {
       if (isOk) {
         publishGlobalPlan(transformed_plan);
       } else {
-        ROS_WARN_NAMED("dwa_local_planner", "DWA planner failed to produce path.");
+        ROS_WARN_NAMED("dwa_local_planner_my", "DWA planner failed to produce path.");
         std::vector<geometry_msgs::PoseStamped> empty_plan;
         publishGlobalPlan(empty_plan);
       }

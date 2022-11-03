@@ -35,8 +35,8 @@
  * Author: Eitan Marder-Eppstein
  *         David V. Lu!!
  *********************************************************************/
-#include <costmap_2d/layered_costmap.h>
-#include <costmap_2d/costmap_2d_ros.h>
+#include <costmap_2d_my/layered_costmap.h>
+#include <costmap_2d_my/costmap_2d_ros.h>
 #include <cstdio>
 #include <string>
 #include <algorithm>
@@ -47,7 +47,7 @@
 
 using namespace std;
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 
 void move_parameter(ros::NodeHandle& old_h, ros::NodeHandle& new_h, std::string name, bool should_delete = true)
@@ -73,7 +73,7 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
     robot_stopped_(false),
     map_update_thread_(NULL),
     last_publish_(0),
-    plugin_loader_("costmap_2d", "costmap_2d::Layer"),
+    plugin_loader_("costmap_2d_my", "costmap_2d_my::Layer"),
     publisher_(NULL),
     dsrv_(NULL),
     footprint_padding_(0.0)
@@ -129,7 +129,7 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
     {
       std::string pname = static_cast<std::string>(my_list[i]["name"]);
       std::string type = static_cast<std::string>(my_list[i]["type"]);
-      ROS_INFO("%s: Using plugin \"%s\"", name_.c_str(), pname.c_str());
+      ROS_INFO("%s: Using my plugin \"%s\"", name_.c_str(), pname.c_str());
 
       copyParentParameters(pname, type, private_nh);
 
@@ -163,6 +163,7 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
                                       always_send_full_costmap);
 
   grid_sub_ = private_nh.subscribe("gridmap", 1, &Costmap2DROS::onGridMapUpdate, this);
+  ROS_INFO("Subscribed to gridmap topic");
 
   // create a thread to handle updating the map
   stop_updates_ = false;
@@ -219,6 +220,21 @@ Costmap2DROS::~Costmap2DROS()
   delete dsrv_;
 }
 
+class SuperValue : public XmlRpc::XmlRpcValue
+{
+public:
+  void setStruct(XmlRpc::XmlRpcValue::ValueStruct* a)
+  {
+    _type = TypeStruct;
+    _value.asStruct = new XmlRpc::XmlRpcValue::ValueStruct(*a);
+  }
+  void setArray(XmlRpc::XmlRpcValue::ValueArray* a)
+  {
+    _type = TypeArray;
+    _value.asArray = new std::vector<XmlRpc::XmlRpcValue>(*a);
+  }
+};
+
 void Costmap2DROS::loadOldParameters(ros::NodeHandle& nh)
 {
   ROS_WARN("%s: Parameter \"plugins\" not provided, loading pre-Hydro parameters", name_.c_str());
@@ -233,7 +249,7 @@ void Costmap2DROS::loadOldParameters(ros::NodeHandle& nh)
   if (nh.getParam("static_map", flag) && flag)
   {
     map["name"] = XmlRpc::XmlRpcValue("static_layer");
-    map["type"] = XmlRpc::XmlRpcValue("costmap_2d::StaticLayer");
+    map["type"] = XmlRpc::XmlRpcValue("costmap_2d_my::StaticLayer");
     super_map.setStruct(&map);
     plugins.push_back(super_map);
 
@@ -248,7 +264,7 @@ void Costmap2DROS::loadOldParameters(ros::NodeHandle& nh)
   if (nh.getParam("map_type", s) && s == "voxel")
   {
     map["name"] = XmlRpc::XmlRpcValue("obstacle_layer");
-    map["type"] = XmlRpc::XmlRpcValue("costmap_2d::VoxelLayer");
+    map["type"] = XmlRpc::XmlRpcValue("costmap_2d_my::VoxelLayer");
     super_map.setStruct(&map);
     plugins.push_back(super_map);
 
@@ -262,7 +278,7 @@ void Costmap2DROS::loadOldParameters(ros::NodeHandle& nh)
   else
   {
     map["name"] = XmlRpc::XmlRpcValue("obstacle_layer");
-    map["type"] = XmlRpc::XmlRpcValue("costmap_2d::ObstacleLayer");
+    map["type"] = XmlRpc::XmlRpcValue("costmap_2d_my::ObstacleLayer");
     super_map.setStruct(&map);
     plugins.push_back(super_map);
   }
@@ -284,7 +300,7 @@ void Costmap2DROS::loadOldParameters(ros::NodeHandle& nh)
   move_parameter(nh, inflation, "cost_scaling_factor");
   move_parameter(nh, inflation, "inflation_radius");
   map["name"] = XmlRpc::XmlRpcValue("inflation_layer");
-  map["type"] = XmlRpc::XmlRpcValue("costmap_2d::InflationLayer");
+  map["type"] = XmlRpc::XmlRpcValue("costmap_2d_my::InflationLayer");
   super_map.setStruct(&map);
   plugins.push_back(super_map);
 
@@ -296,14 +312,14 @@ void Costmap2DROS::copyParentParameters(const std::string& plugin_name, const st
 {
   ros::NodeHandle target_layer(nh, plugin_name);
 
-  if(plugin_type == "costmap_2d::StaticLayer")
+  if(plugin_type == "costmap_2d_my::StaticLayer")
   {
     move_parameter(nh, target_layer, "map_topic", false);
     move_parameter(nh, target_layer, "unknown_cost_value", false);
     move_parameter(nh, target_layer, "lethal_cost_threshold", false);
     move_parameter(nh, target_layer, "track_unknown_space", false);
   }
-  else if(plugin_type == "costmap_2d::VoxelLayer")
+  else if(plugin_type == "costmap_2d_my::VoxelLayer")
   {
     move_parameter(nh, target_layer, "origin_z", false);
     move_parameter(nh, target_layer, "z_resolution", false);
@@ -312,14 +328,14 @@ void Costmap2DROS::copyParentParameters(const std::string& plugin_name, const st
     move_parameter(nh, target_layer, "unknown_threshold", false);
     move_parameter(nh, target_layer, "publish_voxel_map", false);
   }
-  else if(plugin_type == "costmap_2d::ObstacleLayer")
+  else if(plugin_type == "costmap_2d_my::ObstacleLayer")
   {
     move_parameter(nh, target_layer, "max_obstacle_height", false);
     move_parameter(nh, target_layer, "raytrace_range", false);
     move_parameter(nh, target_layer, "obstacle_range", false);
     move_parameter(nh, target_layer, "track_unknown_space", false);
   }
-  else if(plugin_type == "costmap_2d::InflationLayer")
+  else if(plugin_type == "costmap_2d_my::InflationLayer")
   {
     move_parameter(nh, target_layer, "cost_scaling_factor", false);
     move_parameter(nh, target_layer, "inflation_radius", false);
@@ -338,7 +354,7 @@ void Costmap2DROS::checkOldParam(ros::NodeHandle& nh, const std::string &param_n
   }
 }
 
-void Costmap2DROS::reconfigureCB(costmap_2d::Costmap2DConfig &config, uint32_t level)
+void Costmap2DROS::reconfigureCB(costmap_2d_my::Costmap2DConfig &config, uint32_t level)
 {
   transform_tolerance_ = config.transform_tolerance;
   if (map_update_thread_ != NULL)
@@ -385,8 +401,8 @@ void Costmap2DROS::reconfigureCB(costmap_2d::Costmap2DConfig &config, uint32_t l
     map_update_thread_ = new boost::thread(boost::bind(&Costmap2DROS::mapUpdateLoop, this, map_update_frequency));
 }
 
-void Costmap2DROS::readFootprintFromConfig(const costmap_2d::Costmap2DConfig &new_config,
-                                           const costmap_2d::Costmap2DConfig &old_config)
+void Costmap2DROS::readFootprintFromConfig(const costmap_2d_my::Costmap2DConfig &new_config,
+                                           const costmap_2d_my::Costmap2DConfig &old_config)
 {
   // Only change the footprint if footprint or robot_radius has
   // changed.  Otherwise we might overwrite a footprint sent on a
@@ -652,4 +668,4 @@ void Costmap2DROS::getOrientedFootprint(std::vector<geometry_msgs::Point>& orien
                      padded_footprint_, oriented_footprint);
 }
 
-}  // namespace costmap_2d
+}  // namespace costmap_2d_my

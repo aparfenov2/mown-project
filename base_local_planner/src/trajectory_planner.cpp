@@ -35,8 +35,8 @@
 * Author: Eitan Marder-Eppstein
 *********************************************************************/
 
-#include <base_local_planner/trajectory_planner.h>
-#include <costmap_2d/footprint.h>
+#include <base_local_planner_my/trajectory_planner.h>
+#include <costmap_2d_my/footprint.h>
 #include <string>
 #include <sstream>
 #include <math.h>
@@ -54,9 +54,9 @@
 #include <tf2/utils.h>
 
 using namespace std;
-using namespace costmap_2d;
+using namespace costmap_2d_my;
 
-namespace base_local_planner{
+namespace base_local_planner_my{
 
   void TrajectoryPlanner::reconfigure(BaseLocalPlannerConfig &cfg)
   {
@@ -185,7 +185,7 @@ namespace base_local_planner{
     final_goal_position_valid_ = false;
 
 
-    costmap_2d::calculateMinAndMaxDistances(footprint_spec_, inscribed_radius_, circumscribed_radius_);
+    costmap_2d_my::calculateMinAndMaxDistances(footprint_spec_, inscribed_radius_, circumscribed_radius_);
   }
 
   TrajectoryPlanner::~TrajectoryPlanner(){}
@@ -199,7 +199,7 @@ namespace base_local_planner{
     occ_cost = costmap_.getCost(cx, cy);
     if (cell.target_dist == path_map_.obstacleCosts() ||
         cell.target_dist == path_map_.unreachableCellCosts() ||
-        occ_cost >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE) {
+        occ_cost >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE) {
         return false;
     }
     path_cost = cell.target_dist;
@@ -915,7 +915,7 @@ namespace base_local_planner{
     goal_map_.resetPathDist();
 
     //temporarily remove obstacles that are within the footprint of the robot
-    std::vector<base_local_planner::Position2DInt> footprint_list =
+    std::vector<base_local_planner_my::Position2DInt> footprint_list =
         footprint_helper_.getFootprintCells(
             pos,
             footprint_spec_,
@@ -941,7 +941,7 @@ namespace base_local_planner{
     /*
     //If we want to print a ppm file to draw goal dist
     char buf[4096];
-    sprintf(buf, "base_local_planner.ppm");
+    sprintf(buf, "base_local_planner_my.ppm");
     FILE *fp = fopen(buf, "w");
     if(fp){
       fprintf(fp, "P3\n");

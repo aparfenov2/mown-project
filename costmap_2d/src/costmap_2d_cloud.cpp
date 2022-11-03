@@ -27,7 +27,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud.h>
-#include <costmap_2d/VoxelGrid.h>
+#include <costmap_2d_my/VoxelGrid.h>
 #include <voxel_grid/voxel_grid.h>
 
 static inline void mapToWorld3D(const unsigned int mx, const unsigned int my, const unsigned int mz,
@@ -58,7 +58,7 @@ float g_colors_a[] = {0.0f, 0.5f, 1.0f};
 V_Cell g_marked;
 V_Cell g_unknown;
 void voxelCallback(const ros::Publisher& pub_marked, const ros::Publisher& pub_unknown,
-                   const costmap_2d::VoxelGridConstPtr& grid)
+                   const costmap_2d_my::VoxelGridConstPtr& grid)
 {
   if (grid->data.empty())
   {
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
 
   ros::Publisher pub_marked = n.advertise < sensor_msgs::PointCloud > ("voxel_marked_cloud", 2);
   ros::Publisher pub_unknown = n.advertise < sensor_msgs::PointCloud > ("voxel_unknown_cloud", 2);
-  ros::Subscriber sub = n.subscribe < costmap_2d::VoxelGrid
+  ros::Subscriber sub = n.subscribe < costmap_2d_my::VoxelGrid
       > ("voxel_grid", 1, boost::bind(voxelCallback, pub_marked, pub_unknown, _1));
 
   ros::spin();

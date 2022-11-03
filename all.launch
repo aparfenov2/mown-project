@@ -203,7 +203,7 @@
     <param name="/planner/topics/mapping_server/gridmap" type="str" value="/costmap_node/costmap/gridmap"  />
 
     <node pkg="mapping" type="map_server" name="mapping"   output="screen">
-        <param name="fixed_frame_id" type="str"    value="world" />
+        <param name="fixed_frame_id" type="str"    value="odom" />
         <param name="resolution"     type="double" value="0.1"  />
         <param name="max_range"      type="double" value="40.0"  />
         <param name="hit_logprob"       type="double" value="10"  />
@@ -215,23 +215,23 @@
   <arg name="model" default="burger" doc="model type [burger, waffle, waffle_pi]"/>
   <!-- <arg name="cmd_vel_topic" default="/cmd_vel" /> -->
   <!-- <arg name="odom_topic" default="odom" /> -->
-  <arg name="move_forward_only" default="false"/>
+  <!-- <arg name="move_forward_only" default="false"/> -->
 
   <!-- move_base -->
   <node pkg="move_base_mod" type="move_base_mod" respawn="false" name="move_base_mod" output="screen">
-    <param name="gridmap" value="/costmap_node/costmap/gridmap" />
+    <param name="local_costmap/gridmap" value="/costmap_node/costmap/gridmap" />
 
-    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
-    <rosparam file="$(find move_base_mod)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find move_base_mod)/param/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find move_base_mod)/param/move_base_params.yaml" command="load" />
-    <rosparam file="$(find move_base_mod)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
+    <param name="base_local_planner" value="dwa_local_planner_my/DWAPlannerROS" />
+    <!-- <rosparam file="$(find move_base_mod)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" /> -->
+    <rosparam file="$(find move_base_mod)/param/local_costmap_params.yaml" command="load" ns="local_costmap" />
+    <!-- <rosparam file="$(find move_base_mod)/param/move_base_params.yaml" command="load" /> -->
+    <!-- <rosparam file="$(find move_base_mod)/param/dwa_local_planner_params_$(arg model).yaml" command="load" /> -->
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
     <remap from="odom" to="$(arg odom_topic)"/>
-    <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
+    <!-- <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" /> -->
   </node>
 
-    <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
+    <!-- <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/> -->
 
 <!--
         <arg name="move_forward_only" default="false"/>
@@ -315,7 +315,7 @@
         <!-- <include file="$(find mapping)/launch/run.launch"/> -->
 
         <!-- Run the costmap node -->
-        <!-- <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node"> -->
+        <!-- <node name="costmap_node" pkg="costmap_2d_my" type="costmap_2d_node"> -->
         <!-- <rosparam file="$(find my_utils_common)/param/global_costmap_params_test.yaml" command="load" ns="costmap" /> -->
         <!-- <rosparam file="$(find my_utils_common)/param/global_costmap_params.yaml" command="load" ns="costmap" /> -->
         <!-- </node>    -->

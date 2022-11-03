@@ -35,21 +35,21 @@
  * Author: Eitan Marder-Eppstein
  *         David V. Lu!!
  *********************************************************************/
-#include <costmap_2d/voxel_layer.h>
+#include <costmap_2d_my/voxel_layer.h>
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 
 #define VOXEL_BITS 16
-PLUGINLIB_EXPORT_CLASS(costmap_2d::VoxelLayer, costmap_2d::Layer)
+PLUGINLIB_EXPORT_CLASS(costmap_2d_my::VoxelLayer, costmap_2d_my::Layer)
 
-using costmap_2d::NO_INFORMATION;
-using costmap_2d::LETHAL_OBSTACLE;
-using costmap_2d::FREE_SPACE;
+using costmap_2d_my::NO_INFORMATION;
+using costmap_2d_my::LETHAL_OBSTACLE;
+using costmap_2d_my::FREE_SPACE;
 
-using costmap_2d::ObservationBuffer;
-using costmap_2d::Observation;
+using costmap_2d_my::ObservationBuffer;
+using costmap_2d_my::Observation;
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 
 void VoxelLayer::onInitialize()
@@ -59,15 +59,15 @@ void VoxelLayer::onInitialize()
 
   private_nh.param("publish_voxel_map", publish_voxel_, false);
   if (publish_voxel_)
-    voxel_pub_ = private_nh.advertise < costmap_2d::VoxelGrid > ("voxel_grid", 1);
+    voxel_pub_ = private_nh.advertise < costmap_2d_my::VoxelGrid > ("voxel_grid", 1);
 
   clearing_endpoints_pub_ = private_nh.advertise<sensor_msgs::PointCloud>("clearing_endpoints", 1);
 }
 
 void VoxelLayer::setupDynamicReconfigure(ros::NodeHandle& nh)
 {
-  voxel_dsrv_ = new dynamic_reconfigure::Server<costmap_2d::VoxelPluginConfig>(nh);
-  dynamic_reconfigure::Server<costmap_2d::VoxelPluginConfig>::CallbackType cb = boost::bind(
+  voxel_dsrv_ = new dynamic_reconfigure::Server<costmap_2d_my::VoxelPluginConfig>(nh);
+  dynamic_reconfigure::Server<costmap_2d_my::VoxelPluginConfig>::CallbackType cb = boost::bind(
       &VoxelLayer::reconfigureCB, this, _1, _2);
   voxel_dsrv_->setCallback(cb);
 }
@@ -78,7 +78,7 @@ VoxelLayer::~VoxelLayer()
     delete voxel_dsrv_;
 }
 
-void VoxelLayer::reconfigureCB(costmap_2d::VoxelPluginConfig &config, uint32_t level)
+void VoxelLayer::reconfigureCB(costmap_2d_my::VoxelPluginConfig &config, uint32_t level)
 {
   enabled_ = config.enabled;
   footprint_clearing_enabled_ = config.footprint_clearing_enabled;
@@ -191,7 +191,7 @@ void VoxelLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, 
 
   if (publish_voxel_)
   {
-    costmap_2d::VoxelGrid grid_msg;
+    costmap_2d_my::VoxelGrid grid_msg;
     unsigned int size = voxel_grid_.sizeX() * voxel_grid_.sizeY();
     grid_msg.size_x = voxel_grid_.sizeX();
     grid_msg.size_y = voxel_grid_.sizeY();
@@ -446,4 +446,4 @@ void VoxelLayer::updateOrigin(double new_origin_x, double new_origin_y)
   delete[] local_voxel_map;
 }
 
-}  // namespace costmap_2d
+}  // namespace costmap_2d_my

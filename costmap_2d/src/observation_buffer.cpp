@@ -34,7 +34,7 @@
  *
  * Author: Eitan Marder-Eppstein
  *********************************************************************/
-#include <costmap_2d/observation_buffer.h>
+#include <costmap_2d_my/observation_buffer.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
@@ -43,7 +43,7 @@
 using namespace std;
 using namespace tf2;
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 ObservationBuffer::ObservationBuffer(string topic_name, double observation_keep_time, double expected_update_rate,
                                      double min_obstacle_height, double max_obstacle_height, double obstacle_range,
@@ -247,5 +247,5 @@ void ObservationBuffer::resetLastUpdated()
 {
   last_updated_ = ros::Time::now();
 }
-}  // namespace costmap_2d
+}  // namespace costmap_2d_my
 

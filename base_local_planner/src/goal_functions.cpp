@@ -34,7 +34,7 @@
 *
 * Author: Eitan Marder-Eppstein
 *********************************************************************/
-#include <base_local_planner/goal_functions.h>
+#include <base_local_planner_my/goal_functions.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -44,7 +44,7 @@
 #define GOAL_ATTRIBUTE_UNUSED __attribute__ ((unused))
 #endif
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
   double getGoalPositionDistance(const geometry_msgs::PoseStamped& global_pose, double goal_x, double goal_y) {
     return hypot(goal_x - global_pose.pose.position.x, goal_y - global_pose.pose.position.y);
@@ -97,7 +97,7 @@ namespace base_local_planner {
       const tf2_ros::Buffer& tf,
       const std::vector<geometry_msgs::PoseStamped>& global_plan,
       const geometry_msgs::PoseStamped& global_pose,
-      const costmap_2d::GridCostmap2D& costmap,
+      const costmap_2d_my::GridCostmap2D& costmap,
       const std::string& global_frame,
       std::vector<geometry_msgs::PoseStamped>& transformed_plan){
     transformed_plan.clear();
@@ -208,7 +208,7 @@ namespace base_local_planner {
 
   bool isGoalReached(const tf2_ros::Buffer& tf,
       const std::vector<geometry_msgs::PoseStamped>& global_plan,
-      const costmap_2d::GridCostmap2D& costmap GOAL_ATTRIBUTE_UNUSED,
+      const costmap_2d_my::GridCostmap2D& costmap GOAL_ATTRIBUTE_UNUSED,
       const std::string& global_frame,
       geometry_msgs::PoseStamped& global_pose,
       const nav_msgs::Odometry& base_odom,

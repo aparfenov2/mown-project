@@ -35,12 +35,12 @@
  * Author: Eitan Marder-Eppstein
  *         David V. Lu!!
  *********************************************************************/
-#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d_my/costmap_2d.h>
 #include <cstdio>
 
 using namespace std;
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 Costmap2D::Costmap2D(unsigned int cells_size_x, unsigned int cells_size_y, double resolution,
                      double origin_x, double origin_y, unsigned char default_value) :
@@ -485,4 +485,4 @@ bool Costmap2D::saveMap(std::string file_name)
   return true;
 }
 
-}  // namespace costmap_2d
+}  // namespace costmap_2d_my

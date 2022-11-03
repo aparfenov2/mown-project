@@ -35,11 +35,11 @@
  * Author: TKruse
  *********************************************************************/
 
-#include <base_local_planner/simple_scored_sampling_planner.h>
+#include <base_local_planner_my/simple_scored_sampling_planner.h>
 
 #include <ros/console.h>
 
-namespace base_local_planner {
+namespace base_local_planner_my {
   
   SimpleScoredSamplingPlanner::SimpleScoredSamplingPlanner(std::vector<TrajectorySampleGenerator*> gen_list, std::vector<TrajectoryCostFunction*>& critics, int max_samples) {
     max_samples_ = max_samples;

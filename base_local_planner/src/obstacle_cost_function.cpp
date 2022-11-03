@@ -35,17 +35,17 @@
  * Author: TKruse
  *********************************************************************/
 
-#include <base_local_planner/obstacle_cost_function.h>
+#include <base_local_planner_my/obstacle_cost_function.h>
 #include <cmath>
 #include <Eigen/Core>
 #include <ros/console.h>
 
-namespace base_local_planner {
+namespace base_local_planner_my {
 
-ObstacleCostFunction::ObstacleCostFunction(costmap_2d::GridCostmap2D* costmap)
+ObstacleCostFunction::ObstacleCostFunction(costmap_2d_my::GridCostmap2D* costmap)
     : costmap_(costmap), sum_scores_(false) {
   if (costmap != NULL) {
-    world_model_ = new base_local_planner::CostmapModel(*costmap_);
+    world_model_ = new base_local_planner_my::CostmapModel(*costmap_);
   }
 }
 
@@ -119,8 +119,8 @@ double ObstacleCostFunction::footprintCost (
     const double& th,
     double scale,
     std::vector<geometry_msgs::Point> footprint_spec,
-    costmap_2d::GridCostmap2D* costmap,
-    base_local_planner::WorldModel* world_model) {
+    costmap_2d_my::GridCostmap2D* costmap,
+    base_local_planner_my::WorldModel* world_model) {
 
   //check if the footprint is legal
   // TODO: Cache inscribed radius
@@ -141,4 +141,4 @@ double ObstacleCostFunction::footprintCost (
   return occ_cost;
 }
 
-} /* namespace base_local_planner */
+} /* namespace base_local_planner_my */

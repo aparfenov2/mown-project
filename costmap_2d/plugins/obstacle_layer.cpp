@@ -35,23 +35,23 @@
  * Author: Eitan Marder-Eppstein
  *         David V. Lu!!
  *********************************************************************/
-#include <costmap_2d/obstacle_layer.h>
-#include <costmap_2d/costmap_math.h>
+#include <costmap_2d_my/obstacle_layer.h>
+#include <costmap_2d_my/costmap_math.h>
 #include <tf2_ros/message_filter.h>
 
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 
-PLUGINLIB_EXPORT_CLASS(costmap_2d::ObstacleLayer, costmap_2d::Layer)
+PLUGINLIB_EXPORT_CLASS(costmap_2d_my::ObstacleLayer, costmap_2d_my::Layer)
 
-using costmap_2d::NO_INFORMATION;
-using costmap_2d::LETHAL_OBSTACLE;
-using costmap_2d::FREE_SPACE;
+using costmap_2d_my::NO_INFORMATION;
+using costmap_2d_my::LETHAL_OBSTACLE;
+using costmap_2d_my::FREE_SPACE;
 
-using costmap_2d::ObservationBuffer;
-using costmap_2d::Observation;
+using costmap_2d_my::ObservationBuffer;
+using costmap_2d_my::Observation;
 
-namespace costmap_2d
+namespace costmap_2d_my
 {
 
 void ObstacleLayer::onInitialize()
@@ -76,7 +76,7 @@ void ObstacleLayer::onInitialize()
   std::string topics_string;
   // get the topics that we'll subscribe to from the parameter server
   nh.param("observation_sources", topics_string, std::string(""));
-  ROS_INFO("    Subscribed to Topics: %s", topics_string.c_str());
+  ROS_INFO("    Subscribed to my Topics: %s", topics_string.c_str());
 
   // now we need to split the topics based on whitespace which we can use a stringstream for
   std::stringstream ss(topics_string);
@@ -223,8 +223,8 @@ void ObstacleLayer::onInitialize()
 
 void ObstacleLayer::setupDynamicReconfigure(ros::NodeHandle& nh)
 {
-  dsrv_ = new dynamic_reconfigure::Server<costmap_2d::ObstaclePluginConfig>(nh);
-  dynamic_reconfigure::Server<costmap_2d::ObstaclePluginConfig>::CallbackType cb = boost::bind(
+  dsrv_ = new dynamic_reconfigure::Server<costmap_2d_my::ObstaclePluginConfig>(nh);
+  dynamic_reconfigure::Server<costmap_2d_my::ObstaclePluginConfig>::CallbackType cb = boost::bind(
       &ObstacleLayer::reconfigureCB, this, _1, _2);
   dsrv_->setCallback(cb);
 }
@@ -234,7 +234,7 @@ ObstacleLayer::~ObstacleLayer()
     if (dsrv_)
         delete dsrv_;
 }
-void ObstacleLayer::reconfigureCB(costmap_2d::ObstaclePluginConfig &config, uint32_t level)
+void ObstacleLayer::reconfigureCB(costmap_2d_my::ObstaclePluginConfig &config, uint32_t level)
 {
   enabled_ = config.enabled;
   footprint_clearing_enabled_ = config.footprint_clearing_enabled;
@@ -419,11 +419,11 @@ void ObstacleLayer::updateFootprint(double robot_x, double robot_y, double robot
     }
 }
 
-void ObstacleLayer::updateCosts(costmap_2d::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
+void ObstacleLayer::updateCosts(costmap_2d_my::GridCostmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   if (footprint_clearing_enabled_)
   {
-    setConvexPolygonCost(transformed_footprint_, costmap_2d::FREE_SPACE);
+    setConvexPolygonCost(transformed_footprint_, costmap_2d_my::FREE_SPACE);
   }
 
   switch (combination_method_)
@@ -439,7 +439,7 @@ void ObstacleLayer::updateCosts(costmap_2d::GridCostmap2D& master_grid, int min_
   }
 }
 
-void ObstacleLayer::addStaticObservation(costmap_2d::Observation& obs, bool marking, bool clearing)
+void ObstacleLayer::addStaticObservation(costmap_2d_my::Observation& obs, bool marking, bool clearing)
 {
   if (marking)
     static_marking_observations_.push_back(obs);
@@ -612,4 +612,4 @@ void ObstacleLayer::reset()
     activate();
 }
 
-}  // namespace costmap_2d
+}  // namespace costmap_2d_my

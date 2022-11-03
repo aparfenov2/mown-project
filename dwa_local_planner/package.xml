@@ -21,7 +21,7 @@
     <maintainer email="mfergs7@gmail.com">Michael Ferguson</maintainer>
     <maintainer email="ahoy@fetchrobotics.com">Aaron Hoy</maintainer>
     <license>BSD</license>
-    <url>http://wiki.ros.org/dwa_local_planner</url>
+    <url>http://wiki.ros.org/dwa_local_planner_my</url>
 
     <buildtool_depend>catkin</buildtool_depend>
 
@@ -32,7 +32,7 @@
     <depend>costmap_2d_my</depend>
     <depend>dynamic_reconfigure</depend>
     <depend>eigen</depend>
-    <depend>nav_core</depend>
+    <depend>nav_core_my</depend>
     <depend>nav_msgs</depend>
     <depend>pluginlib</depend>
     <depend>sensor_msgs</depend>
@@ -42,7 +42,7 @@
     <depend>tf2_ros</depend>
 
     <export>
-        <nav_core plugin="${prefix}/blp_plugin.xml" />
+        <nav_core_my plugin="${prefix}/blp_plugin.xml" />
     </export>
 
 </package>

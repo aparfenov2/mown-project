@@ -34,15 +34,15 @@
 #include <map>
 #include <cmath>
 
-#include <costmap_2d/costmap_2d.h>
-#include <costmap_2d/layered_costmap.h>
-#include <costmap_2d/obstacle_layer.h>
-#include <costmap_2d/inflation_layer.h>
-#include <costmap_2d/observation_buffer.h>
-#include <costmap_2d/testing_helper.h>
+#include <costmap_2d_my/costmap_2d.h>
+#include <costmap_2d_my/layered_costmap.h>
+#include <costmap_2d_my/obstacle_layer.h>
+#include <costmap_2d_my/inflation_layer.h>
+#include <costmap_2d_my/observation_buffer.h>
+#include <costmap_2d_my/testing_helper.h>
 #include <gtest/gtest.h>
 
-using namespace costmap_2d;
+using namespace costmap_2d_my;
 using geometry_msgs::Point;
 
 std::vector<Point> setRadii(LayeredCostmap& layers, double length, double width, double inflation_radius)
@@ -209,17 +209,17 @@ TEST(costmap, testCostFunctionCorrectness){
 
   for(unsigned int i = 0; i <= (unsigned int)ceil(5.0); i++){
     // To the right
-    ASSERT_EQ(map->getCost(50 + i, 50) >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE, true);
-    ASSERT_EQ(map->getCost(50 + i, 50) >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE, true);
+    ASSERT_EQ(map->getCost(50 + i, 50) >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE, true);
+    ASSERT_EQ(map->getCost(50 + i, 50) >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE, true);
     // To the left
-    ASSERT_EQ(map->getCost(50 - i, 50) >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE, true);
-    ASSERT_EQ(map->getCost(50 - i, 50) >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE, true);
+    ASSERT_EQ(map->getCost(50 - i, 50) >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE, true);
+    ASSERT_EQ(map->getCost(50 - i, 50) >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE, true);
     // Down
-    ASSERT_EQ(map->getCost(50, 50 + i) >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE, true);
-    ASSERT_EQ(map->getCost(50, 50 + i) >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE, true);
+    ASSERT_EQ(map->getCost(50, 50 + i) >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE, true);
+    ASSERT_EQ(map->getCost(50, 50 + i) >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE, true);
     // Up
-    ASSERT_EQ(map->getCost(50, 50 - i) >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE, true);
-    ASSERT_EQ(map->getCost(50, 50 - i) >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE, true);
+    ASSERT_EQ(map->getCost(50, 50 - i) >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE, true);
+    ASSERT_EQ(map->getCost(50, 50 - i) >= costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE, true);
   }
 
   // Verify the normalized cost attenuates as expected
@@ -244,7 +244,7 @@ TEST(costmap, testCostFunctionCorrectness){
 
   for(unsigned int i = 0; i < 100; i++)
     for(unsigned int j = 0; j < 100; j++)
-      ASSERT_EQ(map->getCost(i, j), costmap_2d::FREE_SPACE);*/
+      ASSERT_EQ(map->getCost(i, j), costmap_2d_my::FREE_SPACE);*/
 }
 
 /**
@@ -308,7 +308,7 @@ TEST(costmap, testInflation){
     unsigned int x, y;
     map.indexToCells(ind, x, y);
     ASSERT_EQ(find(occupiedCells, map.getIndex(x, y)), true);
-    ASSERT_EQ(map.getCost(x, y) == costmap_2d::LETHAL_OBSTACLE || map.getCost(x, y) == costmap_2d::INSCRIBED_INFLATED_OBSTACLE, true);
+    ASSERT_EQ(map.getCost(x, y) == costmap_2d_my::LETHAL_OBSTACLE || map.getCost(x, y) == costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE, true);
   }*/
 
   addObservation(olayer, 0, 0, 0.4);
@@ -367,8 +367,8 @@ TEST(costmap, testInflation2){
 
   Costmap2D* costmap = layers.getCostmap();
   //printMap(*costmap);
-  ASSERT_EQ(costmap->getCost(2, 3), costmap_2d::INSCRIBED_INFLATED_OBSTACLE);  
-  ASSERT_EQ(costmap->getCost(3, 3), costmap_2d::INSCRIBED_INFLATED_OBSTACLE);
+  ASSERT_EQ(costmap->getCost(2, 3), costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE);  
+  ASSERT_EQ(costmap->getCost(3, 3), costmap_2d_my::INSCRIBED_INFLATED_OBSTACLE);
 }
 
 /**

@@ -35,7 +35,7 @@
 * Author: Eitan Marder-Eppstein
 *********************************************************************/
 
-#include <base_local_planner/point_grid.h>
+#include <base_local_planner_my/point_grid.h>
 #include <ros/console.h>
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -46,7 +46,7 @@
 #include <sensor_msgs/point_cloud2_iterator.h>
 
 using namespace std;
-using namespace costmap_2d;
+using namespace costmap_2d_my;
 
 void printPoint(const geometry_msgs::Point& pt){
   printf("(%.2f, %.2f, %.2f)", pt.x, pt.y, pt.z);
@@ -76,7 +76,7 @@ void printPolygonPS(const std::vector<geometry_msgs::Point32>& poly, double line
 
 }
 
-using namespace base_local_planner;
+using namespace base_local_planner_my;
 
 int main(int argc, char** argv){
   geometry_msgs::Point origin;
