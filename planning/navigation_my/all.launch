@@ -219,7 +219,7 @@
 
   <!-- move_base -->
   <node pkg="move_base_mod" type="move_base_mod" respawn="false" name="move_base_mod" output="screen">
-    <param name="local_costmap/gridmap" value="/costmap_node/costmap/gridmap" />
+    <remap from="/move_base_mod/local_costmap/gridmap" to="/costmap_node/costmap/gridmap" />
 
     <param name="base_local_planner" value="dwa_local_planner_my/DWAPlannerROS" />
     <!-- <rosparam file="$(find move_base_mod)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" /> -->
