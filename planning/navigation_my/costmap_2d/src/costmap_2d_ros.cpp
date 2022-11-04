@@ -181,12 +181,25 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
 }
 
 void Costmap2DROS::onGridMapUpdate(const grid_map_msgs::GridMap& message) {
-    auto &map = layered_costmap_->getCostmap()->getGridMap();
+    grid_map::GridMap &map = layered_costmap_->getCostmap()->getGridMap();
 
     if (message.info.header.frame_id != map.getFrameId()) {
         ROS_ERROR_STREAM("grid_map update rejected: expected frame_id: " << map.getFrameId()
                 << "incoming msg frame id:  " << message.info.header.frame_id);
                 return;
+    }
+    if (message.info.resolution != map.getResolution() || 
+        message.info.length_x != map.getLength()(0) || 
+        message.info.length_y != map.getLength()(1)) {
+        ROS_ERROR_STREAM("grid_map update rejected: " 
+            << "\nexpected resolution: " << map.getResolution()
+            << " length_x_m: " << map.getLength()(0)
+            << " length_y_m: " << map.getLength()(1)
+            << "\nreceived resolution:  " << message.info.resolution
+            << " length_x_m: " << message.info.length_x
+            << " length_y_m: " << message.info.length_y
+            );
+            return;
     }
 
     boost::unique_lock<Costmap2D::mutex_t> lock(*(layered_costmap_->getCostmap()->getMutex()));

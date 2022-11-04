@@ -42,7 +42,8 @@ void GridCostmap2D::resizeMap(unsigned int size_x, unsigned int size_y, double r
                           double origin_x, double origin_y)
 {
     boost::unique_lock<mutex_t> lock(*access_);
-    costmap_.setGeometry(grid_map::Length(size_x, size_y), resolution, grid_map::Position(origin_x, origin_y));
+    costmap_.setGeometry(grid_map::Length(size_x * resolution, size_y * resolution), 
+        resolution, grid_map::Position(origin_x, origin_y));
 }
 
 void GridCostmap2D::updateOrigin(double new_origin_x, double new_origin_y)
