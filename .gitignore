@@ -1,3 +1,6 @@
 *.pyc
-.vscode/settings.json
+.ros
+.vscode
+**/ws/*
+!**/ws/src
 tmp/*
