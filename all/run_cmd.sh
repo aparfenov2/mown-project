@@ -2,8 +2,8 @@ set -e
 
 [ "$1" == "--inner" ] && {
     shift
-    . "/opt/ros/$ROS_DISTRO/setup.bash"    
-    . /cdir/ws/devel/setup.bash
+    . "/opt/ros/$ROS_DISTRO/setup.bash"
+    . /cdir/ws/devel/setup.bash || true
     export TURTLEBOT3_MODEL=waffle
     [ "$1" == "--build" ] && {
         shift
@@ -17,7 +17,7 @@ set -e
         catkin build
         popd
     }
-    
+
     $@
     exit 0
 }
