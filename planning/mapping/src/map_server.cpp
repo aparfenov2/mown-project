@@ -120,12 +120,14 @@ public:
      */
     void publish_occupied_cells()
     {
-
-        map_.setTimestamp(time.toNSec());
+        ros::Time now = ros::Time::now();
+        map_.setTimestamp(now.toNSec());
         grid_map_msgs::GridMap message;
-        GridMapRosConverter::toMessage(map_, message);
+        grid_map::GridMapRosConverter::toMessage(map_, message);
         grid_map_publisher.publish(message);
-        ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
+        static double last_update_s = 0;
+        ROS_INFO_THROTTLE(5.0, "Grid map (freq %f) published.", now.toSec() - last_update_s);
+        last_update_s = now.toSec();
 
         nav_msgs::OccupancyGrid occupancyGrid;
         grid_map::GridMapRosConverter::toOccupancyGrid(map_,
