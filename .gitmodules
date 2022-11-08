@@ -41,3 +41,6 @@
 [submodule "3rd_party/zed-ros-wrapper"]
 	path = 3rd_party/zed-ros-wrapper
 	url = https://github.com/stereolabs/zed-ros-wrapper.git
+[submodule "experiments/try-amslab-dwa-planner/dwa_planner"]
+	path = experiments/try-amslab-dwa-planner/dwa_planner
+	url = https://github.com/amslabtech/dwa_planner.git
