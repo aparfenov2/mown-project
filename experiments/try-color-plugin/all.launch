@@ -97,7 +97,7 @@
     </group>
     <!-- rviz -->
     <group if="$(arg rviz)">
-        <node args="-d $(find my_utils_common)/rviz/cfg.rviz" name="rviz" pkg="rviz" type="rviz" respawn="true"/>
+        <node args="-d /cdir/cfg.rviz" name="rviz" pkg="rviz" type="rviz" respawn="true"/>
     </group>
     <!-- teleop -->
     <group if="$(arg teleop)">
@@ -198,7 +198,7 @@
             </node>
         </group> -->
         <!-- Arguments -->
-<!-- 
+<!--
     <node pkg="simple_planner" type="simple_planner.py" respawn="false" name="simple_planner" output="screen">
         <remap from="goal" to="/move_base_simple/goal" />
     </node>
@@ -233,7 +233,7 @@
     <param name="DWAPlannerROS/publish_cost_grid_pc" value="true" />
     <param name="DWAPlannerROS/publish_traj_pc" value="true" />
     <param name="DWAPlannerROS/occdist_scale" value="64.0" />
-    
+
     <rosparam file="$(find color_layer)/param/global_costmap_params.yaml" command="load" ns="global_costmap" />
     <rosparam file="$(find color_layer)/param/local_costmap_params.yaml" command="load" ns="local_costmap" />
     <!-- <rosparam file="$(find move_base_mod)/param/move_base_params.yaml" command="load" /> -->
@@ -242,7 +242,7 @@
     <remap from="odom" to="$(arg odom_topic)"/>
     <!-- <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" /> -->
   </node>
-<!-- 
+<!--
   <node pkg="move_base_mod" type="move_base_mod" respawn="false" name="move_base_mod" output="screen">
     <!-1- <remap from="/move_base_mod/local_costmap/gridmap" to="/costmap_node/costmap/gridmap" /> -1->
 
