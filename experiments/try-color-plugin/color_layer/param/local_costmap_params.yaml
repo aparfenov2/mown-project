@@ -13,9 +13,10 @@ origin_x: -20
 origin_y: -20
 
 plugins:
-  - {name: color_layer,     type: 'color_layer::ColorLayer'}
+  - {name: static_layer,  type: 'costmap_2d::StaticLayer'}
+  # - {name: color_layer,     type: 'color_layer::ColorLayer'}
   # - {name: obstacle_layer,  type: 'costmap_2d::ObstacleLayer'}
-  # - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
+  - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
 
 color_layer:
   grid_map_updates_topic: /costmap_node/costmap/gridmap
