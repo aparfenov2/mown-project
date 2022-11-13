@@ -43,7 +43,7 @@ class Frame(object):
 
         self._rlock = RLock()
 
-        self._localization = None
+        self._localization_msg = None
 
         self._trajectory = None
 
@@ -57,6 +57,27 @@ class Frame(object):
         self._path_done = False
         self._cov_path_done = False
         self._cov_task = False
+
+        self._planning_task_type = PlanningTaskTypeWrapper()
+        self._localization = LocalizationWrapper()
+        self._line_moving_task = LineMovingTaskWrapper()
+        self._circle_moving_task = CircleMovingTaskWrapper()
+
+    @property
+    def circle_moving_task(self):
+        return self._circle_moving_task
+
+    @property
+    def line_moving_task(self):
+        return self._line_moving_task
+
+    @property
+    def localization(self):
+        return self._localization
+
+    @property
+    def planning_task_type(self):
+        return self._planning_task_type
 
     def resete_debug(self):
         self._debug_data.coverage_path = None
@@ -158,10 +179,11 @@ class Frame(object):
         return self._task_plan_poly is not None
 
     def set_localization(self, message):
-        self._localization = message
+        self._localization_msg = message
+        self._localization.receive_message(message)
 
     def has_localization(self):
-        return self._localization is not None
+        return self._localization_msg is not None
 
     def receive_map_message(self, message):
         with self._rlock:
@@ -194,18 +216,18 @@ class Frame(object):
             self._grid_map_obstacles = obstacles
 
     def get_localization(self):
-        return self._localization
+        return self._localization_msg
 
     @property
     def linear_speed(self):
-        return self._localization.speed
+        return self._localization_msg.speed
 
     @property
     def linear_acceleration(self):
-        return self._localization.linear_acceleration
+        return self._localization_msg.linear_acceleration
 
     def get_robot_yaw(self):
-        return self._localization.yaw
+        return self._localization_msg.yaw
 
     def get_grid_map_obstacles(self):
         return self._grid_map_obstacles
@@ -218,3 +240,171 @@ class Frame(object):
 
     def get_current_task_type(self):
         return self._current_task_type
+
+
+class LocalizationWrapper:
+    def __init__(self) -> None:
+        self._message = None
+
+    def receive_message(self, message):
+        self._message = message
+
+    def has_localization(self):
+        return self._message is not None
+
+    @property
+    def stamp(self):
+        return self._message.header.stamp
+
+    @property
+    def stamp_sec(self):
+        return self._message.header.stamp.to_sec()
+
+    @property
+    def pose(self):
+        return (self._message.pose.x,
+                self._message.pose.y,
+                self._message.yaw)
+
+    @property
+    def position(self):
+        return (self._message.pose.x, self._message.pose.y)
+
+    @property
+    def linear_speed(self):
+        return self._message.speed
+
+    @property
+    def linear_acceleration(self):
+        return self._message.linear_acceleration
+
+    @property
+    def yaw(self):
+        return self._message.yaw
+
+
+class PlanningTaskTypeWrapper:
+    def __init__(self) -> None:
+        self._message = None
+
+    def receive_message(self, message):
+        self._message = message
+
+    def has_message(self):
+        return self._message is not None
+
+    @property
+    def type(self):
+        return self._message.type
+
+    @property
+    def stamp_sec(self):
+        return self._message.header.stamp.to_sec()
+
+
+class LineMovingTaskWrapper:
+    def __init__(self) -> None:
+        self._message = None
+
+    @property
+    def distance(self):
+        return self._message.distance
+
+    @property
+    def target_speed(self):
+        return self._message.target_speed
+
+    def receive_message(self, message):
+        self._message = message
+
+    def has_message(self):
+        return self._message is not None
+
+    @property
+    def stamp_sec(self):
+        return self._message.header.stamp.to_sec()
+
+
+class CircleMovingTaskWrapper:
+    def __init__(self) -> None:
+        self._message = None
+
+    @property
+    def left_radius(self):
+        return self._message.left_radius
+
+    @property
+    def right_radius(self):
+        return self._message.right_radius
+
+    @property
+    def target_speed(self):
+        return self._message.target_speed
+
+    def receive_message(self, message):
+        self._message = message
+
+    def has_message(self):
+        return self._message is not None
+
+    @property
+    def stamp_sec(self):
+        return self._message.header.stamp.to_sec()
+
+
+class DubinsPlanningTaskWrapper:
+    def __init__(self) -> None:
+        self._message = None
+
+    @property
+    def target_pose(self):
+        return (self._message.target_pose.x,
+                self._message.target_pose.y,
+                self._message.target_pose.theta)
+
+    @property
+    def turning_radius(self):
+        return self._message.turning_radius
+
+    @property
+    def step_size(self):
+        return self._message.step_size
+
+    @property
+    def target_speed(self):
+        return self._message.target_speed
+
+    def receive_message(self, message):
+        self._message = message
+
+    def has_message(self):
+        return self._message is not None
+
+    @property
+    def stamp_sec(self):
+        return self._message.header.stamp.to_sec()
+
+
+class CoveragePlanningTask:
+    def __init__(self) -> None:
+        self._message = None
+
+    @property
+    def path(self):
+        return (self._message.target_pose.x,
+                self._message.target_pose.y,
+                self._message.target_pose.theta)
+
+    @property
+    def target_speed(self):
+        return self._message.target_speed
+
+    def receive_message(self, message):
+        self._message = message
+
+    def has_message(self):
+        return self._message is not None
+
+    @property
+    def stamp_sec(self):
+        return self._message.header.stamp.to_sec()

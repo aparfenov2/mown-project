@@ -12,12 +12,15 @@ from behavior_planning.node import (TrajectoryPublisher,
                                     IdleNode, SpeedGeneratorNode,
                                     CovaragePathGeneratorNode, CoverageNode,
                                     TestTrajectoryNode, SimpleSpeedGenerator,
-                                    TestStraightLineNode, TestCirclesNode)
-from behavior_planning.behavior import SelectByMessageNode
+                                    TestStraightLineNode, TestCirclesNode,
+                                    CircleMovingNode, LineMovingNode,
+                                    DubingPlanningNode)
+from behavior_planning.behavior import SelectByMessageNode, TaskMessageSelector
 
 from nav_msgs.msg import OccupancyGrid, Path
 from enginx_msgs.msg import (Route, Localization, RouteTaskPolygon,
-                             RouteTaskToPoint, PlanningDebug)
+                             RouteTaskToPoint, PlanningDebug,
+                             LineMovingTask, PlanningTaskType, CircleMovingTask)
 
 
 class BehaviorPlanningNode(AbstractNode):
@@ -56,6 +59,16 @@ class BehaviorPlanningNode(AbstractNode):
         rospy.Subscriber(rospy.get_param('/planner/topics/localization'),
                          Localization,
                          self.receive_localization)
+        rospy.Subscriber(rospy.get_param('/planner/topics/behavior_planner/type_task'),
+                         PlanningTaskType,
+                         self._frame.planning_task_type.receive_message)
+        rospy.Subscriber(rospy.get_param('/planner/topics/behavior_planner/line_move_task'),
+                         LineMovingTask,
+                         self._frame.line_moving_task.receive_message)
+        rospy.Subscriber(rospy.get_param('/planner/topics/behavior_planner/circle_move_task'),
+                         CircleMovingTask,
+                         self._frame.circle_moving_task.receive_message)
+
 
     def work(self):
         with self._rlock:
@@ -126,6 +139,22 @@ class BehaviorTreeBuilder(object):
         return behavior_selector
 
 
+class MessageSelectionBehaviorTreeBuilder(object):
+    def build(self, frame):
+        idle_node = IdleNode(name='idle_node', frame=frame)
+        line_move_node = LineMovingNode(name='line_move_node', frame=frame)
+        circle_move_node = CircleMovingNode(name='circle_move_node', frame=frame)
+        dubins_planning_node = DubingPlanningNode(name='dubins_planning_node', frame=frame)
+
+        node_selector = TaskMessageSelector(name='idle_node',
+                                            frame=frame,
+                                            default_node=idle_node,
+                                            line_moving_node=line_move_node,
+                                            circle_moving_node=circle_move_node,
+                                            dubins_planning_node=dubins_planning_node)
+        return node_selector
+
+
 class TestBTreeBuilder(object):
     def build(self, frame):
         # test_node = TestCirclesNode(name="test_node",
@@ -145,8 +174,8 @@ class BehaviorPlanner(object):
     def __init__(self, frame) -> None:
         self._frame = frame
         # self._tree = BehaviorTreeBuilder().build(self._frame)
-
-        self._tree = TestBTreeBuilder().build(self._frame)
+        # self._tree = TestBTreeBuilder().build(self._frame)
+        self._tree = MessageSelectionBehaviorTreeBuilder().build(self._frame)
 
     def execute(self):
         return self._tree.tick()

@@ -115,6 +115,7 @@ add_message_files(
   Route.msg
   Localization.msg
   LocalTrajectoryStamped.msg
+  PlanningTaskType.msg
   PointWithSpeed.msg
   ProgressRoutePlanner.msg
   RouteTaskPolygon.msg
@@ -128,6 +129,13 @@ add_message_files(
   PlanningDebug.msg
   SpeedGeneratorDebug.msg
   ControlDebug.msg
+)
+
+add_message_files(
+  DIRECTORY msg/planning
+  FILES
+  LineMovingTask.msg
+  CircleMovingTask.msg
 )
 
 generate_messages(DEPENDENCIES std_msgs geometry_msgs nav_msgs)

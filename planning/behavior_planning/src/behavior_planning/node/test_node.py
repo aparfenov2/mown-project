@@ -59,8 +59,8 @@ class TestTrajectoryNode(Node):
 class TestStraightLineNode(Node):
     def __init__(self, name, frame, line_len, *args, **kwargs):
         super(TestStraightLineNode, self).__init__(name=name,
-                                                  run_cb=self.run,
-                                                  *args, **kwargs)
+                                                   run_cb=self.run,
+                                                   *args, **kwargs)
         self._frame = frame
         self._published = False
         self._line_len = line_len
