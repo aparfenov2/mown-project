@@ -24,3 +24,7 @@ color_layer:
   grass_color: 0x00ff2600
   road_color:  0x00200000
   non_grass_cost: 254
+
+inflation_layer:
+  inflation_radius: 1.0
+  cost_scaling_factor: 2.0
