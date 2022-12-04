@@ -36,8 +36,11 @@ public:
    * @param visited all the nodes visited by the spiral
    * @return list of nodes that form the spiral
    */
-  std::list<gridNode_t> spiral(std::vector<std::vector<bool> > const &grid, std::list<gridNode_t> &init,
+  static std::list<gridNode_t> spiral(std::vector<std::vector<bool> > const &grid, std::list<gridNode_t> &init,
                                       std::vector<std::vector<bool> > &visited);
+
+  static std::list<gridNode_t> exit_coverage_spot(std::vector<std::vector<bool> > const &grid, std::list<gridNode_t> &init,
+                                      std::vector<std::vector<bool> > &visited, std::vector<std::vector<bool> > const &coverage_grid);
 
   /**
    * Perform Spiral-STC (Spanning Tree Coverage) coverage path planning.
@@ -47,10 +50,10 @@ public:
    * @param init
    * @return
    */
-  std::list<Point_t> spiral_stc(std::vector<std::vector<bool> > const &grid,
+  static std::list<Point_t> spiral_stc(std::vector<std::vector<bool> > const &grid,
                                         Point_t &init,
                                         int &multiple_pass_counter,
-                                        int &visited_counter);
+                                        int &visited_counter, std::vector<std::vector<bool> > const &coverage_grid);
 
 private:
   /**
@@ -70,7 +73,9 @@ private:
    */
   void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
   ros::Subscriber map_sub_;
-  std::vector<std::vector<bool> > coverage_grid_;
+  nav_msgs::OccupancyGrid last_coverage_grid_msg_;
+  typedef boost::recursive_mutex mutex_t;
+  mutex_t* coverage_access_;
   void incomingCoverageMap(const nav_msgs::OccupancyGridConstPtr& map);
 };
 

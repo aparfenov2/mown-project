@@ -63,6 +63,21 @@ void FullCoveragePathPlanner::publishPlan(const std::vector<geometry_msgs::PoseS
   plan_pub_.publish(gui_path);
 }
 
+float euclidean_distance(float x1, float y1, float x2, float y2)
+{
+	float x = x1 - x2; //calculating number to square in next step
+	float y = y1 - y2;
+	float dist;
+
+	dist = std::pow(x, 2) + std::pow(y, 2);       //calculating Euclidean distance
+	dist = std::sqrt(dist);
+
+	return dist;
+}
+
+#define GRID_TO_WORLD_X(_x) ((_x) * tile_size_ + grid_origin_.x + tile_size_ * 0.5)
+#define GRID_TO_WORLD_Y(_y) ((_y) * tile_size_ + grid_origin_.y + tile_size_ * 0.5)
+
 void FullCoveragePathPlanner::parsePointlist2Plan(const geometry_msgs::PoseStamped& start,
     std::list<Point_t> const& goalpoints,
     std::vector<geometry_msgs::PoseStamped>& plan)
@@ -75,6 +90,7 @@ void FullCoveragePathPlanner::parsePointlist2Plan(const geometry_msgs::PoseStamp
   ROS_INFO("Received goalpoints with length: %lu", goalpoints.size());
   if (goalpoints.size() > 1)
   {
+    int last_x, last_y;
     for (it = goalpoints.begin(); it != goalpoints.end(); ++it)
     {
       it_next = it;
@@ -85,6 +101,8 @@ void FullCoveragePathPlanner::parsePointlist2Plan(const geometry_msgs::PoseStamp
       // Check for the direction of movement
       if (it == goalpoints.begin())
       {
+        last_x = it->x;
+        last_y = it->y;
         dx_now = it_next->x - it->x;
         dy_now = it_next->y - it->y;
       }
@@ -109,15 +127,32 @@ void FullCoveragePathPlanner::parsePointlist2Plan(const geometry_msgs::PoseStamp
       // dwa planner cannot plan outside rolling map
     //   do_publish = move_dir_next != move_dir_now || it == goalpoints.begin() ||
     //                (it != goalpoints.end() && it == --goalpoints.end());
-      do_publish = true;
+      do_publish = false;
+      if (it == goalpoints.begin() || it == --goalpoints.end()) {
+        do_publish = true;
+      }
+      if (move_dir_next != move_dir_now) {
+        do_publish = true;
+      }
+
+      float max_consequtive_distance = 4.0;
+      if (euclidean_distance(GRID_TO_WORLD_X(last_x), GRID_TO_WORLD_Y(last_y),
+                            GRID_TO_WORLD_X(it->x), GRID_TO_WORLD_Y(it->y)) >
+                            max_consequtive_distance)
+      {
+          last_x = it->x;
+          last_y = it->y;
+          do_publish = true;
+      }
+
       move_dir_prev = move_dir_now;
 
       // Add to vector if required
       if (do_publish)
       {
         new_goal.header.frame_id = frame_id_;
-        new_goal.pose.position.x = (it->x) * tile_size_ + grid_origin_.x + tile_size_ * 0.5;
-        new_goal.pose.position.y = (it->y) * tile_size_ + grid_origin_.y + tile_size_ * 0.5;
+        new_goal.pose.position.x = GRID_TO_WORLD_X(it->x);
+        new_goal.pose.position.y = GRID_TO_WORLD_Y(it->y);
         // Calculate desired orientation to be in line with movement direction
         switch (move_dir_now)
         {
@@ -256,7 +291,7 @@ bool FullCoveragePathPlanner::parseGrid(costmap_2d::Costmap2D *costmap_,
   uint32_t nodeSize = dmax(floor(toolRadius / resolution), 1);  // Size of node in pixels/units
   uint32_t robotNodeSize = dmax(floor(robotRadius / resolution), 1);  // RobotRadius in pixels/units
   uint32_t nRows = costmap_->getSizeInCellsY(), nCols = costmap_->getSizeInCellsX();
-  ROS_INFO("nRows: %u nCols: %u nodeSize: %d", nRows, nCols, nodeSize);
+  ROS_INFO("parseGrid(costmap): nRows: %u nCols: %u nodeSize: %d", nRows, nCols, nodeSize);
 
   if (nRows == 0 || nCols == 0)
   {
