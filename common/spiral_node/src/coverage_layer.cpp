@@ -106,7 +106,7 @@ namespace full_coverage_path_planner
             // not_footprint_ = visited_cells_ - footprint_set
             std::copy_if(visited_cells_.begin(), visited_cells_.end(), std::back_inserter(not_footprint_),
                 [&footprint_set] (costmap_2d::MapLocation needle) { return footprint_set.find(needle) == footprint_set.end(); });
-            
+
             for (auto &it : not_footprint_)
             {
                 visited_cells_.erase(it);
@@ -120,7 +120,7 @@ namespace full_coverage_path_planner
             int least_cost = INT_MAX;
 
             for (double phi=origin_yaw; phi < origin_yaw + 2*M_PI; phi += M_PI_4)
-            {   
+            {
                 std::vector<costmap_2d::MapLocation> cells;
                 costmap_2d::Costmap2D::PolygonOutlineCells cell_gatherer(*this, nullptr, cells);
                 double radius = 1.5 * layered_costmap_->getCircumscribedRadius();
@@ -131,7 +131,7 @@ namespace full_coverage_path_planner
                 unsigned int mx1, my1;
                 if (!worldToMap(x1, y1, mx1, my1)) {
                     continue;
-                }                
+                }
                 raytraceLine(cell_gatherer, origin_mx, origin_my, mx1, my1);
                 int cost = 0;
                 for (const costmap_2d::MapLocation& p : cells) {
@@ -145,7 +145,7 @@ namespace full_coverage_path_planner
 
             // not_footprint_.erase(
             //     std::remove_if(not_footprint_.begin(), not_footprint_.end(),
-            //         [least_obstacles_direction_, origin_mx, origin_my](const costmap_2d::MapLocation& p) -> bool { 
+            //         [least_obstacles_direction_, origin_mx, origin_my](const costmap_2d::MapLocation& p) -> bool {
             //             int rx = p.x - origin_mx;
             //             int ry = p.y - origin_my;
             //             double q = std::atan2((double)ry , (double)rx);
@@ -153,7 +153,7 @@ namespace full_coverage_path_planner
             //         }),
             //     not_footprint_.end()
             //     );
-            
+
             // update update bounds
             for (auto &it : not_footprint_)
             {

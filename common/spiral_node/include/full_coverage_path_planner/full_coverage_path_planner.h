@@ -114,6 +114,7 @@ protected:
   // nav_msgs::OccupancyGrid cpp_grid_;
   float robot_radius_;
   float tool_radius_;
+  std::string frame_id_;
   float plan_resolution_;
   float tile_size_;
   fPoint_t grid_origin_;

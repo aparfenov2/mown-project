@@ -204,9 +204,9 @@ bool a_star_to_open_space(std::vector<std::vector<bool> > const &grid, gridNode_
 void printGrid(std::vector<std::vector<bool> > const& grid, std::vector<std::vector<bool> > const& visited,
                std::list<Point_t> const& path)
 {
-  for (uint iy = grid.size() - 1; iy >= 0; --iy)
+  for (int iy = grid.size() - 1; iy >= 0; --iy)
   {
-    for (uint ix = 0; ix < grid[0].size(); ++ix)
+    for (int ix = 0; ix < grid[0].size(); ++ix)
     {
       if (visited[iy][ix])
       {
@@ -239,9 +239,9 @@ void printGrid(std::vector<std::vector<bool> > const& grid, std::vector<std::vec
 void printGrid(std::vector<std::vector<bool> > const& grid, std::vector<std::vector<bool> > const& visited,
                std::list<gridNode_t> const& path, gridNode_t start, gridNode_t end)
 {
-  for (uint iy = grid.size() - 1; iy >= 0; --iy)
+  for (int iy = grid.size() - 1; iy >= 0; --iy)
   {
-    for (uint ix = 0; ix < grid[0].size(); ++ix)
+    for (int ix = 0; ix < grid[0].size(); ++ix)
     {
       if (visited[iy][ix])
       {
@@ -273,9 +273,9 @@ void printGrid(std::vector<std::vector<bool> > const& grid, std::vector<std::vec
 
 void printGrid(std::vector<std::vector<bool> > const& grid)
 {
-  for (uint iy = grid.size() - 1; iy >= 0; --iy)
+  for (int iy = grid.size() - 1; iy >= 0; --iy)
   {
-    for (uint ix = 0; ix < grid[0].size(); ++ix)
+    for (int ix = 0; ix < grid[0].size(); ++ix)
     {
       if (grid[iy][ix])
       {

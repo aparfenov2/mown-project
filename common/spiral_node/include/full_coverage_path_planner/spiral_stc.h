@@ -36,7 +36,7 @@ public:
    * @param visited all the nodes visited by the spiral
    * @return list of nodes that form the spiral
    */
-  static std::list<gridNode_t> spiral(std::vector<std::vector<bool> > const &grid, std::list<gridNode_t> &init,
+  std::list<gridNode_t> spiral(std::vector<std::vector<bool> > const &grid, std::list<gridNode_t> &init,
                                       std::vector<std::vector<bool> > &visited);
 
   /**
@@ -47,7 +47,7 @@ public:
    * @param init
    * @return
    */
-  static std::list<Point_t> spiral_stc(std::vector<std::vector<bool> > const &grid,
+  std::list<Point_t> spiral_stc(std::vector<std::vector<bool> > const &grid,
                                         Point_t &init,
                                         int &multiple_pass_counter,
                                         int &visited_counter);
@@ -69,6 +69,9 @@ private:
    * @param  costmap A pointer to the ROS wrapper of the costmap to use for planning
    */
   void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
+  ros::Subscriber map_sub_;
+  std::vector<std::vector<bool> > coverage_grid_;
+  void incomingCoverageMap(const nav_msgs::OccupancyGridConstPtr& map);
 };
 
 }  // namespace full_coverage_path_planner

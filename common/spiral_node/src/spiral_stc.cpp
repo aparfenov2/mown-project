@@ -33,9 +33,29 @@ void SpiralSTC::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_r
     // Define  tool radius (radius) parameter
     float tool_radius_default = 0.5f;
     private_named_nh.param<float>("tool_radius", tool_radius_, tool_radius_default);
+    std::string default_frame_id = "map";
+    private_named_nh.param<std::string>("frame_id", frame_id_, default_frame_id);
     initialized_ = true;
     costmap_ros_ = costmap_ros;
+
+    std::string coverage_map_topic;
+    std::string default_coverage_map_topic = "/coverage_grid";
+    private_named_nh.param<std::string>("coverage_map_topic", coverage_map_topic, default_coverage_map_topic);
+
+    map_sub_ = nh.subscribe(coverage_map_topic, 1, &SpiralSTC::incomingCoverageMap, this);
   }
+}
+
+void SpiralSTC::incomingCoverageMap(const nav_msgs::OccupancyGridConstPtr& map) {
+    geometry_msgs::PoseStamped start;
+    Point_t startPoint;
+    ROS_INFO_THROTTLE(15, "incomingCoverageMap: recieved update");
+    coverage_grid_.empty();
+  if (!parseGrid(*map, coverage_grid_, robot_radius_ * 2, tool_radius_ * 2, start, startPoint ))
+  {
+    ROS_ERROR("incomingCoverageMap: Could not parse retrieved grid");
+  }
+
 }
 
 std::list<gridNode_t> SpiralSTC::spiral(std::vector<std::vector<bool> > const& grid, std::list<gridNode_t>& init,
@@ -51,6 +71,55 @@ std::list<gridNode_t> SpiralSTC::spiral(std::vector<std::vector<bool> > const& g
     it--;                    // Let iterator point to second to last element
 
   gridNode_t prev = *(it);
+
+  // escape from coverage spot
+  // trace the spot in 4 directions until first uncovered open cell or map boundary
+  // select the shortest path
+  std::list<std::list<gridNode_t>> coverage_spot_exits;
+  // Initialize spiral direction towards y-axis
+  dx = 0;
+  dy = 1;
+  for (int i = 0; i < 4; ++i)
+  {
+    x2 = pathNodes.back().pos.x + dx;
+    y2 = pathNodes.back().pos.y + dy;
+    std::list<gridNode_t> exit_path;
+
+    while (
+      x2 >= 0 && x2 < nCols && y2 >= 0 && y2 < nRows &&
+      grid[y2][x2] == eNodeOpen && visited[y2][x2] == eNodeOpen &&
+      coverage_grid_[y2][x2] == eNodeClosed
+    )
+    {
+      Point_t new_point = { x2, y2 };
+      gridNode_t new_node =
+      {
+        new_point,  // Point: x,y
+        0,          // Cost
+        0,          // Heuristic
+      };
+
+      exit_path.push_back(new_node);
+      dx2 = dx2 + dx;
+      dy2 = dy2 + dy;
+    }
+    coverage_spot_exits.push_back(exit_path);
+
+    dx_prev = dx;
+    dx = -dy;
+    dy = dx_prev;
+  }
+  std::list<gridNode_t> shortest_exit_path;
+  for (int i = 0; i < 4; ++i)
+  {
+    if (coverage_spot_exits[i].size() < shortest_exit_path.size())
+    {
+      shortest_exit_path = coverage_spot_exits[i];
+    }
+  }
+  pathNodes.insert(pathNodes.end(), shortest_exit_path.begin(), shortest_exit_path.end());
+
+  // unwinding Spiral
   bool done = false;
   while (!done)
   {
@@ -59,6 +128,7 @@ std::list<gridNode_t> SpiralSTC::spiral(std::vector<std::vector<bool> > const& g
       // turn ccw
       dx = pathNodes.back().pos.x - prev.pos.x;
       dy = pathNodes.back().pos.y - prev.pos.y;
+
       dx_prev = dx;
       dx = -dy;
       dy = dx_prev;
@@ -71,10 +141,22 @@ std::list<gridNode_t> SpiralSTC::spiral(std::vector<std::vector<bool> > const& g
     }
     done = true;
 
+    // try next step
+    // list open grid cells as open_grid_list
+    // list all open that not covered as open_grid_not_covered
+    //      if any open_grid_not_covered - go there
+    //          mark (open open_grid_list - open_grid_not_covered) as visited
+    //      if none open_grid_not_covered - go first open open_grid_list
+    //          mark all open_grid_list as visited
+
+    std::vector<gridNode_t> open_grid_list;
+
+    int dx2 = dx, dy2 = dy;
+
     for (int i = 0; i < 4; ++i)
     {
-      x2 = pathNodes.back().pos.x + dx;
-      y2 = pathNodes.back().pos.y + dy;
+      x2 = pathNodes.back().pos.x + dx2;
+      y2 = pathNodes.back().pos.y + dy2;
       if (x2 >= 0 && x2 < nCols && y2 >= 0 && y2 < nRows)
       {
         if (grid[y2][x2] == eNodeOpen && visited[y2][x2] == eNodeOpen)
@@ -83,21 +165,46 @@ std::list<gridNode_t> SpiralSTC::spiral(std::vector<std::vector<bool> > const& g
           gridNode_t new_node =
           {
             new_point,  // Point: x,y
-            0,          // Cost
+            coverage_grid_[y2][x2] ? 1 : 0,          // Cost
             0,          // Heuristic
           };
-          prev = pathNodes.back();
-          pathNodes.push_back(new_node);
-          it = --(pathNodes.end());
-          visited[y2][x2] = eNodeVisited;  // Close node
-          done = false;
-          break;
+            open_grid_list.push_back(new_node);
         }
       }
       // try next direction cw
-      dx_prev = dx;
-      dx = dy;
-      dy = -dx_prev;
+      dx_prev = dx2;
+      dx2 = dy2;
+      dy2 = -dx_prev;
+    }
+
+    int first_open_idx = -1;
+    int first_open_uncovered_idx = -1;
+
+    ROS_ASSERT(open_grid_list.size() <= 4);
+
+    for (int i=0; i < open_grid_list.size(); i++) {
+        auto pt = open_grid_list[i];
+        if (first_open_idx < 0) {
+            first_open_idx = i;
+        }
+        if (first_open_uncovered_idx < 0) {
+            if (!pt.cost) {
+                first_open_uncovered_idx = i;
+            }
+        }
+    }
+
+    int first_possibly_uncovered_idx = first_open_uncovered_idx >= 0 ? first_open_uncovered_idx : first_open_idx;
+
+    if (first_open_idx >= 0) {
+        auto new_node = open_grid_list[first_open_idx];
+        // ROS_INFO("%d %d first_open_uncovered_idx %d first_open_idx %d", new_node.pos.y, new_node.pos.x, first_open_uncovered_idx, first_open_idx);
+          prev = pathNodes.back();
+          new_node.cost = 0;
+          pathNodes.push_back(new_node);
+          it = --(pathNodes.end());
+          visited[new_node.pos.y][new_node.pos.x] = eNodeVisited;  // Close node
+          done = false;
     }
   }
   return pathNodes;
@@ -146,7 +253,7 @@ std::list<Point_t> SpiralSTC::spiral_stc(std::vector<std::vector<bool> > const& 
     fullPath.push_back(newPoint);
   }
   // Remove all elements from pathNodes list except last element
-  pathNodes.erase(pathNodes.begin(), --(pathNodes.end()));
+  pathNodes.erase(pathNodes.begin(), --(pathNodes.end()));      // dwa planner cannot plan outside rolling map
 
 #ifdef DEBUG_PLOT
   ROS_INFO("Current grid after first spiral is");
@@ -157,7 +264,7 @@ std::list<Point_t> SpiralSTC::spiral_stc(std::vector<std::vector<bool> > const& 
   {
     // Remove all elements from pathNodes list except last element.
     // The last point is the starting point for a new search and A* extends the path from there on
-    pathNodes.erase(pathNodes.begin(), --(pathNodes.end()));
+    pathNodes.erase(pathNodes.begin(), --(pathNodes.end()));    // dwa planner cannot plan outside rolling map
     visited_counter--;  // First point is already counted as visited
     // Plan to closest open Node using A*
     // `goals` is essentially the map, so we use `goals` to determine the distance from the end of a potential path

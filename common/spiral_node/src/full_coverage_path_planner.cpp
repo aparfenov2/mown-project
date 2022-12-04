@@ -106,14 +106,16 @@ void FullCoveragePathPlanner::parsePointlist2Plan(const geometry_msgs::PoseStamp
       move_dir_next = dx_next + dy_next * 2;
 
       // Check if this points needs to be published (i.e. a change of direction or first or last point in list)
-      do_publish = move_dir_next != move_dir_now || it == goalpoints.begin() ||
-                   (it != goalpoints.end() && it == --goalpoints.end());
+      // dwa planner cannot plan outside rolling map
+    //   do_publish = move_dir_next != move_dir_now || it == goalpoints.begin() ||
+    //                (it != goalpoints.end() && it == --goalpoints.end());
+      do_publish = true;
       move_dir_prev = move_dir_now;
 
       // Add to vector if required
       if (do_publish)
       {
-        new_goal.header.frame_id = "map";
+        new_goal.header.frame_id = frame_id_;
         new_goal.pose.position.x = (it->x) * tile_size_ + grid_origin_.x + tile_size_ * 0.5;
         new_goal.pose.position.y = (it->y) * tile_size_ + grid_origin_.y + tile_size_ * 0.5;
         // Calculate desired orientation to be in line with movement direction
@@ -153,7 +155,7 @@ void FullCoveragePathPlanner::parsePointlist2Plan(const geometry_msgs::PoseStamp
   }
   else
   {
-    new_goal.header.frame_id = "map";
+    new_goal.header.frame_id = frame_id_;
     new_goal.pose.position.x = (goalpoints.begin()->x) * tile_size_ + grid_origin_.x + tile_size_ * 0.5;
     new_goal.pose.position.y = (goalpoints.begin()->y) * tile_size_ + grid_origin_.y + tile_size_ * 0.5;
     new_goal.pose.orientation = tf::createQuaternionMsgFromYaw(0);
@@ -196,7 +198,7 @@ bool FullCoveragePathPlanner::parseGrid(nav_msgs::OccupancyGrid const& cpp_grid_
   uint32_t nodeSize = dmax(floor(toolRadius / cpp_grid_.info.resolution), 1);  // Size of node in pixels/units
   uint32_t robotNodeSize = dmax(floor(robotRadius / cpp_grid_.info.resolution), 1);  // RobotRadius in pixels/units
   uint32_t nRows = cpp_grid_.info.height, nCols = cpp_grid_.info.width;
-  ROS_INFO("nRows: %u nCols: %u nodeSize: %d", nRows, nCols, nodeSize);
+  ROS_INFO_THROTTLE(15, "parseGrid(occ_grid): nRows: %u nCols: %u nodeSize: %d", nRows, nCols, nodeSize);
 
   if (nRows == 0 || nCols == 0)
   {
