@@ -40,8 +40,10 @@ cv::Mat createLTU(int len);
 
 static const int INPUT_H = 1024;
 static const int INPUT_W = 1024;
+static const int OUTPUT_H = 1024;
+static const int OUTPUT_W = 1024;
 static const int NUM_CLASSES = 19;
-static const int OUTPUT_SIZE = INPUT_H * INPUT_W;
+// static const int OUTPUT_SIZE = INPUT_H * INPUT_W;
 static const char* INPUT_BLOB_NAME = "input_0";
 static const char* OUTPUT_BLOB_NAME = "output_0";
 extern Logger gLogger;
@@ -63,11 +65,18 @@ public:
     std::string weights_filename;
     cudaStream_t stream;
     float *data;
-    int *prob; // using int. output is index
+    float *prob;
+    int grass_id_;
+    int road_id_;
     void *buffers[2];
 
     DDRNetNode():pnh("~") {
         pnh.param("weights_file", weights_filename, std::string("DDRNet.engine"));
+        pnh.param("grass_id", grass_id_, 1);
+        pnh.param("road_id", road_id_, 2);
+
+        ROS_INFO("using %d for grass id, %d for road id", grass_id_, road_id_);
+        
         mask_color_pub = pnh.advertise<sensor_msgs::Image>("mask_color", 2);
         overlay_pub = pnh.advertise<sensor_msgs::Image>("overlay", 2);
         image_transport = new image_transport::ImageTransport(nh);
@@ -118,9 +127,9 @@ public:
         // prepare input data ---------------------------
         cudaSetDeviceFlags(cudaDeviceMapHost);
         // float *data;
-        // int *prob; // using int. output is index
-        CHECK(cudaHostAlloc((void **)&data, BATCH_SIZE * 3 * INPUT_H * INPUT_W * sizeof(float), cudaHostAllocMapped));
-        CHECK(cudaHostAlloc((void **)&prob, BATCH_SIZE * OUTPUT_SIZE * sizeof(int), cudaHostAllocMapped));
+        // float *prob;
+        CHECK(cudaHostAlloc((void **)&data, BATCH_SIZE * 3           * INPUT_H * INPUT_W * sizeof(float), cudaHostAllocMapped));
+        CHECK(cudaHostAlloc((void **)&prob, BATCH_SIZE * NUM_CLASSES * OUTPUT_H * OUTPUT_W * sizeof(float), cudaHostAllocMapped));
 
         IRuntime *runtime = createInferRuntime(gLogger);
         assert(runtime != nullptr);
@@ -196,6 +205,16 @@ public:
         return output;
     }
 
+    void dumpProbs(std::string fn, float *prob) {
+        std::ofstream wf(fn, std::ios::out | std::ios::binary);
+        if(!wf) {
+            std::cout << "Cannot open file!" << std::endl;
+            return;
+        }
+        wf.write((char *) prob, BATCH_SIZE * NUM_CLASSES * OUTPUT_H * OUTPUT_W * sizeof(float));
+        wf.close();
+    }
+
     void imageCallback(const sensor_msgs::ImageConstPtr& input) {
 
         cv_bridge::CvImagePtr cv_ptr;
@@ -234,31 +253,52 @@ public:
         auto start = std::chrono::high_resolution_clock::now();
         doInference(*context, stream, buffers, BATCH_SIZE);
         auto end = std::chrono::high_resolution_clock::now();
-        ROS_INFO_STREAM_THROTTLE(5, "ddrnet inference took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" );
+        ROS_INFO_STREAM_THROTTLE(10, "ddrnet inference took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" );
 
 
-        cv::Mat outimg(INPUT_H, INPUT_W, CV_8UC1);
-        for (int row = 0; row < INPUT_H; ++row)
+        cv::Mat outimg(OUTPUT_H, OUTPUT_W, CV_32FC3);
+
+        float *prob_grass = &prob[grass_id_ * OUTPUT_H * OUTPUT_W];
+        float *prob_road  = &prob[road_id_  * OUTPUT_H * OUTPUT_W];
+        const int grass_channel = 0;
+        const int road_channel = 1;
+        
+        for (int row = 0; row < OUTPUT_H; ++row)
         {
-            uchar *uc_pixel = outimg.data + row * outimg.step;
-            for (int col = 0; col < INPUT_W; ++col)
+            for (int col = 0; col < OUTPUT_W; ++col)
             {
-                uc_pixel[col] = (uchar)prob[row * INPUT_W + col];
+                auto vec = cv::Vec3f();
+                vec[grass_channel] = prob_grass[row * OUTPUT_W + col];
+                vec[road_channel] = prob_road[row * OUTPUT_W + col];
+                outimg.at<cv::Vec3f>(cv::Point(col, row)) = vec;
             }
         }
-        cv::Mat im_color;
-        cv::cvtColor(outimg, im_color, cv::COLOR_GRAY2RGB);
-        cv::Mat lut = createLTU(NUM_CLASSES);
-        cv::LUT(im_color, lut, im_color);
-        // false color
-        cv::cvtColor(im_color, im_color, cv::COLOR_RGB2GRAY);
-        cv::applyColorMap(im_color, im_color, cv::COLORMAP_HOT);
+
+        dumpProbs("probs.bin", prob);
+
+        // double minVal; 
+        // double maxVal; 
+        // cv::minMaxLoc( outimg, &minVal, &maxVal);
+        // ROS_INFO_STREAM_THROTTLE(10, "minVal " << minVal << " maxVal " << maxVal );
+
+        // cv::Mat im_color;
+        // cv::cvtColor(outimg, im_color, cv::COLOR_GRAY2RGB);
+        // cv::Mat lut = createLTU(NUM_CLASSES);
+        // cv::LUT(im_color, lut, im_color);
+        // // false color
+        // cv::cvtColor(im_color, im_color, cv::COLOR_RGB2GRAY);
+        // cv::applyColorMap(im_color, im_color, cv::COLORMAP_HOT);
 
         // cv::Mat fusionImg;
         // cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
 
         // cv::resize(im_color,im_color,cv::Size(orig_w,orig_h));
-        im_color = resizeKeepAspectRatioBack(im_color, cv::Size(orig_w,orig_h), 0 );
+        
+        auto im_color = resizeKeepAspectRatioBack(outimg, cv::Size(orig_w,orig_h), 0 );
+
+        // cv::Mat debug_color;
+        // cv::cvtColor(outimg, debug_color, cv::COLOR_RGB2GRAY);
+
         // std::cout << im_color.rows << " " << im_color.cols << " " << im_color.channels() << "\n";
         // std::cout << img.rows << " " << img.cols << " " << img.channels() << "\n";
 
@@ -266,22 +306,22 @@ public:
         {
             cv_bridge::CvImage out_msg;
             out_msg.header   = input->header; // Same timestamp and tf frame as input image
-            out_msg.encoding = sensor_msgs::image_encodings::BGR8; // Or whatever
+            out_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC3; // Or whatever
             out_msg.image    = im_color;
             mask_color_pub.publish(out_msg.toImageMsg());
         }
 
 
-        cv::cvtColor(img, img, cv::COLOR_RGB2BGR);
-        cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
+        // cv::cvtColor(img, img, cv::COLOR_RGB2BGR);
+        // cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
 
-        {
-            cv_bridge::CvImage out_msg;
-            out_msg.header   = input->header; // Same timestamp and tf frame as input image
-            out_msg.encoding = sensor_msgs::image_encodings::BGR8; // Or whatever
-            out_msg.image    = im_color;
-            overlay_pub.publish(out_msg.toImageMsg());
-        }
+        // {
+        //     cv_bridge::CvImage out_msg;
+        //     out_msg.header   = input->header; // Same timestamp and tf frame as input image
+        //     out_msg.encoding = sensor_msgs::image_encodings::BGR8; // Or whatever
+        //     out_msg.image    = debug_color;
+        //     overlay_pub.publish(out_msg.toImageMsg());
+        // }
     }
 };
 

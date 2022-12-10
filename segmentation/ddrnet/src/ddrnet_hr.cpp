@@ -206,13 +206,17 @@ ICudaEngine *createEngine(unsigned int maxBatchSize, IBuilder *builder, IBuilder
     dim.d[2] = INPUT_W;
     auto feature_map = netAddUpsampleBi(network, conv_1785->getOutput(0), dim);
     debug_print(feature_map->getOutput(0), "upsample");
-    auto topk = network->addTopK(*feature_map->getOutput(0), TopKOperation::kMAX, 1, 0X01);
 
-    debug_print(topk->getOutput(0), "topk");
+    // auto topk = network->addTopK(*feature_map->getOutput(0), TopKOperation::kMAX, 1, 0X01);
+    // debug_print(topk->getOutput(0), "topk");
 
     std::cout << "set name out" << std::endl;
-    topk->getOutput(1)->setName(OUTPUT_BLOB_NAME);
-    network->markOutput(*topk->getOutput(1));
+    // topk->getOutput(1)->setName(OUTPUT_BLOB_NAME);
+    // network->markOutput(*topk->getOutput(1));
+
+    feature_map->getOutput(1)->setName(OUTPUT_BLOB_NAME);
+    network->markOutput(*feature_map->getOutput(1));
+
     builder->setMaxBatchSize(maxBatchSize);
     config->setMaxWorkspaceSize((1 << 30)); // 1G
 #ifdef USE_FP16
