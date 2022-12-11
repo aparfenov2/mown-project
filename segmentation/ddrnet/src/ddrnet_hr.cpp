@@ -214,8 +214,8 @@ ICudaEngine *createEngine(unsigned int maxBatchSize, IBuilder *builder, IBuilder
     // topk->getOutput(1)->setName(OUTPUT_BLOB_NAME);
     // network->markOutput(*topk->getOutput(1));
 
-    feature_map->getOutput(1)->setName(OUTPUT_BLOB_NAME);
-    network->markOutput(*feature_map->getOutput(1));
+    feature_map->getOutput(0)->setName(OUTPUT_BLOB_NAME);
+    network->markOutput(*feature_map->getOutput(0));
 
     builder->setMaxBatchSize(maxBatchSize);
     config->setMaxWorkspaceSize((1 << 30)); // 1G

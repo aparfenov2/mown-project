@@ -219,6 +219,7 @@ public:
 
         cv_bridge::CvImagePtr cv_ptr;
 
+        auto start_all = std::chrono::high_resolution_clock::now();
         try
         {    
             cv_ptr = cv_bridge::toCvCopy(input, sensor_msgs::image_encodings::RGB8);
@@ -253,15 +254,15 @@ public:
         auto start = std::chrono::high_resolution_clock::now();
         doInference(*context, stream, buffers, BATCH_SIZE);
         auto end = std::chrono::high_resolution_clock::now();
-        ROS_INFO_STREAM_THROTTLE(10, "ddrnet inference took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" );
+        ROS_INFO_STREAM_THROTTLE(15, "ddrnet inference took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" );
 
 
         cv::Mat outimg(OUTPUT_H, OUTPUT_W, CV_32FC3);
 
         float *prob_grass = &prob[grass_id_ * OUTPUT_H * OUTPUT_W];
         float *prob_road  = &prob[road_id_  * OUTPUT_H * OUTPUT_W];
-        const int grass_channel = 0;
-        const int road_channel = 1;
+        const int grass_channel = 1;
+        const int road_channel = 2;
         
         for (int row = 0; row < OUTPUT_H; ++row)
         {
@@ -274,12 +275,12 @@ public:
             }
         }
 
-        dumpProbs("probs.bin", prob);
+        // dumpProbs("probs.bin", prob);
 
-        // double minVal; 
-        // double maxVal; 
-        // cv::minMaxLoc( outimg, &minVal, &maxVal);
-        // ROS_INFO_STREAM_THROTTLE(10, "minVal " << minVal << " maxVal " << maxVal );
+        double minVal; 
+        double maxVal; 
+        cv::minMaxLoc( outimg, &minVal, &maxVal);
+        ROS_INFO_STREAM_THROTTLE(15, "minVal " << minVal << " maxVal " << maxVal );
 
         // cv::Mat im_color;
         // cv::cvtColor(outimg, im_color, cv::COLOR_GRAY2RGB);
@@ -302,26 +303,40 @@ public:
         // std::cout << im_color.rows << " " << im_color.cols << " " << im_color.channels() << "\n";
         // std::cout << img.rows << " " << img.cols << " " << img.channels() << "\n";
 
+        // im_color.convertTo(im_color, CV_8UC3, 255);
 
         {
             cv_bridge::CvImage out_msg;
             out_msg.header   = input->header; // Same timestamp and tf frame as input image
-            out_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC3; // Or whatever
+            // http://docs.ros.org/en/jade/api/sensor_msgs/html/namespacesensor__msgs_1_1image__encodings.html
+            out_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC3;
             out_msg.image    = im_color;
             mask_color_pub.publish(out_msg.toImageMsg());
         }
 
+        if (overlay_pub.getNumSubscribers() > 0) {
+            // double OldRange = (maxVal - minVal);
+            // double NewRange = (255 - 0);
+            // double NewValue = (((OldValue - minVal) * NewRange) / OldRange) + 0;
+            // OldValue * NewRange/ OldRange - minVal * NewRange/ OldRange
 
-        // cv::cvtColor(img, img, cv::COLOR_RGB2BGR);
-        // cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
+            // m(x,y)=saturate_cast<rType>(α(∗this)(x,y)+β)
+            im_color.convertTo(im_color, CV_8UC3, 255./(maxVal - minVal), - minVal * 255./(maxVal - minVal));
 
-        // {
-        //     cv_bridge::CvImage out_msg;
-        //     out_msg.header   = input->header; // Same timestamp and tf frame as input image
-        //     out_msg.encoding = sensor_msgs::image_encodings::BGR8; // Or whatever
-        //     out_msg.image    = debug_color;
-        //     overlay_pub.publish(out_msg.toImageMsg());
-        // }
+            // cv::cvtColor(img, img, cv::COLOR_RGB2BGR);
+            // cv::addWeighted(img, 1, im_color, 0.8, 1, im_color);
+
+            {
+                cv_bridge::CvImage out_msg;
+                out_msg.header   = input->header; // Same timestamp and tf frame as input image
+                out_msg.encoding = sensor_msgs::image_encodings::BGR8; // Or whatever
+                out_msg.image    = im_color;
+                overlay_pub.publish(out_msg.toImageMsg());
+            }
+        }
+
+        auto end_all = std::chrono::high_resolution_clock::now();
+        ROS_INFO_STREAM_THROTTLE(15, "ddrnet cycle time " << std::chrono::duration_cast<std::chrono::milliseconds>(end_all - start_all).count() << " ms" );
     }
 };
 
