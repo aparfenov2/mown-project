@@ -40,9 +40,9 @@ move_controller:
     range_sensor_threshold: 1.4
 
     speed_pid:
-      p: 0.5
+      p: 0.01
       i: 0.0
-      d: 20.0
+      d: 0.0
       min_value: -2.0
       max_value: 2.0
       min_integral_error: -1.0

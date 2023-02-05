@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import math
 from threading import RLock
+import numpy as np
 
 import rospy
 import tf
 from tf import TransformListener
-from tf.transformations import euler_from_quaternion
+from tf.transformations import euler_from_quaternion, euler_matrix
 
 from abstractnode import AbstractNode
 from nav_msgs.msg import Odometry
@@ -33,17 +34,17 @@ class OdometryToLocalizationNode(AbstractNode):
         rospy.Subscriber(odometry_topic, Odometry, self.__odometry_callback)
 
     def __odometry_callback(self, message: Odometry):
-        if True: # self.tf_listener_.frameExists("/world") and self.tf_listener_.frameExists("/axel_center"):
-            p1 = PoseStamped()
-            # p1.header.frame_id = "base_link"
-            p1.header.frame_id = "axel_center"
-            p1.pose = message.pose.pose
-            # p_in_base = self.tf_listener_.transformPose("/axel_center", p1)
-            p_in_base = self.tf_listener_.transformPose("/base_link", p1)
-            # rospy.logwarn(f"BEFORE: {p1}\nAFTER: {p_in_base}")
-            message.pose.pose = p_in_base.pose
-        else:
-            rospy.logwarn(f"FRAMES doesn't exits: {self.tf_listener_.frameExists('/world')}, {self.tf_listener_.frameExists('/axel_center')}")
+        # if True: # self.tf_listener_.frameExists("/world") and self.tf_listener_.frameExists("/axel_center"):
+        #     p1 = PoseStamped()
+        #     p1.header.frame_id = "base_link"
+        #     # p1.header.frame_id = "axel_center"
+        #     p1.pose = message.pose.pose
+        #     # p_in_base = self.tf_listener_.transformPose("/axel_center", p1)
+        #     p_in_base = self.tf_listener_.transformPose("/base_link", p1)
+        #     # rospy.logwarn(f"BEFORE: {p1}\nAFTER: {p_in_base}")
+        #     message.pose.pose = p_in_base.pose
+        # else:
+        #     rospy.logwarn(f"FRAMES doesn't exits: {self.tf_listener_.frameExists('/world')}, {self.tf_listener_.frameExists('/axel_center')}")
         self.debug_publish(message)
         localization_msg = self.__odom_to_loc(message)
         self.localization_publisher.publish(localization_msg)
@@ -59,15 +60,26 @@ class OdometryToLocalizationNode(AbstractNode):
         localization.yaw = euler[2]
         localization.angular_speed = odometry.twist.twist.angular.z
 
-        localization.speed = math.hypot(odometry.twist.twist.linear.x, odometry.twist.twist.linear.y)
+        # localization.speed = math.hypot(odometry.twist.twist.linear.x, odometry.twist.twist.linear.y)
+        velocity = [odometry.twist.twist.linear.x, odometry.twist.twist.linear.y, odometry.twist.twist.linear.z]
+        rot_velocity = self.__rotate_to_body_frame(velocity, euler)
+        localization.speed = rot_velocity[0]
+
         if self._last_time is None:
             localization.linear_acceleration = 0.0
         else:
             localization.linear_acceleration = (localization.speed - self._last_speed) / max(10e-10, odometry.header.stamp.to_sec() - self._last_time)
 
         self._last_time = odometry.header.stamp.to_sec()
-        self._last_speed = odometry.twist.twist.linear.x
+        self._last_speed = localization.speed
         return localization
+
+    def __rotate_to_body_frame(self, speed, euler):
+        R = euler_matrix(-euler[0], -euler[1], -euler[2])
+        t = np.array([1.0]*4)
+        t[:3] = np.array(speed)
+        t = R.dot(t)
+        return t[:3]
 
     def debug_publish(self, message):
         pose_stamped = PoseStamped()

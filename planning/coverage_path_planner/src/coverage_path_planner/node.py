@@ -19,7 +19,7 @@ from geometry_msgs.msg import PoseStamped, Pose, Quaternion, TwistStamped, Twist
 from nav_msgs.msg import Odometry
 from nav_msgs.msg import Path
 
-from enginx_msgs.msg import CoverageTask, Localization, RouteTaskPolygon
+from enginx_msgs.msg import CoverageTask, Localization, RouteTaskPolygon, CoveragePlanningTask, PlanningTaskType
 
 
 class CoveragePlannerNode(AbstractNode):
@@ -31,10 +31,26 @@ class CoveragePlannerNode(AbstractNode):
         self._offset_resolution = rospy.get_param('/planner/coverage_planner_node/offset_resolution')
         self._robot_position = []
 
+        self.turning_radius = 3.0
+        self.target_speed = 0.2
+
         self._debug_publisher = rospy.Publisher('planner/debug/coverage_path', Path, queue_size=2)
         self._task_publisher = rospy.Publisher(rospy.get_param('planner/topics/task_polygon_planning'),
                                                RouteTaskPolygon,
                                                queue_size=2)
+
+        self.task_type_publisher = rospy.Publisher(
+            rospy.get_param('/planner/topics/behavior_planner/type_task'),
+            PlanningTaskType,
+            queue_size=1,
+            latch=True
+        )
+        self.task_publisher = rospy.Publisher(
+            rospy.get_param('/planner/topics/behavior_planner/coverage_planning_task'),
+            CoveragePlanningTask,
+            queue_size=1,
+            latch=True
+        )
 
         rospy.Subscriber(rospy.get_param('/planner/topics/localization'),
                          Localization,
@@ -67,6 +83,7 @@ class CoveragePlannerNode(AbstractNode):
                     point_count = max(1, int(point_count))
                     extended_segment = np.linspace(temp_polygon[i-1], temp_polygon[i], point_count).tolist()
                     listed_polygon += extended_segment
+            print(listed_polygon)
             if message.auto_angle:
                 path_creator = AreaPolygon(listed_polygon, self._robot_position, ft=self._step_size)
             else:
@@ -88,10 +105,22 @@ class CoveragePlannerNode(AbstractNode):
 
             self._debug_publisher.publish(path)
 
-            task = RouteTaskPolygon()
-            task.header.stamp = rospy.get_rostime()
-            task.path = path
-            self._task_publisher.publish(task)
+            time_now = rospy.Time.now()
+            coverage_task_message = CoveragePlanningTask()
+            coverage_task_message.header.stamp = time_now
+            coverage_task_message.turning_radius = self.turning_radius
+            coverage_task_message.step_size = 0.1
+            coverage_task_message.target_speed = self.target_speed
+            coverage_task_message.path = path
+
+            self._publish_task_type(time_now)
+            self.task_publisher.publish(coverage_task_message)
+
+    def _publish_task_type(self, stamp):
+        planning_task_type_message = PlanningTaskType()
+        planning_task_type_message.header.stamp = stamp
+        planning_task_type_message.type = PlanningTaskType.COVERAGE_TASK
+        self.task_type_publisher.publish(planning_task_type_message)
 
     def _create_offset(self, polygon):
         shapely_polygon = Polygon(polygon)

@@ -270,7 +270,7 @@
             <arg name="robot" value="$(arg robot)" />
         </include>
 
-        <include file="$(find my_utils_common)/launch/map.launch"/>        
+        <!-- <include file="$(find my_utils_common)/launch/map.launch"/>         -->
         
         <param name="planner/topics/velocity_commands" value="$(arg cmd_vel_topic)"/>
         <!-- <include file="$(find route_util)/launch/utils.launch"/> -->

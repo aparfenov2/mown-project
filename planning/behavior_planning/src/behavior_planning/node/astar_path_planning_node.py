@@ -10,6 +10,7 @@ from tf.transformations import euler_from_quaternion
 
 from behavior_planning.algorithms import AstarWrapper
 from behavior_planning.algorithms import ContinuosAstarWrapper
+from .trajectory_smoother import TrajectorySmoother
 
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Point32, PoseStamped
@@ -133,7 +134,7 @@ class AstarPathPlanningNode(Node):
         return np.linalg.norm(p1 - p2)
 
 
-class TrajectorySmoother:
+class TrajectorySmootherOld:
     def __init__(self, w: list, raise_exception=True) -> None:
         self._w1 = w[0]
         self._w2 = w[1]

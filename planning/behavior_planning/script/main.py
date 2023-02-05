@@ -14,13 +14,14 @@ from behavior_planning.node import (TrajectoryPublisher,
                                     TestTrajectoryNode, SimpleSpeedGenerator,
                                     TestStraightLineNode, TestCirclesNode,
                                     CircleMovingNode, LineMovingNode,
-                                    DubingPlanningNode)
+                                    DubingPlanningNode, CoveragePlanPathGeneratorNode)
 from behavior_planning.behavior import SelectByMessageNode, TaskMessageSelector
 
 from nav_msgs.msg import OccupancyGrid, Path
 from enginx_msgs.msg import (Route, Localization, RouteTaskPolygon,
                              RouteTaskToPoint, PlanningDebug,
-                             LineMovingTask, PlanningTaskType, CircleMovingTask)
+                             LineMovingTask, PlanningTaskType,
+                             CoveragePlanningTask, CircleMovingTask)
 
 
 class BehaviorPlanningNode(AbstractNode):
@@ -68,7 +69,9 @@ class BehaviorPlanningNode(AbstractNode):
         rospy.Subscriber(rospy.get_param('/planner/topics/behavior_planner/circle_move_task'),
                          CircleMovingTask,
                          self._frame.circle_moving_task.receive_message)
-
+        rospy.Subscriber(rospy.get_param('/planner/topics/behavior_planner/coverage_planning_task'),
+                         CoveragePlanningTask,
+                         self._frame.coverage_planning_task.receive_message)
 
     def work(self):
         with self._rlock:
@@ -145,13 +148,15 @@ class MessageSelectionBehaviorTreeBuilder(object):
         line_move_node = LineMovingNode(name='line_move_node', frame=frame)
         circle_move_node = CircleMovingNode(name='circle_move_node', frame=frame)
         dubins_planning_node = DubingPlanningNode(name='dubins_planning_node', frame=frame)
+        coverage_planning_node = CoveragePlanPathGeneratorNode(name='coverage_planning_node', frame=frame)
 
         node_selector = TaskMessageSelector(name='idle_node',
                                             frame=frame,
                                             default_node=idle_node,
                                             line_moving_node=line_move_node,
                                             circle_moving_node=circle_move_node,
-                                            dubins_planning_node=dubins_planning_node)
+                                            dubins_planning_node=dubins_planning_node,
+                                            coverage_node=coverage_planning_node)
         return node_selector
 
 

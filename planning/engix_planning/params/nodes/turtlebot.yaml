@@ -29,7 +29,7 @@ move_controller:
     d: 0.5
 
     max_val: 2.0
-    max_integrator: 1.0
+    max_integrator: 1.0 
   
   nonlinear_mpc:
     horizon: 2.0
@@ -40,7 +40,7 @@ move_controller:
     range_sensor_threshold: 1.4
   
     speed_pid:
-      p: 1.0
+      p: 0.5
       i: 0.0
       d: 1.0
       min_value: -1.0
@@ -61,8 +61,8 @@ move_controller:
     carrot: 4
 
 coverage_planner_node:
-  step_size: 2.0
-  offset_distance: -2.0
+  step_size: 0.5
+  offset_distance: -0.1
   offset_resolution: 3
 
 behavior_planning_node:

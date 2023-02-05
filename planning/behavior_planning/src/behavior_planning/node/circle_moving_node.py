@@ -80,7 +80,7 @@ class CircleMovingNode(Node):
                 self._paths.append((localization, route2))
 
             self._current == -1
-            self._last_stamp = self._frame.line_moving_task.stamp_sec
+            self._last_stamp = self._frame.circle_moving_task.stamp_sec
 
         if self._current == -1:
             self._current = 0

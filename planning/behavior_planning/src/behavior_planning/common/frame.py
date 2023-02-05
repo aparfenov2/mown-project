@@ -62,6 +62,11 @@ class Frame(object):
         self._localization = LocalizationWrapper()
         self._line_moving_task = LineMovingTaskWrapper()
         self._circle_moving_task = CircleMovingTaskWrapper()
+        self._coverage_planning_task = CoveragePlanningTask()
+
+    @property
+    def coverage_planning_task(self):
+        return self._coverage_planning_task
 
     @property
     def circle_moving_task(self):
@@ -391,13 +396,20 @@ class CoveragePlanningTask:
 
     @property
     def path(self):
-        return (self._message.target_pose.x,
-                self._message.target_pose.y,
-                self._message.target_pose.theta)
+        return [(pose.pose.position.x, pose.pose.position.y)
+                for pose in self._message.path.poses]
 
     @property
     def target_speed(self):
         return self._message.target_speed
+
+    @property
+    def turning_radius(self):
+        return self._message.turning_radius
+
+    @property
+    def step_size(self):
+        return self._message.step_size
 
     def receive_message(self, message):
         self._message = message

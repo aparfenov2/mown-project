@@ -33,3 +33,4 @@ behavior_planner:
   type_task: "/planner/behavior_planner/type_task"
   line_move_task: "/planner/behavior_planner/line_move_task"
   circle_move_task: "/planner/behavior_planner/circle_move_task"
+  coverage_planning_task: "/planner/behavior_planner/coverage_planning_task"

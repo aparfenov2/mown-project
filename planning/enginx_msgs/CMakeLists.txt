@@ -136,6 +136,7 @@ add_message_files(
   FILES
   LineMovingTask.msg
   CircleMovingTask.msg
+  CoveragePlanningTask.msg
 )
 
 generate_messages(DEPENDENCIES std_msgs geometry_msgs nav_msgs)

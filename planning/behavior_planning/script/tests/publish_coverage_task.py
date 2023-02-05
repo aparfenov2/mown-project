@@ -1,6 +1,7 @@
 import rospy
 
-from enginx_msgs.msg import LineMovingTask, PlanningTaskType
+from geometry_msgs.msg import PoseStamped
+from enginx_msgs.msg import CoveragePlanningTask, PlanningTaskType
 from rosgraph_msgs.msg import Clock
 
 
@@ -16,7 +17,7 @@ def wait_for_clock():
 
 
 if __name__ == '__main__':
-    distance = 5.0
+    turning_radius = 3.0
     target_speed = 0.2
 
     rospy.init_node('publish_line_move_task', anonymous=True)
@@ -30,8 +31,8 @@ if __name__ == '__main__':
         latch=True
     )
     task_publisher = rospy.Publisher(
-        rospy.get_param('/planner/topics/behavior_planner/line_move_task'),
-        LineMovingTask,
+        rospy.get_param('/planner/topics/behavior_planner/coverage_planning_task'),
+        CoveragePlanningTask,
         queue_size=1,
         latch=True
     )
@@ -40,15 +41,22 @@ if __name__ == '__main__':
 
     planning_task_type_message = PlanningTaskType()
     planning_task_type_message.header.stamp = time_now
-    planning_task_type_message.type = PlanningTaskType.LINE_MOVING_TASK
+    planning_task_type_message.type = PlanningTaskType.COVERAGE_TASK
 
-    line_move_task_message = LineMovingTask()
-    line_move_task_message.header.stamp = time_now
-    line_move_task_message.distance = distance
-    line_move_task_message.target_speed = target_speed
+    coverage_task_message = CoveragePlanningTask()
+    coverage_task_message.header.stamp = time_now
+    coverage_task_message.turning_radius = turning_radius
+    coverage_task_message.step_size = 0.1
+    coverage_task_message.target_speed = target_speed
+
+    for point in [(1.0, 0.0), (8.0, 0.0), (7.0, 7.0), (1.0, 7.0)]:
+        pose = PoseStamped()
+        pose.pose.position.x = point[0]
+        pose.pose.position.y = point[1]
+        coverage_task_message.path.poses.append(pose)
 
     task_type_publisher.publish(planning_task_type_message)
-    task_publisher.publish(line_move_task_message)
+    task_publisher.publish(coverage_task_message)
 
     rospy.loginfo("Done...")
     rospy.spin()

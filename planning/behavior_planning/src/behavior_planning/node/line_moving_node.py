@@ -59,10 +59,10 @@ class LineMovingNode(Node):
                 pws.d_time = 0.0
                 route.route.append(pws)
 
-            self._speed_generator = SpeedGenerator(target_speed, 5, 5)
+            self._speed_generator = SpeedGenerator(target_speed, 10, 10)
             self._speed_generator.fill_speeds(route, True)
 
             self._frame.set_trajectory(route)
-            self._last_stamp = self._frame.line_moving_task.stamp_sec            
+            self._last_stamp = self._frame.line_moving_task.stamp_sec
 
         return NodeStatus(NodeStatus.SUCCESS)

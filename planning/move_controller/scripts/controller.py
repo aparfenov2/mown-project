@@ -216,7 +216,7 @@ class ControllerNode(AbstractNode):
             #                            -np.rad2deg(1) * 0.1,
             #                            np.rad2deg(1) * 0.1)
 
-            print(f"CONTROLLER {linear_velocity=}, {angular_velocity=}, control time: {end_t - start_t}")
+            # print(f"CONTROLLER {linear_velocity=}, {angular_velocity=}, control time: {end_t - start_t}")
 
             if linear_velocity is None:
                 linear_velocity = 0.0

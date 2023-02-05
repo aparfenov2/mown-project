@@ -40,9 +40,12 @@ class LeonardoController(object):
 
         w = self._steer_lqr.execute(self._frame.state, self._frame.path)
 
-        print(f'[LeonardoController] {robot_speed=}, {current_v=}, {a=}')
+        out_speed = robot_speed + a * self._dt
+        out_speed = 0.0 if out_speed < 0.0 else out_speed
 
-        return robot_speed + a, w
+        print(f'[LeonardoController] {robot_speed=} {out_speed=}, {current_v=}, {a=}')
+
+        return out_speed, w
 
     def _calc_nearest_index(self):
         state = self._frame.state
@@ -91,7 +94,7 @@ class PIDController(object):
 
         self.integrate_error = self.__bound(self.integrate_error, self.min_integral_error, self.max_integral_error)
 
-        value = self.p * error + self.i * self.integrate_error + self.d * d_error
+        value = self.p * error + self.i * self.integrate_error * 0.1 + self.d * d_error / 0.1
 
         value = self.__bound(value, self.min_value, self.max_value)
         return value
