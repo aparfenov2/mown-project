@@ -5,10 +5,11 @@ set -e
     . "/opt/ros/$ROS_DISTRO/setup.bash"
     . /cdir/ws/devel/setup.bash || true
     export TURTLEBOT3_MODEL=waffle
+    export ROSCONSOLE_FORMAT='[${severity}] [${node}]: ${message}'
     [ "$1" == "--build" ] && {
         shift
         pushd $PWD
-        cd /cdir/ws 
+        cd /cdir/ws
         # catkin_make
         catkin config \
         --extend /opt/ros/$ROS_DISTRO \

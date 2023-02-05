@@ -25,11 +25,14 @@ namespace color_layer
         // virtual void matchSize();
 
     private:
+        std::string log_name_;
         unsigned long grass_color_;
         unsigned long road_color_;
         bool use_road_color_;
         bool black_is_obstacle_;
         unsigned char non_grass_cost_;
+        double last_hit_; // instance-aware ROS_LOG_THROTTLE
+        double last_update_s_;
 
         void reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level);
         dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
