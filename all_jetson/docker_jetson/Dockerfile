@@ -1,6 +1,7 @@
 # ------- ROS core --------
 
-FROM ubuntu:focal
+# FROM ubuntu:focal
+FROM timongentzsch/l4t-ubuntu20-opencv:latest
 # FROM nvidia/cudagl:11.0.3-devel-ubuntu20.04
 # FROM nvcr.io/nvidia/l4t-base:r32.4.4
 # FROM nvcr.io/nvidia/l4t-base:r32.6.1
@@ -20,7 +21,7 @@ FROM ubuntu:focal
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
-    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
+    # ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
     apt-get update && \
     apt-get install -q -y --no-install-recommends tzdata && \
     rm -rf /var/lib/apt/lists/*
@@ -198,15 +199,18 @@ RUN if [ "x$(nproc)" = "x1" ] ; then export USE_PROC=1 ; else export USE_PROC=$(
 
 WORKDIR /tmp
 
-COPY requirements.txt ./
+# COPY requirements.txt ./
 
-# Install requirements
-RUN python3 -m pip install --no-cache-dir --upgrade pip && \
-    python3 -m pip install --no-cache-dir -r requirements.txt
-RUN rm requirements.txt
+# # Install requirements
+# RUN python3 -m pip install --no-cache-dir --upgrade pip && \
+#     python3 -m pip install --no-cache-dir -r requirements.txt
+# RUN rm requirements.txt
+
+RUN python3 -m pip install matplotlib scikit-learn Shapely tk
 
 RUN apt-get install -y python3-tk
-RUN python3 -m pip install -U catkin_tools
+# RUN python3 -m pip install -U catkin_tools
+RUN apt-get install -y python3-catkin-tools
 
 WORKDIR /catkin_ws
 RUN apt-get update && apt-get install -y \
@@ -214,4 +218,72 @@ RUN apt-get update && apt-get install -y \
 	python3-sklearn-lib
 
 
+RUN apt-get install -y ros-noetic-rosbridge-suite
+# RUN apt-get update && apt-get install -y ros-noetic-rtabmap-ros
+
+RUN apt-get update && apt-get install -y libturbojpeg
+RUN ln -s $(which python3) /usr/bin/python
+
+# RUN add-apt-repository ppa:deadsnakes/ppa
+# RUN apt-get update
+# RUN apt-get install python3-tk
+RUN python3 -m pip install Rtree
+# RUN python3 -m pip install casadi
+RUN apt-get install -y ros-noetic-octomap
+RUN apt-get install -y ros-noetic-octomap-msgs
+RUN apt-get install -y ros-noetic-rviz
+
+# Install IPOPT
+RUN apt-get -y install gcc g++ gfortran git patch wget pkg-config liblapack-dev libmetis-dev
+
+# Install CASADI
+WORKDIR /tmp
+# RUN git clone https://github.com/casadi/casadi.git -b tested casadi && \
+#     export CMAKE_PREFIX_PATH=$HOME/local/ && \
+#     cd /tmp/casadi && \
+#     mkdir build && \
+#     cd /tmp/casadi/build && \
+#     cmake .. && \
+#     make && \
+#     make install 
+RUN python -m pip install casadi pyproj
+
+# Install ZED SDK
+# WORKDIR /tmp
+# RUN wget https://download.stereolabs.com/zedsdk/3.7/l4t32.4/jetsons && \
+#     chmod +x jetsons && \ 
+#     ./jetsons -- silent
+
+ARG L4T_MINOR_VERSION=1
+ARG ZED_SDK_MAJOR=3
+ARG ZED_SDK_MINOR=7
+ARG JETPACK_MAJOR=32
+ARG JETPACK_MINOR=7
+
+# 
+# install zedsdk
+#
+
+RUN apt-get update -y && apt-get install --no-install-recommends -y lsb-release wget less udev sudo apt-transport-https build-essential cmake libusb-1.0-0-dev && \
+    echo "# R${JETPACK_MAJOR} (release), REVISION: ${JETPACK_MINOR}.${L4T_MINOR_VERSION}" > /etc/nv_tegra_release ; \
+    wget -q --no-check-certificate -O ZED_SDK_Linux_JP.run https://download.stereolabs.com/zedsdk/${ZED_SDK_MAJOR}.${ZED_SDK_MINOR}/l4t${JETPACK_MAJOR}.${JETPACK_MINOR}/jetsons && \
+    chmod +x ZED_SDK_Linux_JP.run && ./ZED_SDK_Linux_JP.run silent && \
+    rm -rf /usr/local/zed/resources/* && \
+    rm -rf ZED_SDK_Linux_JP.run && \
+    rm -rf /var/lib/apt/lists/*
+RUN python -m pip install matplotlib
+RUN python3 -m pip install --upgrade odrive
+RUN bash -c "curl https://cdn.odriverobotics.com/files/odrive-udev-rules.rules > /etc/udev/rules.d/91-odrive.rules && udevadm control --reload-rules && udevadm trigger"
+
+RUN git clone https://github.com/eric-wieser/ros_numpy && \
+    cd ros_numpy && python setup.py install && \
+    rm -rf /tmp/ros_numpy/*
+
+# For Rtree lib
+RUN apt update
+RUN apt install libspatialindex-dev
+
+RUN python -m pip install dubins fibre
+
+WORKDIR /catkin_ws
 
