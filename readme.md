@@ -26,7 +26,7 @@ args are:
 - --proj  - projection (of segmentation data to grid costmap)
 - --teleop - run teleop (run it in a separate window)
 
-OBSOLETE: 
+OBSOLETE:
 1. simulation/run_sim.sh  - starts gazebo simulation with virtual robot model
 2. etc
 
@@ -34,7 +34,7 @@ launcher.sh - common launcher script for all submodules
 
 using docker registry
 ------------------------
-You can use docker registry to split build and run stages. 
+You can use docker registry to split build and run stages.
 1. docker login -u=testuser -p=testpassword kan-rt.ddns.net:5043
 2. docker tag yourimage:latest kan-rt.ddns.net:5043/yourimage:latest
 docker push
@@ -42,7 +42,7 @@ docker push
 Planning
 ------------------------
 ### Usage
-Run planning modules with roslaunch command: 
+Run planning modules with roslaunch command:
 ```
 roslaunch my_utils_common all.launch planning:=true
 ```
@@ -86,7 +86,7 @@ Go button test
 ! git submodule update --init --recursive отключен в run_all.cmd, теперь надо делать вручную. Это чтобы не сбрасывать версию субмодуля при разработке.
 
 запускаем след. ноды:
-run_all.sh --sim
+run_all.sh --sim --robot ya_model
 run_all.sh --planning
 run_all.sh backend:=true
 run_all.sh --rosbridge
@@ -100,12 +100,18 @@ run_all.sh --studio
 
 добавляем панель "Mower" из доступного набора панелей
 
-рисуем полигон инстрментом "точка", последовательно кликая не менее 3х точек. По завершении кликнуть на начальную точку, чтобы полигон стал красным. 
+рисуем полигон инстрментом "точка" в координатах "odom", последовательно кликая не менее 3х точек. По завершении кликнуть на начальную точку, чтобы полигон стал красным.
 
 Нажимаем кнопку Go на панели "Mower". Если кнопки Go нет,  открываем настройки панели, прописываем имя топика /cmd_ui в единственный параметр.
+
+### Useful commands
+Остановить робота
+    ./run_cmd.sh rostopic pub -1 /cmd_vel geometry_msgs/Twist [0,0,0] [0,0,0]
+рестарт симуляции без перезагрузки gazebo
+    ./run_all.sh reset_sim:=true
 
 ![alt text](imgs/go_test.png "Go test")
 
 Папка experiments
 --------------------------
-Здесь лежат исходники всех экспериментов. 
+Здесь лежат исходники всех экспериментов.

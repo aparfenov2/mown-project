@@ -3,6 +3,7 @@
     <arg name="loca" default="false" />
     <arg name="teleop" default="false" />
     <arg name="sim" default="false" />
+    <arg name="reset_sim" default="false" />
     <arg name="segm" default="false" />
     <arg name="segm_net" default="false" />
     <arg name="planning" default="false"/>
@@ -92,6 +93,9 @@
             <param name="publish_frequency" type="double" value="30.0"/>
         </node>
         <!-- <node args="/mobile_base/sensors/imu_data /mobile_base/sensors/imu_data_raw" name="imu_relay" pkg="topic_tools" type="relay"/> -->
+    </group>
+    <group if="$(arg reset_sim)">
+        <node pkg="rosservice" type="rosservice" name="reset_pos" args="call --wait /gazebo/reset_simulation" />
     </group>
     <!-- rviz -->
     <group if="$(arg rviz)">

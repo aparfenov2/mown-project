@@ -84,15 +84,15 @@ class BackendNode:
         # self.FRAMES_FOLDER = rospy.get_param("~frames_folder")
         # self.DEPTH_FOLDER = rospy.get_param("~depth_folder")
         rospy.Subscriber("/clicked_point", geometry_msgs.msg.PointStamped, self.pointCb)
-        rospy.Subscriber("/cmd_ui", std_msgs.msg.String, self.cmdUiCb)
+        rospy.Subscriber("/ui_cmd", std_msgs.msg.String, self.cmdUiCb)
         self.point_viz_pub = rospy.Publisher("exploration_polygon_marker", visualization_msgs.msg.Marker, queue_size=10)
         self.pub = rospy.Publisher(rospy.get_param('/planner/topics/task_polygon_planning'), RouteTaskPolygon, queue_size=2)
         rospy.Timer(rospy.Duration(0.1), self.visTimerCb)
-    
+
     def cmdUiCb(self, cmd_msg: std_msgs.msg.String):
         cmd = cmd_msg.data
         if cmd == 'go':
-            rospy.loginfo("emit execute msg");            
+            rospy.loginfo("emit execute msg");
             if not self.polygon_is_built:
                 rospy.logerr("cannot execute: build polygon first");
                 return
@@ -113,20 +113,20 @@ class BackendNode:
             average_distance = polygonPerimeter(self.points) / len(self.points)
         else:
             average_distance = 10
-        
+
         if self.polygon_is_built:
             rospy.logwarn("Polygon is built. Start creating new");
             self.polygon_is_built = False
             self.points = []
-            
+
         if not self.points:
             self.pointsFrame = point_msg.header.frame_id
             self.points += [point]
-        
+
         elif self.pointsFrame != point_msg.header.frame_id:
             rospy.logerr("Frame mismatch, restarting polygon selection");
             self.points = []
-        
+
         elif len(self.points) > 1 and pointsNearby(self.points[0], point, average_distance*0.1):
             if len(self.points) < 3:
                 rospy.logerr("Not a valid polygon, restarting");
@@ -176,7 +176,7 @@ class BackendNode:
                 points.color.a = points.color.b = line_strip.color.b = line_strip.color.a = 1.0;
         else:
             points.action = line_strip.action = visualization_msgs.msg.Marker.DELETE;
-        
+
         self.point_viz_pub.publish(points);
         self.point_viz_pub.publish(line_strip);
 
