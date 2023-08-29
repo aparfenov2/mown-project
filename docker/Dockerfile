@@ -222,3 +222,4 @@ RUN apt-get update && apt-get install -y ros-noetic-costmap-converter ros-noetic
 RUN apt-get update && apt-get install -y ros-noetic-control-box-rst
 # RUN apt-get update && apt-get install -y coinor-libipopt-dev
 # RUN apt-get update && apt-get install -y ros-noetic-mpc-local-planner
+RUN apt-get update && apt-get install -y ros-$ROS_DISTRO-foxglove-bridge
