@@ -1,9 +1,0 @@
-std_msgs/Header header
-uint8 type
-
-uint8 DEFAULT_TASK=0
-uint8 COVERAGE_TASK=1
-uint8 MOVING_TO_POINT_TASK=2
-uint8 LINE_MOVING_TASK=3
-uint8 CIRCLE_MOVING_TASK=4
-uint8 DUBINS_PLANNING_TASK=4

@@ -1,0 +1,22 @@
+topics:
+  twist: '/turtlebot/mobile_base/commands/velocity'
+  path: '/global_planner/path'
+  localization: '/engix/localization'
+
+pid_tracking_controller:
+  linear_pid:
+    kp: 1.0
+    ki: 0.0
+    kd: 0.0
+    
+
+  angular_pid:
+    kp: 0.1
+    ki: 0.0
+    kd: 0.0
+
+  max_linear_velocity: 0.05
+  max_acceleration: 0.05
+  max_angular_velocity: 0.5
+
+  d_linear_velocity: 0.05

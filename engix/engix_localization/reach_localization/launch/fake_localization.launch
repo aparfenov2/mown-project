@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="engix_localization" type="fake_localization.py" name="fake_localization" output="screen"/>
+</launch>

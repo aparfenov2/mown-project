@@ -1,0 +1,15 @@
+std_msgs/Header header
+uint8 type
+
+uint8 DEFAULT_TASK=0
+uint8 COVERAGE_TASK=1
+uint8 MOVING_TO_POINT_TASK=2
+uint8 LINE_MOVING_TASK=3
+uint8 CIRCLE_MOVING_TASK=4
+uint8 DUBINS_PLANNING_TASK=4
+
+AstarPlanningTask astar_planning_task
+CircleMovingTask circle_moving_task
+CoveragePlanningTask coverage_planning_task
+DubinsPlanningTask dubins_planning_task
+LineMovingTask line_moving_task

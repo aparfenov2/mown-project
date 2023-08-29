@@ -1,0 +1,8 @@
+<launch>
+    <arg name="config"/>
+    <!-- <rosparam command="load" ns="move_controller" file="$(find move_controller)/params/$(arg config)/config.yaml" /> -->
+
+    <node name="move_controller" pkg="move_controller" type="main.py" output="screen">
+        <rosparam command="load" file="$(find move_controller)/params/$(arg config)/config.yaml" />
+    </node>
+</launch>
