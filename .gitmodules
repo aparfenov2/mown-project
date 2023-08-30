@@ -35,7 +35,7 @@
 	path = 3rd_party/zed_ros_wrapper
 	url = https://github.com/stereolabs/zed-ros-wrapper.git
 [submodule "studio"]
-	path = studio
+	path = apps/studio
 	url = git@github.com:kantengri/studio.git
 	branch = aparfenov/control-panel
 [submodule "3rd_party/zed-ros-wrapper"]
@@ -44,3 +44,6 @@
 [submodule "experiments/try-amslab-dwa-planner/dwa_planner"]
 	path = experiments/try-amslab-dwa-planner/dwa_planner
 	url = https://github.com/amslabtech/dwa_planner.git
+[submodule "apps/studio"]
+	path = apps/studio
+	url = git@github.com:kantengri/studio.git
