@@ -1,0 +1,53 @@
+<launch>
+    <arg name="sim" default="false" />
+    <arg name="teleop" default="false" />
+    <arg name="control" default="false" />
+    <arg name="global_planner" default="false" />
+    <arg name="rosbridge" default="false" />
+
+    <group if="$(arg sim)">
+        <arg name="world"/>
+        <arg name="robot"/>
+        <arg name="use_sim_time_in_gazebo" default="true" />
+
+        <include file="$(find engix_launch)/launch/gazebo.launch">
+            <arg name="use_sim_time_in_gazebo" value="$(arg use_sim_time_in_gazebo)"/>
+            <arg name="robot" value="$(arg robot)"/>
+            <arg name="world" value="$(arg world)"/>
+        </include>
+    </group>
+
+    <group if="$(arg teleop)">
+
+        <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
+        <node name="teleop" output="screen" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py">
+            <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
+        </node>
+    </group>
+
+    <group if="$(arg control)">
+        <arg name="config"/>
+
+        <include file="$(find engix_launch)/launch/move_controller.launch">
+            <arg name="config" value="$(arg config)"/>
+        </include>
+    </group>
+
+    <group if="$(arg global_planner)">
+        <arg name="config"/>
+
+        <include file="$(find engix_launch)/launch/global_planner.launch">
+            <arg name="config" value="$(arg config)"/>
+        </include>
+    </group>
+
+    <group if="$(arg rosbridge)">
+        <arg name="rosbridge_port" default="9090" />
+        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+            <arg name="port" value="$(arg rosbridge_port)"/>
+        </include>
+
+        <node name="point_to_dubins_node" pkg="engix_utils" type="publish_point_to_dubins_task.py" respawn="true" respawn_delay="5" output="screen"/>
+    </group>
+
+</launch>

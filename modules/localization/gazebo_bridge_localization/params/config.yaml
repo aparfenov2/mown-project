@@ -1,0 +1,8 @@
+topics:
+  odometry: '/ground_truth/state'
+  localization: '/engix/localization'
+
+# source_frame: 'turtlebot/odom'
+# target_frame: 'turtlebot/base_footprint'
+source_frame: 'turtlebot/base_footprint'
+target_frame: 'turtlebot/odom'

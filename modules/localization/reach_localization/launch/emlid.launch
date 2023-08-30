@@ -1,0 +1,6 @@
+<launch>
+    <node pkg="reach_ros_node" type="nmea_tcp_driver" name="nmea_tcp_driver" output="screen">
+      <param name="host" value="192.168.88.247" />
+      <param name="port" value="9001" />
+    </node>
+</launch>

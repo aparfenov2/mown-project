@@ -1,0 +1,6 @@
+step_size: 2.0
+offset_distance: -2.0
+offset_resolution: 3
+
+topics:
+  localization: '/engix/localization'

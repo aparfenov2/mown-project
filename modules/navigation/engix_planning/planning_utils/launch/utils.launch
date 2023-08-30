@@ -1,0 +1,5 @@
+<launch>
+    <node name="polygon_msg_adapter" pkg="planning_utils" type="polygon_msg_adapter.py" respawn="true" respawn_delay="5" output="screen"/>
+    <node name="rviz_adapter" pkg="planning_utils" type="rviz_adapter.py" respawn="true" respawn_delay="5" output="screen"/>
+    <node name="bridge" pkg="planning_utils" type="localization_bridge.py" respawn="true" respawn_delay="5" output="screen"/>
+</launch>

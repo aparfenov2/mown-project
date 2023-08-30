@@ -1,0 +1,53 @@
+global_frame: world
+robot_base_frame: base_link
+
+update_frequency: 10.0
+publish_frequency: 10.0
+transform_tolerance: 0.5
+
+rolling_window: false
+static_map: true
+always_send_full_costmap: true
+width: 50
+height: 50
+origin_x: -20
+origin_y: -20
+resolution: 0.1
+
+plugins:
+#  - {name: polygon_layer, type: "polygon_layer::PolygonLayer"}
+ - {name: obstacles, type: "costmap_2d::ObstacleLayer"}
+#  - {name: coverage, type: "full_coverage_path_planner::CoverageLayer"}
+#  - {name: inflation, type: "costmap_2d::InflationLayer"}
+
+polygon_layer:
+    resize_to_polygon: false
+
+obstacles:
+  observation_sources: scan
+  scan: 
+    # sensor_frame: base_link
+    # sensor_frame: velodyne
+    data_type: PointCloud2
+    topic: /velodyne_points/new
+    # topic: /kitti/gndnet_segcloud
+    marking: true
+    clearing: true
+
+  # ya_scan: 
+  #   sensor_frame: base_link
+  #   data_type: LaserScan
+  #   topic: /scan
+  #   marking: true
+  #   clearing: true
+
+  track_unknown_space: true
+  obstacle_range: 3.0
+  raytrace_range: 3.5
+
+# footprint: [[-0.164, -0.124], [-0.164, 0.124], [0.0616, 0.140], [0.0616, -0.140]]
+#robot_radius: 0.17
+
+inflation:
+  inflation_radius: 0.15
+  # cost_scaling_factor: 5.0

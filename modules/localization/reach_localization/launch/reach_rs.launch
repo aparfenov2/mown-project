@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="reach_rs_driver" type="reach_rs_driver_node" name="reach_rs_driver" output="screen">
+      <param name="reach_rs_host_or_ip" value="192.168.88.247" />
+      <param name="reach_rs_port" value="9001" />
+      <param name="reach_rs_frame_id" value="gnss" />
+      <param name="fix_timeout" value="2.0" />
+    </node>
+</launch>

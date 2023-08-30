@@ -1,0 +1,34 @@
+<launch>
+    <arg name="world"/>
+    <arg name="robot"/>
+    <arg name="use_sim_time_in_gazebo" default="True"/>
+    
+    <arg name="publish_tf" default="1"/>
+    <param name="use_sim_time" command="true"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="use_sim_time" value="$(arg use_sim_time_in_gazebo)"/>
+        <arg name="world_name" value="$(find engix_gazebo)/worlds/$(arg world).world"/>
+    </include>
+
+    <group if="$(eval robot == 'turtlebot')">
+        <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf) prefix:=$(arg robot)"/>
+        <param name="robot_description" command="$(arg urdf_file)"/>
+        <param name="tf_prefix" value="$(arg robot)"/>
+    </group>
+
+    <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base -robot_namespace $(arg robot)" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+
+    <node name="gazebo_bridge_localization" pkg="gazebo_bridge_localization" type="turtlebot_tf_localization.py" output="screen">
+        <rosparam command="load" file="$(find gazebo_bridge_localization)/params/config.yaml" />
+    </node>
+
+    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 1 odom turtlebot/odom 2" />
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+      <param name="publish_frequency" type="double" value="50.0" />
+      <!-- <param name="base_frame" value="$(arg name)/base_link"/> 
+      <param name="tf_prefix" value="$(arg name)"/> -->
+    </node>
+
+</launch>
