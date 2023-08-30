@@ -110,7 +110,7 @@ run_all.sh --studio
 рестарт симуляции без перезагрузки gazebo
     ./run_all.sh reset_sim:=true
 
-![alt text](imgs/go_test.png "Go test")
+![alt text](docs/imgs/go_test.png "Go test")
 
 Папка experiments
 --------------------------
