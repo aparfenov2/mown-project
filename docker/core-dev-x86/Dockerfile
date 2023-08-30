@@ -210,15 +210,5 @@ RUN apt-get install python3-tk
 RUN python3 -m pip install Rtree
 RUN python3 -m pip install casadi
 RUN python3 -m pip install msgpack-rpc-python
-RUN python3 -m pip install dubins
-
 # RUN apt-get update && apt-get install -y ros-noetic-robot-pose-ekf
 # RUN apt-get update && apt-get install ros-noetic-depthimage-to-laserscan
-RUN apt-get update && apt-get install -y ros-noetic-pybind11-catkin
-# RUN apt-get update && apt-get install -y ros-noetic-teb-local-planner - bad_alloc
-# for teb-local-planner
-RUN apt-get update && apt-get install -y ros-noetic-costmap-converter ros-noetic-mbf-costmap-nav
-# for mpc-local-planner (plus all for teb)
-RUN apt-get update && apt-get install -y ros-noetic-control-box-rst
-# RUN apt-get update && apt-get install -y coinor-libipopt-dev
-# RUN apt-get update && apt-get install -y ros-noetic-mpc-local-planner
