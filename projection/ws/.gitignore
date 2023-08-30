@@ -1,8 +1,0 @@
-build
-devel
-src/CMakeLists.txt
-src/elevation_mapping
-src/grid_map
-src/kindr
-src/kindr_ros
-src/A-LOAM
