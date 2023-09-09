@@ -5,6 +5,7 @@
     <arg name="global_planner" default="false" />
     <arg name="rosbridge" default="false" />
     <arg name="foxglove_bridge" default="false" />
+    <arg name="map" default="false" />
 
     <group if="$(arg sim)">
         <arg name="world"/>
@@ -57,6 +58,10 @@
         </include>
 
         <node name="point_to_dubins_node" pkg="engix_utils" type="publish_point_to_dubins_task.py" respawn="true" respawn_delay="5" output="screen"/>
+    </group>
+
+    <group if="$(arg map)">
+        <include file="$(find engix_launch)/launch/map.launch"/>
     </group>
 
 </launch>

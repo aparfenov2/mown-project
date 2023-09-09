@@ -31,6 +31,6 @@
       <param name="publish_frequency" type="double" value="50.0" />
       <!-- <param name="base_frame" value="$(arg name)/base_link"/> 
       <param name="tf_prefix" value="$(arg name)"/> -->
-    </node>
+    </node> 
 
 </launch>
