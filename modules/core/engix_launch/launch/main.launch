@@ -4,6 +4,7 @@
     <arg name="control" default="false" />
     <arg name="global_planner" default="false" />
     <arg name="rosbridge" default="false" />
+    <arg name="foxglove_bridge" default="false" />
 
     <group if="$(arg sim)">
         <arg name="world"/>
@@ -45,6 +46,14 @@
         <arg name="rosbridge_port" default="9090" />
         <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
             <arg name="port" value="$(arg rosbridge_port)"/>
+        </include>
+
+        <node name="point_to_dubins_node" pkg="engix_utils" type="publish_point_to_dubins_task.py" respawn="true" respawn_delay="5" output="screen"/>
+    </group>
+
+    <group if="$(arg foxglove_bridge)">
+        <include file="$(find foxglove_bridge)/launch/foxglove_bridge.launch">
+            <arg name="port" value="8765" />
         </include>
 
         <node name="point_to_dubins_node" pkg="engix_utils" type="publish_point_to_dubins_task.py" respawn="true" respawn_delay="5" output="screen"/>

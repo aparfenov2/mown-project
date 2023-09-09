@@ -43,7 +43,7 @@ class PIDTrackingController:
         max_acceleration: float,
         max_angular_velocity: float,
         carrot_step: int,
-        last_point_threshold: float = 0.1
+        last_point_threshold: float = 0.05
     ) -> None:
         self.linear_controller = PIDController(
             linear_controller_params['kp'],

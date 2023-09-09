@@ -3,3 +3,4 @@ topics:
   localization: '/engix/localization'
   straight_line_task: '/global_planner/straight_line_task'
   dubins_planning_task: '/global_planner/dubins_planning_task'
+  coverage_planning_task: '/global_planner/coverage_planning_task'

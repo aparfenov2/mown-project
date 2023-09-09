@@ -1,6 +1,6 @@
 from shapely.geometry import Point, Polygon, LinearRing, LineString
 from shapely.geometry import MultiLineString, MultiPoint, GeometryCollection
-from shapely.geos import TopologicalError
+from shapely.errors import TopologicalError
 import numpy as np
 from logging import error
 from math import atan
@@ -76,7 +76,7 @@ class AreaPolygon:
 
     def rotated_polygon(self):
         """Applies rtf to polygon and holes (if any)"""
-        points = np.array(self.P.exterior)
+        points = np.array(list(self.P.exterior.coords))
         tf_points = self.rotate_points(points)
         tf_holes = []
         for hole in self.P.interiors:

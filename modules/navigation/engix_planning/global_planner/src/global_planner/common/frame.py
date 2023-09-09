@@ -3,6 +3,7 @@ class Frame:
         self._localization = LocalizationWrapper()
         self._dubins_planning_task = DubinsPlanningTaskWrapper()
         self._line_moving_task = LineMovingTaskWrapper()
+        self._coverage_task = CoverageTaskWrapper()
 
     @property
     def localization(self):
@@ -16,6 +17,10 @@ class Frame:
     def dubins_planning_task(self):
         return self._dubins_planning_task
 
+    @property
+    def coverage_task(self):
+        return self._coverage_task
+
     def set_localization(self, new_localization):
         self._localization.set_message(new_localization)
 
@@ -23,7 +28,10 @@ class Frame:
         self._line_moving_task.set_message(message)
 
     def set_dubins_planning_task(self, message):
-        self.dubins_planning_task.set_message(message)
+        self._dubins_planning_task.set_message(message)
+
+    def set_coverage_task(self, message):
+        self._coverage_task.set_message(message)
 
 
 class AbstractMessage:
@@ -86,3 +94,25 @@ class DubinsPlanningTaskWrapper(AbstractMessage):
             self.message.target_pose.y,
             self.message.target_pose.theta
         )
+
+
+class CoverageTaskWrapper(AbstractMessage):
+    def __init__(self):
+        super(CoverageTaskWrapper, self).__init__()
+
+    @property
+    def target_polygon(self):
+        return self.message.target_polygon
+
+    @property
+    def approximate(self):
+        return self.message.approximate
+
+    @property
+    def auto_angle(self):
+        return self.message.auto_angle
+
+    @property
+    def angle(self):
+        return self.message.angle
+

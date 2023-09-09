@@ -198,7 +198,7 @@ RUN apt-get update && apt-get install -y ros-noetic-robot-localization
 # gazebo GPS
 RUN apt-get update && apt-get install -y ros-noetic-hector-gazebo-plugins
 
-RUN apt-get install -y ros-noetic-rosbridge-suite
+RUN apt-get install -y ros-noetic-rosbridge-suite ros-noetic-foxglove-bridge
 RUN apt-get update && apt-get install -y ros-noetic-rtabmap-ros
 
 RUN apt-get update && apt-get install -y libturbojpeg
