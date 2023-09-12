@@ -95,6 +95,10 @@ for f in $(find ws/src -type l); do
     VOLUMES+=("-v $(readlink -f $f):/cdir/$f")
 done
 
+[ -e "data" ] && {
+    VOLUMES+=("-v $(readlink -f data):/cdir/data")
+}
+
 [ -n "$JETSON" ] && {
     JETSON_ARGS="--ws docker_jetson"
     [ -n "$SEGMENTATION" ] && {
