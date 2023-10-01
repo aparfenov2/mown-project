@@ -1,0 +1,23 @@
+global_frame: odom
+robot_base_frame: base_footprint
+
+update_frequency: 5
+publish_frequency: 5
+transform_tolerance: 0.5
+
+rolling_window: false
+width: 40
+height: 40
+resolution: 0.1
+origin_x: -20
+origin_y: -20
+
+plugins: []
+  # - {name: color_layer,     type: 'color_layer::ColorLayer'}
+  # - {name: obstacle_layer,  type: 'costmap_2d::ObstacleLayer'}
+  # - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
+
+# color_layer:
+#   grid_map_updates_topic: /costmap_node/costmap/gridmap
+#   grass_color: 0x00200000
+#   non_grass_cost: 10

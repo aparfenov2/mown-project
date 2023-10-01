@@ -1,0 +1,37 @@
+# RTAB-Map configuration
+# https://github.com/introlab/rtabmap/blob/master/corelib/include/rtabmap/core/Parameters.h
+# https://raw.githubusercontent.com/introlab/rtabmap/0.20.18-noetic/corelib/include/rtabmap/core/Parameters.h
+# http://packages.ros.org/ros/ubuntu/dists/focal/main/binary-amd64/Packages
+
+# Package: ros-noetic-rtabmap
+# Version: 0.20.18-3focal.20220303.214015
+
+subscribe_depth:        true
+subscribe_rgb:          true
+subscribe_rgbd:         false
+subscribe_stereo:       false
+subscribe_scan:         true
+subscribe_scan_cloud:   false
+subscribe_user_data:    false
+subscribe_odom_info:    false
+
+database_path:      "~/.ros/rtabmap.db"
+config_path:        "~/.ros/rtabmap.cfg"
+
+frame_id:       "base_footprint"
+map_frame_id:   "map"
+
+publish_tf:             true                   # Set to false if fusing different poses (map->odom) with UKF
+approx_sync:            true
+
+Reg:
+  Strategy: 1       # 0-visual, 1-icp, 2-visual icp
+  Force3DoF:  true  # Force 3DoF registration: roll, pitch and z won't be estimated. 
+GridGlobal:
+  MinSize:      20
+# Grid:
+#     Sensor:  1      # 0=laser scan, 1=depth image(s) or 2=both laser scan and
+# Kp:
+#   DetectorStrategy: 6
+# Vis:
+#   FeatureType:      6

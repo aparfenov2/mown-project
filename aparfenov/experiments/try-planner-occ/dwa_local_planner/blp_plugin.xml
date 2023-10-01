@@ -1,0 +1,7 @@
+<library path="lib/libdwa_local_planner_my">
+  <class name="dwa_local_planner_my/DWAPlannerROS" type="dwa_local_planner_my::DWAPlannerROS" base_class_type="nav_core_my::BaseLocalPlanner">
+    <description>
+      A implementation of a local planner using either a DWA approach based on configuration parameters.
+    </description>
+  </class>
+</library>

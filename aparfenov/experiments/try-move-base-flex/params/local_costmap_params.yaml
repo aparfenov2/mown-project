@@ -1,0 +1,21 @@
+global_frame: odom
+robot_base_frame: base_footprint
+
+rolling_window: true
+width: 5
+height: 5
+resolution: 0.1
+publish_frequency: 5
+
+plugins:
+  - {name: static_layer,  type: 'costmap_2d::StaticLayer'}
+  - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
+  # - {name: color_layer,     type: 'color_layer::ColorLayer'}
+  # - {name: obstacle_layer,  type: 'costmap_2d::ObstacleLayer'}
+
+color_layer:
+  grid_map_updates_topic: /costmap_node/costmap/gridmap
+  use_road_color: true
+  grass_color: 0x00ff2600
+  road_color:  0x00200000
+  non_grass_cost: 254

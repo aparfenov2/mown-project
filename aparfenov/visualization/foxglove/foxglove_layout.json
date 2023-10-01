@@ -1,0 +1,96 @@
+{
+  "configById": {
+    "3D Panel!guhbda": {
+      "autoSyncCameraState": false,
+      "autoTextBackgroundColor": true,
+      "cameraState": {
+        "distance": 14.291499541653833,
+        "perspective": false,
+        "phi": 0.7853981633974483,
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "thetaOffset": 0,
+        "fovy": 0.7853981633974483,
+        "near": 0.01,
+        "far": 5000
+      },
+      "checkedKeys": [
+        "name:Topics",
+        "t:/costmap_node/costmap/costmap",
+        "t:/planner/debug/localization",
+        "t:/planner/debug/path",
+        "t:/planner/debug/target_point"
+      ],
+      "clickToPublishPoseTopic": "/move_base_simple/goal",
+      "clickToPublishPointTopic": "/clicked_point",
+      "clickToPublishPoseEstimateTopic": "/initialpose",
+      "clickToPublishPoseEstimateXDeviation": 0.5,
+      "clickToPublishPoseEstimateYDeviation": 0.5,
+      "clickToPublishPoseEstimateThetaDeviation": 0.2617993877991494,
+      "customBackgroundColor": "#000000",
+      "diffModeEnabled": true,
+      "expandedKeys": [],
+      "followMode": "follow",
+      "modifiedNamespaceTopics": [],
+      "pinTopics": false,
+      "settingsByKey": {
+        "t:/planner/debug/localization": {
+          "overrideColor": {
+            "r": 0,
+            "g": 0.10196078431372549,
+            "b": 1,
+            "a": 1
+          },
+          "size": {
+            "shaftWidth": 0.1,
+            "headWidth": 0,
+            "headLength": 0
+          }
+        },
+        "t:/planner/debug/path": {
+          "overrideColor": {
+            "r": 1,
+            "g": 0,
+            "b": 0,
+            "a": 1
+          }
+        },
+        "t:/planner/debug/target_point": {
+          "overrideColor": {
+            "r": 0.984313725490196,
+            "g": 1,
+            "b": 0,
+            "a": 1
+          },
+          "size": {
+            "shaftLength": 0.5,
+            "shaftWidth": 0.5,
+            "headWidth": 0,
+            "headLength": 0
+          }
+        }
+      },
+      "useThemeBackgroundColor": true
+    },
+    "Tab!3lslauu": {
+      "activeTabIdx": 0,
+      "tabs": [
+        {
+          "title": "Map",
+          "layout": "3D Panel!guhbda"
+        }
+      ]
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "linkedGlobalVariables": [],
+  "playbackConfig": {
+    "speed": 1,
+    "messageOrder": "receiveTime"
+  },
+  "layout": "Tab!3lslauu"
+}

@@ -1,0 +1,6 @@
+rgb_input: "/camera/rgb/image_color"
+checkpoint: "mobilenetv2_coco_voctrainaug"
+config: "mobilenetv2_coco_voctrainaug"
+palette: "cityscapes"
+device: "cuda:0"
+visualize: true

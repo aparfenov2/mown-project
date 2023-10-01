@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>engix_planning</name>
+  <version>1.0.0</version>
+  <description>commont utils and launch files</description>
+
+  <maintainer email="kos1694@gmail.com">Konstantin Usenko</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <!-- <build_depend>tf</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>catkin_simple</build_depend>
+  <build_depend>tb_gazebo_description</build_depend>
+
+  <run_depend>tf</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>move_base</run_depend>
+  <run_depend>map_server</run_depend>  
+  <run_depend>amcl</run_depend>
+  <run_depend>gmapping</run_depend>
+  <run_depend>turtlebot_bringup</run_depend>
+  <run_depend>dwa_local_planner</run_depend>
+  <run_depend>tb_gazebo_description</run_depend>
+
+  <run_depend>rospy</run_depend>
+  
+  <export>
+
+  </export> -->
+
+</package>

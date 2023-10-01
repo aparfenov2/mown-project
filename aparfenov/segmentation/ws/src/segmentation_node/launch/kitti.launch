@@ -1,0 +1,63 @@
+<launch>
+
+  <node name="segmentation_node" pkg="segmentation_node" type="segmentation_node.py" output="screen">
+    <param name="rgb_input" value="/stereo/left/image_rect_color" />
+    <param name="checkpoint" value="$(find segmentation_node)/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth" />
+    <param name="config" value="$(find segmentation_node)/configs/hrnet/fcn_hr18s_512x1024_40k_cityscapes.py" />
+  </node>
+
+  <node name="bag" pkg="rosbag" type="play"
+      args="-l $(find segmentation_node)/bags/kitti.bag" >
+      <remap from="/cam02/image_raw" to="/stereo/left/image_raw" />
+      <remap from="/cam02/camera_info" to="/stereo/left/camera_info" />
+      <remap from="/cam03/image_raw" to="/stereo/right/image_raw" />
+      <remap from="/cam03/camera_info" to="/stereo/right/camera_info" />
+  </node>
+
+  <!-- Start a nodelet manager; the name must be unqualified here -->
+  <node pkg="nodelet" type="nodelet" name="stereo_proc" args="manager" />
+
+  <!-- Include the stereo_image_proc.launch file and pass in a qualified manager name -->
+<!-- https://github.com/mjgarcia/image_stereo_proc/blob/master/stereo_image_proc/launch/stereo_image_proc.launch -->
+  <include file="$(find stereo_image_proc)/launch/stereo_image_proc.launch" ns="stereo">
+    <arg name="manager" value="/stereo_proc" />
+<!-- 
+    <arg name="left" value="/cam02" />
+    <arg name="right" value="/cam03" />
+ -->    
+    <arg name="approximate_sync" value="true" />
+  </include>
+
+  <!-- <node pkg="nodelet" type="nodelet" name="stereo_proc"  args="manager"/> -->
+
+<!-- depth image generation -->
+<!--   <node name="disparity_image_proc" pkg="nodelet" type="nodelet" args="load disparity_image_proc/depth_image stereo_proc" output="screen">
+   <remap from="/right/camera_info" to="/stereo/right/camera_info"/>
+    <remap from="/left/camera_info" to="/stereo/left/camera_info"/>
+    <remap from="/left/image_rect_color" to="/stereo/left/image_rect_color"/>
+    <remap from="/disparity" to="/stereo/disparity"/>
+    <remap from="/depth_image" to="/stereo/left/depth_image"/>    
+    <param name="approximate_sync" value="true" />
+  </node>
+ -->
+
+<!-- segmented pcl -->
+<!-- https://github.com/strawlab/image_stereo_proc/blob/master/stereo_image_proc/src/nodelets/point_cloud2.cpp -->
+
+<node pkg="nodelet" type="nodelet" name="pcl_proc"  args="manager" output="screen"/>
+
+<node pkg="nodelet" type="nodelet" name="point_cloud2_pcl"
+        args="load stereo_image_proc/point_cloud2 pcl_proc"
+  respawn="false" output="screen" >
+
+    <remap from="/left/image_rect_color" to="/segmentation_node/segmentation" />
+    <!-- <remap from="left/image_rect_color" to="/stereo/left/image_rect_color" /> -->
+    <remap from="left/camera_info" to="/stereo/left/camera_info" />
+    <remap from="right/camera_info" to="/stereo/right/camera_info" />
+    <remap from="disparity" to="/stereo/disparity" />
+    
+    <remap from="points2" to="/pcl_proc/points2" />
+    <param name="approximate_sync" value="true" />
+</node>
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find segmentation_node)/rviz/deeplab_ros.rviz" /> -->
+</launch>

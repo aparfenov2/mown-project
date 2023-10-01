@@ -1,0 +1,31 @@
+footprint: [[-0.9, -0.45], [-0.9, 0.45], [0.9, 0.45], [0.9, -0.45]] #MO tuned
+footprint_padding: 0.05
+
+robot_base_frame: base_link
+update_frequency: 5.0
+publish_frequency: 3.0
+transform_tolerance: 0.3
+
+resolution: 0.25
+
+obstacle_range: 2.0
+raytrace_range: 2.5
+
+#layer definitions
+static:
+    map_topic: /map
+    subscribe_to_updates: true
+
+obstacles_laser:
+    observation_sources: scan
+    scan: {sensor_frame: ce30c_lidar, data_type: LaserScan, clearing: true, marking: true, topic: scan, inf_is_valid: true}
+
+
+inflation:
+    inflation_radius: 0.3
+# sonar_layer:
+#  topics: ["/ultrasound_center", "/ultrasound_left_top", "/ultrasound_left_back", "/ultrasound_left_back_back", "/ultrasound_right_top", "/ultrasound_right_back", "/ultrasound_right_back_back"]
+#  no_readings_timeout: 2.0
+#  clear_on_max_reading: true
+#  clear_threshold: 0.2
+#  mark_threshold: 0.80

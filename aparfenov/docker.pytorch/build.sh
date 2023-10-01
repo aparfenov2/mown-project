@@ -1,0 +1,1 @@
+docker build -t $(cat image) . 2>&1 > /dev/null
