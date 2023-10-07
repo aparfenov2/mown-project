@@ -86,7 +86,7 @@
             <velocityTopicName>/gps/fix_velocity</velocityTopicName>
             <referenceLatitude>55.16444</referenceLatitude>
             <referenceLongitude>61.436844</referenceLongitude>
-            <referenceHeading>0</referenceHeading>
+            <referenceHeading>180</referenceHeading>
             <referenceAltitude>10</referenceAltitude>
             <offset>0 0 0</offset>
             <drift>0.00 0.00 0.00</drift>

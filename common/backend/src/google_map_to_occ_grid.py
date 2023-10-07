@@ -13,7 +13,6 @@ import numpy as np
 import rospy
 import tf_conversions
 import tf2_ros
-import utm
 
 from geometry_msgs.msg import Pose, Point, Quaternion, TransformStamped
 from sensor_msgs.msg import NavSatFix
@@ -41,14 +40,16 @@ class Node:
 
         self.map_frame_id = rospy.get_param("~map_frame_id", "map")
         self.world_frame_id = rospy.get_param("~world_frame_id", "world")
-        origin_lat = float(rospy.get_param("~origin_lat"))
-        origin_lon = float(rospy.get_param("~origin_lon"))
+        self.robot_frame_id = rospy.get_param("~robot_frame_id", "base_link")
         timer_period = float(rospy.get_param("~timer_period", 5.0))
         self.sensitivity = float(rospy.get_param("~sensitivity", 1e-6))
-        self.origin_utm_x, self.origin_utm_y, _,_ = utm.from_latlon(origin_lat, origin_lon)
+        self.z = float(rospy.get_param("~z", 18))
         self.last_lat, self.last_lon = None, None
         self.prev_last_lat, self.prev_last_lon = None, None
+
         self.br = tf2_ros.TransformBroadcaster()
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
         self._map_pub = rospy.Publisher('map', Grid, queue_size=1, latch=True)
         # self._map_data_pub = rospy.Publisher('map_metadata',
@@ -94,7 +95,7 @@ class Node:
 
         width = img.shape[1]
         height = img.shape[0]
-        resolution = 0.01
+        resolution = 0.1
         origin_x = -width/2 * resolution
         origin_y = -height/2 * resolution
 
@@ -127,26 +128,30 @@ class Node:
         return grid_msg
 
     def timerCallback(self, _):
-        if self.last_lat is None or (
-            self.prev_last_lat is not None and
-            math.isclose(self.last_lat, self.prev_last_lat, rel_tol=0, abs_tol=self.sensitivity) and
-            math.isclose(self.last_lon, self.prev_last_lon, rel_tol=0, abs_tol=self.sensitivity)
-            ):
-            return
-        self.prev_last_lat, self.prev_last_lon = self.last_lat, self.last_lon
-        last_utm_x, last_utm_y, _,_ = utm.from_latlon(self.last_lat, self.last_lon)
+        # if self.last_lat is None or (
+        #     self.prev_last_lat is not None and
+        #     math.isclose(self.last_lat, self.prev_last_lat, rel_tol=0, abs_tol=self.sensitivity) and
+        #     math.isclose(self.last_lon, self.prev_last_lon, rel_tol=0, abs_tol=self.sensitivity)
+        #     ):
+        #     return
+        # self.prev_last_lat, self.prev_last_lon = self.last_lat, self.last_lon
 
-        img = self.call_firefox(self.last_lat, self.last_lon)
+        try:
+            timestamp = self.last_timestamp
+            last_trans = self.tfBuffer.lookup_transform(self.world_frame_id, self.robot_frame_id, timestamp, rospy.Duration(3.0))
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as ex:
+            rospy.logerr(f"failed to get transform from {self.world_frame_id} to {self.robot_frame_id} for time {timestamp}: reason {ex}")
+            return
+
+        img = self.call_firefox(self.last_lat, self.last_lon, self.z)
 
         grid_msg = self.to_message(img)
         self._map_pub.publish(grid_msg)
 
-        t = TransformStamped()
+        t = last_trans
         t.header.stamp = rospy.Time.now()
         t.header.frame_id = self.world_frame_id
         t.child_frame_id = self.map_frame_id
-        t.transform.translation.x = (last_utm_x - self.origin_utm_x)
-        t.transform.translation.y = (last_utm_y - self.origin_utm_y)
         t.transform.translation.z = 0.0
         q = tf_conversions.transformations.quaternion_from_euler(0, 0, 0)
         t.transform.rotation.x = q[0]
@@ -156,9 +161,9 @@ class Node:
 
         self.br.sendTransform(t)
 
-
     def gpsCallback(self, msg):
         self.last_lat, self.last_lon = msg.latitude, msg.longitude
+        self.last_timestamp = msg.header.stamp
 
     def run(self):
         rospy.spin()
