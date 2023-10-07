@@ -6,15 +6,18 @@ input: GPS coordinates
 output: occupancy_grid
 """
 
+import math
 import cv2
-import rospy
-from nav_msgs.msg import OccupancyGrid, MapMetaData
-from geometry_msgs.msg import Pose, Point, Quaternion
-from sensor_msgs.msg import LaserScan, NavSatFix
-from foxglove_msgs.msg import Grid, PackedElementField
-
 import numpy as np
-import PIL
+
+import rospy
+import tf_conversions
+import tf2_ros
+import utm
+
+from geometry_msgs.msg import Pose, Point, Quaternion, TransformStamped
+from sensor_msgs.msg import NavSatFix
+from foxglove_msgs.msg import Grid, PackedElementField
 
 from selenium import webdriver as selenium_webdriver
 from selenium.webdriver.firefox.options import Options as selenium_options
@@ -36,14 +39,25 @@ class Node:
             # capabilities=capabilities_argument
         )
 
+        self.map_frame_id = rospy.get_param("~map_frame_id", "map")
+        self.world_frame_id = rospy.get_param("~world_frame_id", "world")
+        origin_lat = float(rospy.get_param("~origin_lat"))
+        origin_lon = float(rospy.get_param("~origin_lon"))
+        timer_period = float(rospy.get_param("~timer_period", 5.0))
+        self.sensitivity = float(rospy.get_param("~sensitivity", 1e-6))
+        self.origin_utm_x, self.origin_utm_y, _,_ = utm.from_latlon(origin_lat, origin_lon)
+        self.last_lat, self.last_lon = None, None
+        self.prev_last_lat, self.prev_last_lon = None, None
+        self.br = tf2_ros.TransformBroadcaster()
+
         self._map_pub = rospy.Publisher('map', Grid, queue_size=1, latch=True)
         # self._map_data_pub = rospy.Publisher('map_metadata',
         #                                      MapMetaData, latch=True)
         rospy.Subscriber('fix', NavSatFix, self.gpsCallback)
+        rospy.Timer(rospy.Duration(timer_period), self.timerCallback)
         rospy.loginfo('ready')
 
     def call_firefox(self, lat = 43.640722, lng = -79.3811892, z = 17):
-        # Toronto Waterfront Coordinates
 
         # Build the URL
         url = 'https://www.google.com/maps/@' + str(lat) + ',' + str(lng) + ',' + str(z) + 'z'
@@ -54,8 +68,8 @@ class Node:
         browser.get(url)
 
         # # Remove omnibox
-        # js_string = "var element = document.getElementById(\"omnibox container\"); element.remove();"
-        # browser.execute_script(js_string)
+        js_string = "var element = document.getElementById(\"omnibox-container\"); element.remove();"
+        browser.execute_script(js_string)
         # # Remove username and icons
         # js_string = "var element = document.getElementById(\"vasquette\"); element.remove();"
         # browser.execute_script(js_string)
@@ -89,7 +103,7 @@ class Node:
 
         # Set up the header.
         grid_msg.timestamp = rospy.Time.now()
-        grid_msg.frame_id = "base_link"
+        grid_msg.frame_id = self.map_frame_id
 
         # Rotated maps are not supported... quaternion represents no
         # rotation.
@@ -112,10 +126,39 @@ class Node:
         grid_msg.data = list(img.flatten())
         return grid_msg
 
-    def gpsCallback(self, msg):
-        img = self.call_firefox(lat=msg.latitude, lng=msg.longitude)
+    def timerCallback(self, _):
+        if self.last_lat is None or (
+            self.prev_last_lat is not None and
+            math.isclose(self.last_lat, self.prev_last_lat, rel_tol=0, abs_tol=self.sensitivity) and
+            math.isclose(self.last_lon, self.prev_last_lon, rel_tol=0, abs_tol=self.sensitivity)
+            ):
+            return
+        self.prev_last_lat, self.prev_last_lon = self.last_lat, self.last_lon
+        last_utm_x, last_utm_y, _,_ = utm.from_latlon(self.last_lat, self.last_lon)
+
+        img = self.call_firefox(self.last_lat, self.last_lon)
+
         grid_msg = self.to_message(img)
         self._map_pub.publish(grid_msg)
+
+        t = TransformStamped()
+        t.header.stamp = rospy.Time.now()
+        t.header.frame_id = self.world_frame_id
+        t.child_frame_id = self.map_frame_id
+        t.transform.translation.x = (last_utm_x - self.origin_utm_x)
+        t.transform.translation.y = (last_utm_y - self.origin_utm_y)
+        t.transform.translation.z = 0.0
+        q = tf_conversions.transformations.quaternion_from_euler(0, 0, 0)
+        t.transform.rotation.x = q[0]
+        t.transform.rotation.y = q[1]
+        t.transform.rotation.z = q[2]
+        t.transform.rotation.w = q[3]
+
+        self.br.sendTransform(t)
+
+
+    def gpsCallback(self, msg):
+        self.last_lat, self.last_lon = msg.latitude, msg.longitude
 
     def run(self):
         rospy.spin()

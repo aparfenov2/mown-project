@@ -86,13 +86,17 @@
             <velocityTopicName>/gps/fix_velocity</velocityTopicName>
             <referenceLatitude>55.16444</referenceLatitude>
             <referenceLongitude>61.436844</referenceLongitude>
-            <referenceHeading>90</referenceHeading>
+            <referenceHeading>0</referenceHeading>
             <referenceAltitude>10</referenceAltitude>
             <offset>0 0 0</offset>
-            <drift>0.001 0.001 0.001</drift>
+            <drift>0.00 0.00 0.00</drift>
+            <gaussianNoise>0.0 0.0 0.0</gaussianNoise>
+            <velocityDrift>0.00 0.00 0.00</velocityDrift>
+            <velocityGaussianNoise>0.0 0.0 0.0</velocityGaussianNoise>
+            <!-- <drift>0.001 0.001 0.001</drift>
             <gaussianNoise>0.05 0.05 0.05</gaussianNoise>
             <velocityDrift>0.001 0.001 0.001</velocityDrift>
-            <velocityGaussianNoise>0.5 0.5 0.5</velocityGaussianNoise>
+            <velocityGaussianNoise>0.5 0.5 0.5</velocityGaussianNoise> -->
         </plugin>
     </gazebo>
 
