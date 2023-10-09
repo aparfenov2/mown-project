@@ -33,6 +33,11 @@ function run_foxglove_bridge() {
     roslaunch engix_launch main.launch foxglove_bridge:=True
 }
 
+function run_full_stack() {
+    . ws_source.sh
+    roslaunch engix_launch main.launch sim:=True robot:=turtlebot world:=empty rosbridge:=True control:=True global_planner:=True config:=gazebo_turtlebot
+}
+
 function main() {
     if [ "$#" -eq 1 ]; then
         case $1 in
@@ -64,6 +69,11 @@ function main() {
         --gui)
             echo "Run command panel"
             run_gui
+            ;;
+
+        --full-stack)
+            echo "Run planning, control and sim panel"
+            run_full_stack
             ;;
 
         *)
