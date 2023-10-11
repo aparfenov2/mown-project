@@ -80,7 +80,7 @@ class WebPageRenderer:
     def __init__(self, calib_lat, calib_lng, z=17) -> None:
         # https://towardsdatascience.com/google-maps-feature-extraction-with-selenium-faa2b97b29af
         browser_options = selenium_options()
-        browser_options.add_argument("--headless")
+        # browser_options.add_argument("--headless")
         capabilities_argument = selenium_DesiredCapabilities().FIREFOX
         capabilities_argument["marionette"] = True
 
@@ -189,6 +189,7 @@ class WebPageRenderer:
         action.pointer_action.move_to_location(start_x, start_y)
         action.pointer_action.pointer_down(MouseButton.LEFT)
         action.pointer_action.move_to_location(end_x, end_y)
+        action.pointer_action.pause(duration=0.5)
         action.pointer_action.pointer_up(MouseButton.LEFT)
         action.perform()
 
@@ -252,7 +253,7 @@ class WebPageRenderer:
         assert dx > 0 and dy > 0
 
         _dx, _dy = dx, dy
-        for move_step in range(3):
+        for move_step in range(2):
             rospy.loginfo("move step %d", move_step)
             if not self._do_move(start_x, start_y, end_x, end_y):
                 return
@@ -267,15 +268,17 @@ class WebPageRenderer:
         rospy.loginfo("calibrated scales for z = %d: self.scale_x = %f, self.scale_y = %f",
                       self.z, self.scale_x, self.scale_y)
 
-        self.move_to_position(cur_lat, cur_lng)
+        x, y, a,b = utm.from_latlon(new_lat, new_lng)
+        lat1, lng1 = utm.to_latlon(x + 10, y + 10, a, b)
+        self.move_to_position(lat1, lng1)
         self.load_map_page(cur_lat, cur_lng)
         rospy.loginfo("position restored to %s", self.driver.current_url)
 
 
-    def move_to_position(self, lat, lng):
+    def _move_to_position(self, lat, lng):
         if self.scale_x == 0:
             rospy.logerr("need to calibrate scales first")
-            return
+            return False
 
         min_dx, min_dy = 4, 4
         cur_lat, cur_lng = self.get_cur_lat_lng()
@@ -285,7 +288,7 @@ class WebPageRenderer:
         if abs(dy) < min_dy and abs(dx) < min_dx:
             rospy.logerr("diff too small: dx = %d, dy = %d, cur_lat = %f, cur_lng = %f, lat = %f, lng = %f",
                          dx, dy, cur_lat, cur_lng, lat, lng)
-            return
+            return False
 
         rospy.loginfo("requested lat = %f, lng = %f, cur_lat = %f, cur_lng = %f, dx = %d, dy = %d ",
                       lat, lng, cur_lat, cur_lng, dx, dy)
@@ -293,7 +296,7 @@ class WebPageRenderer:
         bb_x0, bb_y0, bb_x1, bb_y1 = self.get_bb()
         bb_xc, bb_yc = (bb_x0 + bb_x1) // 2, (bb_y0 + bb_y1) // 2
         if not self.do_move(bb_xc, bb_yc, bb_xc + dx, bb_yc + dy):
-            return
+            return False
 
         rospy.loginfo("url after: %s", self.driver.current_url)
 
@@ -303,6 +306,25 @@ class WebPageRenderer:
         _x, _y, _, _ = utm.from_latlon(lat, lng)
         rospy.loginfo("abs error: d_lat = %f, d_lng = %f, dx, m = %f, dy, m = %d, cur_lat = %f, cur_lng = %f, lat = %f, lng = %f",
                       lat - cur_lat, lng - cur_lng, _x - cur_x, _y - cur_y, cur_lat, cur_lng, lat, lng)
+
+        return True
+
+    def get_curr_err_in_meters(self, lat, lng):
+        cur_lat, cur_lng = self.get_cur_lat_lng()
+        cur_x, cur_y, _, _ = utm.from_latlon(cur_lat, cur_lng)
+        _x, _y, _, _ = utm.from_latlon(lat, lng)
+        return np.linalg.norm(np.array([cur_x - _x, cur_y - _y]))
+
+    def move_to_position(self, lat, lng):
+        step = 0
+        while step < 5 and self.get_curr_err_in_meters(lat, lng) > 4:
+            if not self._move_to_position(lat, lng):
+                return False
+            step += 1
+        if step >= 5:
+            rospy.logerr("failed to obtain desired location precision after %d steps", step)
+            return False
+        return True
 
     def render_map_with_coords(self, lat=43.640722, lng=-79.3811892):
         self.move_to_position(lat, lng)
