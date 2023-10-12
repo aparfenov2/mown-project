@@ -170,7 +170,11 @@
     <node pkg="backend" type="google_map_to_occ_grid.py" name="google_map" output="screen" >
         <param name="world_frame_id" value="odom" />
         <param name="sensitivity" value="1e-6" />
-        <param name="z" value="20" />
+        <param name="run_cfg_srv" value="true" />
+        <param name="headless" value="true" />
+        <param name="z" value="19.95" />
+        <param name="window_size" value="1920x1080" />
+        <param name="resolution" value="0.05" />
         <remap from="fix" to="/gps/fix"/>
     </node>
 </group>
