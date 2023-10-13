@@ -30,10 +30,21 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities a
 # https://gis.stackexchange.com/questions/7430/what-ratio-scales-do-google-maps-zoom-levels-correspond-to
 
 class WebPageRenderer:
-    def __init__(self, z=19.95, headless=True, w=512, h=512, resolution=0.1) -> None:
+    def __init__(self,
+        z=19.95,
+        m=100,
+        headless=True,
+        w=512, h=512,
+        resolution=0.1,
+        satellite_mode=False,
+        load_cap_delay=3.0
+        ) -> None:
 
         self.resolution = resolution
         self.z = z
+        self.m = m
+        self.load_cap_delay = load_cap_delay
+        self.satellite_mode = satellite_mode
         _z = self.calc_z(55)
         rospy.loginfo("set driver window size to %dx%d, z (calculated) = %f, self.z = %f", w, h, _z, self.z)
 
@@ -61,10 +72,12 @@ class WebPageRenderer:
         h = int(wnd_sz["height"])
         return w, h
 
-    def load_map_page(self, lat=43.640722, lng=-79.3811892):
+    def load_map_page(self, lat=43.640722, lon=-79.3811892):
         # z = self.calc_z(lat)
-
-        url = f"https:/www.google.com/maps/@{lat:0.7f},{lng:0.7f},{self.z:0.4f}z"
+        if not self.satellite_mode:
+            url = f"https:/www.google.com/maps/@{lat:0.7f},{lon:0.7f},{self.z:0.4f}z"
+        else:
+            url = f"https://www.google.com/maps/@{lat:0.7f},{lon:0.7f},{self.m:0.0f}m/data=!3m1!1e3?entry=ttu"
         rospy.loginfo("loading url = %s", url)
         self.driver.get(url)
 
@@ -100,8 +113,9 @@ class WebPageRenderer:
         # rospy.loginfo(f"got {img.shape} {img.dtype} image")
         return img
 
-    def render_map_with_coords(self, lat, lng):
-        self.load_map_page(lat, lng)
+    def render_map_with_coords(self, lat, lon):
+        self.load_map_page(lat, lon)
+        rospy.sleep(self.load_cap_delay)
         return self.capture_page()
 
 
@@ -118,14 +132,34 @@ class Node:
         self.world_frame_id = rospy.get_param("~world_frame_id", "world")
         self.timer_period = float(rospy.get_param("~timer_period", 5.0))
         self.sensitivity = float(rospy.get_param("~sensitivity", 1e-6))
-        run_cfg_srv = float(rospy.get_param("~run_cfg_srv", False))
-        headless = float(rospy.get_param("~headless", False))
+        self.orig_lat_override = rospy.get_param("~orig_lat_override", None)
+        if self.orig_lat_override is not None:
+            self.orig_lat_override = float(self.orig_lat_override)
+        self.orig_lon_override = rospy.get_param("~orig_lon_override", None)
+        if self.orig_lon_override is not None:
+            self.orig_lon_override = float(self.orig_lon_override)
+        self.lat_offset = float(rospy.get_param("~lat_offset", 0))
+        self.lon_offset = float(rospy.get_param("~lon_offset", 0))
+
+        run_cfg_srv = bool(rospy.get_param("~run_cfg_srv", False))
+        satellite_mode = bool(rospy.get_param("~satellite_mode", False))
+        headless = bool(rospy.get_param("~headless", False))
         wnd_w, wnd_h = rospy.get_param("~window_size", "512x512").split('x')
+        load_cap_delay = float(rospy.get_param("~load_cap_delay", 3.0))
         resolution = float(rospy.get_param("~resolution", 0.1))
         wnd_w, wnd_h = float(wnd_w), float(wnd_h)
         z = float(rospy.get_param("~z", 18))
+        m = float(rospy.get_param("~m", 100))
 
-        self.driver = WebPageRenderer(z=z, headless=headless, w=wnd_w, h=wnd_h, resolution=resolution)
+        self.driver = WebPageRenderer(
+            z=z, m=m,
+            headless=headless,
+            w=wnd_w,
+            h=wnd_h,
+            resolution=resolution,
+            satellite_mode=satellite_mode,
+            load_cap_delay=load_cap_delay
+            )
 
         self.last_lat, self.last_lon = None, None
         self.prev_last_lat, self.prev_last_lon = None, None
@@ -221,12 +255,10 @@ class Node:
         grid_msg.data = list(img.flatten())
         return grid_msg
 
-    def cfgClientCbStub(self, _):
-        pass
-
     def cfgCallback(self, config, _):
-        rospy.loginfo("Reconfigure Request: z=%f", config['z'])
+        rospy.loginfo("Reconfigure Request: z=%f, m=%f", config['z'], config['m'])
         self.driver.z = config['z']
+        self.driver.m = config['m']
         return config
 
     def timerCallback(self, _):
@@ -270,7 +302,11 @@ class Node:
         self.br.sendTransform(t)
 
     def gpsCallback(self, msg):
-        self.last_lat, self.last_lon = msg.latitude, msg.longitude
+        if self.lat_offset == 0 and self.orig_lat_override is not None:
+            self.lat_offset = self.orig_lat_override - msg.latitude
+        if self.lon_offset == 0 and self.orig_lon_override is not None:
+            self.lon_offset = self.orig_lon_override - msg.longitude
+        self.last_lat, self.last_lon = msg.latitude + self.lat_offset, msg.longitude + self.lon_offset
         self.last_timestamp = msg.header.stamp
         if self.origin_utm_x is None:
             self.origin_utm_x, self.origin_utm_y, _,_ = utm.from_latlon(self.last_lat, self.last_lon)
