@@ -1,0 +1,8 @@
+scikit-learn
+Shapely
+tk
+dubins
+Rtree
+casadi
+msgpack-rpc-python
+osrf-pycommon

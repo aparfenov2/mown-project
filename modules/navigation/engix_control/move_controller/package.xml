@@ -42,6 +42,9 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>engix_msgs</depend>
+  <exec_depend>abstractnode</exec_depend>
+  
 
 
   <!-- The export tag contains other, unspecified, tags -->
