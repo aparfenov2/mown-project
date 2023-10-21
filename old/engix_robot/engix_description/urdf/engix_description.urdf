@@ -1,0 +1,1324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="engix">
+
+  <transmission name="left_wheel_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_wheel_actr">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_wheel_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_wheel_actr">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <robotNamespace>/</robotNamespace>
+      <legacyMode>true</legacyMode>
+      <alwaysOn>true</alwaysOn>
+      <publishWheelTF>false</publishWheelTF>
+      <publishTf>1</publishTf>
+      <publishOdomTF>true</publishOdomTF>
+      <publishWheelJointState>true</publishWheelJointState>
+      <updateRate>100.0</updateRate>
+      <leftJoint>left_wheel_joint</leftJoint>
+      <rightJoint>right_wheel_joint</rightJoint>
+      <wheelSeparation>1.2</wheelSeparation>
+      <wheelDiameter>0.42</wheelDiameter>
+      <wheelAcceleration>1.0</wheelAcceleration>
+      <wheelTorque>10</wheelTorque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>base_link</robotBaseFrame>
+      <odometrySource>world</odometrySource>
+      <rosDebugLevel>na</rosDebugLevel>
+    </plugin>
+  </gazebo>
+
+
+  <gazebo>
+    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>50.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>ground_truth/state</topicName>
+      <gaussianNoise>0.01</gaussianNoise>
+      <frameName>world</frameName>
+      <xyzOffsets>0 0 0</xyzOffsets>
+      <rpyOffsets>0 0 0</rpyOffsets>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="laser">
+    <sensor name="laser" type="ray" >
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>20</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>320</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.66</min_angle>
+            <max_angle>0.66</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>24</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.045</min_angle>
+            <max_angle>0.045</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.1</min>
+          <max>4.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_velodyne_laser.so">
+        <robotNamespace>/</robotNamespace>
+        <topicName>ce30c_output</topicName>
+        <frameName>ce30c_lidar</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+  <gazebo reference="imu_link">
+    <plugin filename="libgazebo_ros_imu.so" name="gazebo_imu_plugin">
+      <robotNamespace>/</robotNamespace>
+      <topicName>imu/data</topicName>
+      <serviceName>imu_service</serviceName>
+      <bodyName>base_link</bodyName>
+      <gaussianNoise>0</gaussianNoise>
+      <rpyOffsets>0 0 0</rpyOffsets>
+      <updateRate>20.0</updateRate>
+      <alwaysOn>true</alwaysOn>
+    </plugin>
+  </gazebo>
+  <gazebo>
+    <plugin filename="libhector_gazebo_ros_gps.so" name="gps_controller">
+      <robotNamespace>/</robotNamespace>
+      <updateRate>40</updateRate>
+      <bodyName>base_link</bodyName>
+      <frameId>base_link</frameId>
+      <topicName>navsat/fix</topicName>
+      <velocityTopicName>navsat/vel</velocityTopicName>
+      <referenceLatitude>49.9</referenceLatitude>
+      <referenceLongitude>8.9</referenceLongitude>
+      <referenceHeading>0</referenceHeading>
+      <referenceAltitude>0</referenceAltitude>
+      <drift>0.0001 0.0001 0.0001</drift>
+    </plugin>
+  </gazebo>
+  <gazebo reference="ultrasound_center">
+    <sensor type="ray" name="ultrasound_center">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.02</min>
+          <max>3</max>
+          <resolution>0.02</resolution>
+        </range>
+      </ray>
+
+      <plugin name="gazebo_ros_sonar_controller" filename="libhector_gazebo_ros_sonar.so">
+        <gaussianNoise>0.005</gaussianNoise>
+        <topicName>ultrasound_center</topicName>
+        <frameId>ultrasound_center</frameId>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+  <gazebo reference="ultrasound_left_top">
+    <sensor type="ray" name="ultrasound_left_top">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.02</min>
+          <max>3</max>
+          <resolution>0.02</resolution>
+        </range>
+      </ray>
+
+      <plugin name="gazebo_ros_sonar_controller" filename="libhector_gazebo_ros_sonar.so">
+        <gaussianNoise>0.005</gaussianNoise>
+        <topicName>ultrasound_left_top</topicName>
+        <frameId>ultrasound_left_top</frameId>
+      </plugin>
+    </sensor>
+  </gazebo>
+  <gazebo reference="ultrasound_right_top">
+    <sensor type="ray" name="ultrasound_right_top">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.02</min>
+          <max>3</max>
+          <resolution>0.02</resolution>
+        </range>
+      </ray>
+
+      <plugin name="gazebo_ros_sonar_controller" filename="libhector_gazebo_ros_sonar.so">
+        <gaussianNoise>0.005</gaussianNoise>
+        <topicName>ultrasound_right_top</topicName>
+        <frameId>ultrasound_right_top</frameId>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="ultrasound_left_back">
+    <sensor type="ray" name="ultrasound_left_back">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.02</min>
+          <max>3</max>
+          <resolution>0.02</resolution>
+        </range>
+      </ray>
+
+      <plugin name="gazebo_ros_sonar_controller" filename="libhector_gazebo_ros_sonar.so">
+        <gaussianNoise>0.005</gaussianNoise>
+        <topicName>ultrasound_left_back</topicName>
+        <frameId>ultrasound_left_back</frameId>
+      </plugin>
+    </sensor>
+  </gazebo>
+  <gazebo reference="ultrasound_right_back">
+    <sensor type="ray" name="ultrasound_right_back">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.02</min>
+          <max>3</max>
+          <resolution>0.02</resolution>
+        </range>
+      </ray>
+
+      <plugin name="gazebo_ros_sonar_controller" filename="libhector_gazebo_ros_sonar.so">
+        <gaussianNoise>0.005</gaussianNoise>
+        <topicName>ultrasound_right_back</topicName>
+        <frameId>ultrasound_right_back</frameId>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="ultrasound_left_back_back">
+    <sensor type="ray" name="ultrasound_left_back_back">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.02</min>
+          <max>3</max>
+          <resolution>0.02</resolution>
+        </range>
+      </ray>
+
+      <plugin name="gazebo_ros_sonar_controller" filename="libhector_gazebo_ros_sonar.so">
+        <gaussianNoise>0.005</gaussianNoise>
+        <topicName>ultrasound_left_back_back</topicName>
+        <frameId>ultrasound_left_back_back</frameId>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="ultrasound_right_back_back">
+    <sensor type="ray" name="ultrasound_right_back_back">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.14835</min_angle>
+            <max_angle>0.14835</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.02</min>
+          <max>3</max>
+          <resolution>0.02</resolution>
+        </range>
+      </ray>
+
+      <plugin name="gazebo_ros_sonar_controller" filename="libhector_gazebo_ros_sonar.so">
+        <gaussianNoise>0.005</gaussianNoise>
+        <topicName>ultrasound_right_back_back</topicName>
+        <frameId>ultrasound_right_back_back</frameId>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- <link name="base_footprint"/>
+  <joint name="base_footprint_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="base_footprint"/>
+  </joint> -->
+  <link name="inertial_link">
+    <inertial>
+      <mass value="10"/>
+      <origin xyz="0.0005263550102558459 -0.0008435206011111315 0.2088531479687758"/>
+      <inertia ixx="0.298693" ixy="0.003154" ixz="-0.020052" iyy="0.45471" iyz="0.003425" izz="0.326894"/>
+    </inertial>
+  </link>
+  <joint name="inertial_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="inertial_link"/>
+  </joint>
+
+  <link name="base_link">
+    <!-- <inertial>
+      <origin
+        xyz="0,374056359 0.00526150593338467 0.0527030720786924"
+        rpy="0 0 0" />
+      <mass
+        value="13.9193807318929" />
+      <inertia
+        ixx="0.283104751456096"
+        ixy="-9.17169868644118E-05"
+        ixz="-0.0303686361911287"
+        iyy="0.694211916770157"
+        iyz="5.31670879227359E-05"
+        izz="0.933125038601792" />
+    </inertial> -->
+    <visual>
+      <origin
+        xyz="-0.162028179738504 -0.00526150593338467 0.019"
+        rpy="0 0 3.1416" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="lwheel">
+    <inertial>
+      <mass value="4.637" />
+      <origin xyz="0 0 0" />
+      <inertia  ixx="0.02467" ixy="0" ixz="0" iyy="0.04411" iyz="0" izz="0.02467" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/lwheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/lwheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_wheel_joint" type="continuous">
+    <origin
+      xyz="-0.59511 0.42022 -0.11179"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="lwheel" />
+    <axis
+      xyz="0 1 -1.3832E-05" />
+  </joint>
+    <link name="stop">
+    <!-- <inertial>
+      <origin
+        xyz="8.01438915232211E-11 -7.29305504876265E-12 0.0138238205727138"
+        rpy="0 0 0" />
+      <mass
+        value="0.0281984480696176" />
+      <inertia
+        ixx="6.72540159939615E-06"
+        ixy="3.7259864948733E-11"
+        ixz="-2.12799667393466E-14"
+        iyy="6.72201404961766E-06"
+        iyz="1.93646720152684E-15"
+        izz="3.40059228920416E-06" />
+    </inertial> -->
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/stop.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/stop.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="stop_joint"
+    type="fixed">
+    <origin
+      xyz="-0.69 -0.37937 0.40441"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="stop" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="cover">
+    <!-- <inertial>
+      <origin
+        xyz="-0.551441504533107 -0.0126564496319977 -0.0946936917411068"
+        rpy="0 0 0" />
+      <mass
+        value="639.55152495748" />
+      <inertia
+        ixx="121.128020945133"
+        ixy="2.23693263942331"
+        ixz="-1.57368041967364"
+        iyy="43.5974122594775"
+        iyz="-0.0340743547938204"
+        izz="138.576050287635" />
+    </inertial> -->
+    <inertial>
+      <origin
+        xyz="-0.162028179738504 -0.00526150593338467 0.019"
+        rpy="0 0 3.1416" />
+      <mass
+        value="0.1" />
+      <inertia
+        ixx="0.001"
+        ixy="0.001"
+        ixz="0.001"
+        iyy="0.001"
+        iyz="0.001"
+        izz="0.001" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="-0.162028179738504 -0.00526150593338467 0.019"
+        rpy="0 0 3.1416" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/cover.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/cover.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="cover_joint"
+    type="fixed">
+    <origin
+      xyz="-0.162 -0.0044742 -0.016717"
+      rpy="0 0 3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="cover" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="rwheel">
+    <inertial>
+    <mass value="4.637" />
+    <origin xyz="0 0 0" />
+    <inertia  ixx="0.02467" ixy="0" ixz="0" iyy="0.04411" iyz="0" izz="0.02467" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/rwheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/rwheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_wheel_joint" type="continuous">
+    <origin
+      xyz="-0.59511 -0.42022 -0.11179"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rwheel" />
+    <axis
+      xyz="0 1 -1.3832E-05" />
+  </joint>
+  
+  <link name="axel_center"/>
+  <joint name="axel_center_joint" type="continuous">
+    <origin
+      xyz="-0.59511 0 -0.11179"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="axel_center" />
+    <!-- <axis
+      xyz="0 1 -1.3832E-05" /> -->
+  </joint>
+
+  <link name="caster_left">
+    <inertial>
+      <origin
+        xyz="0.0136666051162592 5.81740895955196E-07 -0.128816257273344"
+        rpy="0 0 0" />
+      <mass
+        value="1.0" />
+      <inertia
+        ixx="0.00442216870785303"
+        ixy="-1.28985529609481E-08"
+        ixz="0.000703041039067919"
+        iyy="0.00329065457320726"
+        iyz="0.10495869480082E-08"
+        izz="0.00197684777439707" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/caster_left.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/caster_left.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="caster_left_joint" type="continuous">
+    <origin
+      xyz="0.643 0.39037 0.091717"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="caster_left" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link name="caster_right">
+    <inertial>
+      <origin
+        xyz="0.0136666051162589 5.81740895344574E-07 -0.128816257273344"
+        rpy="0 0 0" />
+      <mass
+        value="1.0" />
+      <inertia
+        ixx="0.00442216870785306"
+        ixy="-1.28985529604838E-08"
+        ixz="0.000703041039067914"
+        iyy="0.00329065457320729"
+        iyz="0.10495869258973E-08"
+        izz="0.00197684777439707" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/caster_right.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/caster_right.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="caster_right_joint" type="continuous">
+    <origin
+      xyz="0.643 -0.39932 0.091717"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="caster_right" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link name="caster_wheel_left">
+    <inertial>
+      <origin
+        xyz="-2.22044604925031E-16 1.66533453693773E-16 8.32667268468867E-17"
+        rpy="0 0 0" />
+      <mass
+        value="1.0" />
+      <inertia
+        ixx="0.00672051631359307"
+        ixy="0.43365000061373E-19"
+        ixz="-1.91929731178655E-17"
+        iyy="0.0102859795840278"
+        iyz="0.58886559456232E-19"
+        izz="0.00672051631359308" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/caster_wheel_left.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/caster_wheel_left.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="caster_wheel_left_joint" type="continuous">
+    <origin
+      xyz="0.067678 0 -0.27618"
+      rpy="0 0 0" />
+    <parent
+      link="caster_left" />
+    <child
+      link="caster_wheel_left" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link name="caster_wheel_right">
+    <inertial>
+      <origin
+        xyz="1.11022302462516E-16 2.22044604925031E-16 1.11022302462516E-16"
+        rpy="0 0 0" />
+      <mass
+        value="1.0" />
+      <inertia
+        ixx="0.00672051631359309"
+        ixy="0.2732333861913E-19"
+        ixz="0.08185551320853E-18"
+        iyy="0.0102859795840278"
+        iyz="0.39195968546971E-18"
+        izz="0.00672051631359309" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/caster_wheel_right.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/caster_wheel_right.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="caster_wheel_right_joint" type="continuous">
+    <origin
+      xyz="0.067678 0 -0.27618"
+      rpy="0 0 0" />
+    <parent
+      link="caster_right" />
+    <child
+      link="caster_wheel_right" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+
+
+  <link name="deck">
+    <!-- <inertial>
+      <origin
+        xyz="0.0716595052325995 0.0547981436633182 -0.172887277173742"
+        rpy="0 0 0" />
+      <mass
+        value="10.0" />
+      <inertia
+        ixx="0.353063694459244"
+        ixy="-0.0622753255897354"
+        ixz="-0.0130147712780993"
+        iyy="0.159919200824219"
+        iyz="0.000471990511557466"
+        izz="0.498507564006978" />
+    </inertial> -->
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/deck.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/deck.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="deck_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="deck" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="battery">
+    <!-- <inertial>
+      <origin
+        xyz="-0.175546583916824 0.103793503480278 0.0936916020368893"
+        rpy="0 0 0" />
+      <mass
+        value="50.0" />
+      <inertia
+        ixx="0.278241643155452"
+        ixy="6.89616688210623E-18"
+        ixz="-2.31260766468446E-17"
+        iyy="0.530062199999999"
+        iyz="1.12222275779455E-17"
+        izz="0.587073643155452" />
+    </inertial> -->
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/battery.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/battery.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="battery_joint"
+    type="fixed">
+    <origin
+      xyz="-0.63961 -0.098618 -0.044982"
+      rpy="1.5708 0 -3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="battery" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="zed">
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/zed.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/zed.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="zed_joint"
+    type="fixed">
+    <origin
+      xyz="-0.064262 -0.0023649 0.54982"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="zed" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="laser">
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/laser.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/laser.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="laser_joint"
+    type="fixed">
+    <origin
+      xyz="-0.056018 -0.0047765 0.48823"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="laser" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+
+  <!-- <link name="ce30c_output"/>
+  <joint name="ce30c_output_joint"
+    type="fixed">
+    <origin
+      xyz="-0.056018 -0.0047765 0.48823"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="ce30c_output" />
+    <axis
+      xyz="0 0 0" />
+  </joint> -->
+
+
+  <link name="gps">
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/gps.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/gps.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="gps_joint"
+    type="fixed">
+    <origin
+      xyz="-0.079471 0.11632 0.54778"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="gps" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+
+  <link name="ultrasound_center">
+    <!-- <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/ultrasound_center.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual> -->
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/ultrasound_center.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="ultrasound_center_joint"
+    type="fixed">
+    <origin
+      xyz="0.67838 -0.00040907 0.10435"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="ultrasound_center" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="ultrasound_left_top">
+    <!-- <visual>
+      <origin
+        xyz="2.55208334514201E-05 0.00256991380789062 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/ultrasound_left_top.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual> -->
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/ultrasound_left_top.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="ultrasound_left_top_joint"
+    type="fixed">
+    <origin
+      xyz="0.41729 0.33052 -0.0062646"
+      rpy="0 0 -4.7" />
+    <parent
+      link="base_link" />
+    <child
+      link="ultrasound_left_top" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="ultrasound_left_back">
+    <!-- <visual>
+      <origin
+        xyz="0.00256991380789057 2.55208334514756E-05 -0.000705168155339608"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/ultrasound_left_back.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://engix_description/meshes/ultrasound_left_back.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="ultrasound_left_back_joint"
+    type="fixed">
+    <origin
+      xyz="-0.66119 0.37242 0.27466"
+      rpy="0 0 -4.7" />
+    <parent
+      link="base_link" />
+    <child
+      link="ultrasound_left_back" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="ultrasound_left_back_back">
+  </link>
+  <joint name="ultrasound_left_back_back_joint"
+    type="fixed">
+    <origin
+      xyz="-0.8798 0.19399 -0.05687"
+      rpy="0 0 -3.25" />
+    <parent
+      link="base_link" />
+    <child
+      link="ultrasound_left_back_back" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="ultrasound_right_top">
+
+  </link>
+  <joint name="ultrasound_right_top_joint"
+    type="fixed">
+    <origin
+      xyz="0.41736 -0.33598 -0.0062646"
+      rpy="0 0 -1.5708" />
+      <!-- rpy="0 0 1.5708" -->
+    <parent
+      link="base_link" />
+    <child
+      link="ultrasound_right_top" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="ultrasound_right_back">
+  </link>
+  <joint name="ultrasound_right_back_joint"
+    type="fixed">
+    <origin
+      xyz="-0.66113 -0.37937 0.27466"
+      rpy="0 0 -1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="ultrasound_right_back" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link name="ultrasound_right_back_back">
+  </link>
+  <joint name="ultrasound_right_back_back_joint"
+    type="fixed">
+    <origin
+      xyz="-0.8798 -0.20253 -0.05687"
+      rpy="0 0 -3" />
+    <parent
+      link="base_link" />
+    <child
+      link="ultrasound_right_back_back" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <link name="imu_link"/>
+  
+  <joint name="imu_joint"
+    type="fixed">
+    <origin
+      xyz="-0.064262 -0.0023649 0.54982"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="imu_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <gazebo reference="base_link">
+  <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="deck">
+  <material>Gazebo/Yellow</material>
+  </gazebo>
+  <gazebo reference="caster_left">
+  <material>Gazebo/Gray</material>
+  </gazebo>
+  <gazebo reference="caster_right">
+  <material>Gazebo/Gray</material>
+  </gazebo>
+  <gazebo reference="caster_wheel_left">
+  <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="caster_wheel_right">
+  <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="lwheel">
+    <mu1 value="1.0"/>
+    <mu2 value="1.0"/>
+    <kp value="10000000.0" />
+    <kd value="1.0" />
+    <fdir1 value="1 0 0"/>
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="rwheel">
+    <mu1 value="1.0"/>
+    <mu2 value="1.0"/>
+    <kp value="10000000.0" />
+    <kd value="1.0" />
+    <fdir1 value="1 0 0"/>
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="zed">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="gps">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <gazebo reference="laser">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="battery">
+    <material>Gazebo/White</material>
+  </gazebo>
+  <gazebo reference="stop">
+    <material>Gazebo/Red</material>
+  </gazebo>
+
+
+</robot>

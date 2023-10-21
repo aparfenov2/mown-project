@@ -1,0 +1,106 @@
+<launch>
+  <!-- Arguments -->
+  <!-- <arg name="open_rviz" default="true"/> -->
+    <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="move_forward_only" default="false"/>
+
+    <arg name="rviz" default="false" />
+    <arg name="sim" default="false" />
+    <arg name="teleop" default="false"/>
+    <arg name="mb" default="false"/>
+    <arg name="segm" default="false"/>
+
+    <arg name="bypass" default="false"/>
+
+    <arg name="image_rect_topic" default="/segmentation_node/mask_color" unless="$(arg bypass)" />
+    <arg name="image_rect_topic" default="/camera/rgb/image_raw" if="$(arg bypass)" />
+
+<!-- sim -->
+    <group if="$(arg sim)">
+        <include file="$(find tb_gazebo)/launch/turtletown.launch">
+            <arg name="publish_tf" value="1" />
+        </include>
+    </group>
+
+<!-- rviz -->
+    <group if="$(arg rviz)">
+        <node pkg="rviz" type="rviz" name="rviz"
+            args="-d $(find my_move_base_launcher)/rviz/cfg.rviz"/>
+    </group>
+
+<!-- teleop -->
+    <group if="$(arg teleop)">
+        <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen">
+            <remap from="cmd_vel" to="/mobile_base/commands/velocity"/>
+        </node>
+    </group>
+
+
+<!-- segm -->
+    <group if="$(arg segm)">
+        <group unless="$(arg bypass)">
+            <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
+                <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
+                <remap from="camera/image" to="/camera/rgb/image_raw" />
+            </node>
+        </group>
+
+        <node pkg="nodelet" type="nodelet" name="pcl_proc"  args="manager" output="screen"/>
+
+        <!-- register depth image -->
+        <node pkg="nodelet" type="nodelet" name="point_cloud2_register"
+                args="load depth_image_proc/register pcl_proc"
+          respawn="false" output="screen" >
+            <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
+            <remap from="/depth/camera_info" to="/camera/depth/camera_info" />
+            <remap from="/depth/image_rect" to="/camera/depth/image_raw" />
+        </node>
+
+        <!-- registered depth to pcl rgb -->
+        <node pkg="nodelet" type="nodelet" name="point_cloud2_pcl"
+                args="load depth_image_proc/point_cloud_xyzrgb pcl_proc"
+          respawn="false" output="screen" >
+
+            <remap from="/rgb/image_rect_color" to="$(arg image_rect_topic)" />
+            <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
+            
+            <remap from="depth_registered/points" to="/pcl_proc/points2" />
+        </node>
+
+        <node name="color_filter" pkg="simpcl" type="color_filter" output="screen">
+            <remap from="points_in" to="/pcl_proc/points2"/>
+            <remap from="points_out" to="/pcl_proc/filtered"/>
+            
+            <param name="use_hsi" type="int" value="0"/>
+            
+            <param name="r_min" type="double" value="255"/>
+            <param name="r_max" type="double" value="255"/>
+
+            <param name="g_min" type="double" value="232"/>
+            <param name="g_max" type="double" value="255"/>
+
+            <param name="b_min" type="double" value="0"/>
+            <param name="b_max" type="double" value="20"/>
+        </node>
+
+        <node pkg="nodelet" type="nodelet" name="point_cloud2_laserscan"
+                args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc"
+          respawn="false" output="screen" required="true" clear_params="true">
+            <param name="min_height" type="double" value="0.1"/>
+            <param name="max_height" type="double" value="2.0"/>
+            <param name="target_frame" type="str" value="base_link"/>
+            
+            <remap from="cloud_in" to="/pcl_proc/filtered" />
+            <remap from="scan" to="/pcl_proc/scan" />            
+        </node>
+
+    </group>
+
+  <!-- move_base -->
+    <group if="$(arg mb)">
+      <include file="$(find my_move_base_launcher)/launch/move_base.launch">
+        <!-- <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" /> -->
+      </include>
+    </group>
+
+</launch>

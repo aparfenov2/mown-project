@@ -1,0 +1,77 @@
+#===============================================================================
+# move_base is the node the uses costmaps (global & local) and planners (global
+# & local) to collect various inputs (map, lidar/rgb-d data, transforms, and
+# odometry) and outputs a geometry_msgs/Twist data which a robot needs to 
+# implement. Good for in house navigation.
+# NOTE: This file is not used. To use it go to move_base.launch and enable the 
+#       rosparam tag.
+#===============================================================================
+
+
+# Since the Navigation stack tuning document by Kaiyu Zheng uses the global_planner
+# and offers tunning aproaches, this is what I will use. The performance of the 
+# code is shown here: https://wiki.ros.org/global_planner and for install see:
+# https://answers.ros.org/question/171306/how-to-use-global-planner-package-in-hydro-devel-navigation/
+base_global_planner: "global_planner/GlobalPlanner"
+
+
+# MO - not using this global planner. It is the default, so we don't need to
+# explicitly declare it.... fun fact....
+# global planner - http://wiki.ros.org/nav_core#BaseGlobalPlanner tells you about
+#base_global_planner: "navfn/NavfnROS"
+
+# used by Kaiyu Zheng.
+# local planner - http://wiki.ros.org/nav_core#BaseLocalPlanner
+base_local_planner: "dwa_local_planner/DWAPlannerROS"
+########## ???? base_local_planner: "base_local_planner/TrajectoryPlannerROS"
+
+################################################################################
+# to do. However since this is not mentioned in the navigation tune doc, I am  #
+# keeping defaults.                                                            #
+################################################################################
+# cntr_frq = The rate in Hz at which to run the control loop and send velocity
+# commands to the base. controller_frequency: 10.0    # 5.0 ## SEEMS NOT TO 
+# WORK FROM THIS FILE (LOCAL PLANNER ALSO HAS THIS)
+#controller_frequency: 10.0 MO
+
+# How long the planner will wait in seconds in an attempt to find a
+# valid plan before space-clearing operations are performed.
+#planner_patience: 8.0 #MO
+
+# How long the controller will wait in seconds without receiving a
+# valid control before space-clearing operations are performed.
+#controller_patience: 10.0 # def 3, was 15.0 #MO
+
+# The distance away from the robot in meters at which obstacles will 
+# be cleared from the costmap when attempting to clear space in the map
+# Works only with default recovery behavior.
+#conservative_reset_dist: 0.5 #MO
+
+# Enables the move_base recovery behaviors to attempt to clear out space.
+#recovery_behavior_enabled: true #MO
+
+# Robot will attempt an in-place rotation when attempting to clear out 
+# space. Works only with default recovery behavior.
+#clearing_rotation_allowed: true #MO
+
+# Determines whether or not to shutdown the costmaps of the node when
+# move_base is in an inactive state
+#shutdown_costmaps: false #MO
+
+# How long in seconds to allow for oscillation before executing
+# recovery behaviors. A value of 0.0 corresponds to an infinite timeout.
+#oscillation_timeout: 10.0 # 30.0 # 10.0 #MO
+
+# How far in meters the robot must move to be considered not to be
+# oscillating. Moving this far resets the timer counting up to the
+# ~oscillation_timeout # oscillation_distance: 0.2
+#oscillation_distance: 0.05 #MO
+
+# The rate in Hz at which to run the global planning loop. If the
+# frequency is set to 0.0, the global planner will only run when a new
+# goal is received or the local planner reports that its path is
+# blocked.
+#planner_frequency: 0.0 #MO
+
+# How many times to allow for planning retries before executing recovery # behaviors. -1 corresponds to an infinite retries.
+max_planning_retries: 100

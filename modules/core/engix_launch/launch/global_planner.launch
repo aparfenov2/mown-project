@@ -1,0 +1,9 @@
+<launch>
+    <arg name="config"/>
+
+    <node name="global_planner" pkg="global_planner" type="main.py">
+        <rosparam command="load" file="$(find global_planner)/params/$(arg config)/config.yaml" />
+    </node>
+
+    <!-- <include file="$(find coverage_path_planner)/launch/run.launch"/> -->
+</launch>

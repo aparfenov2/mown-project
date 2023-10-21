@@ -1,0 +1,18 @@
+<library path="lib/libspiral_node">
+    <class name="full_coverage_path_planner/SpiralSTC" type="full_coverage_path_planner::SpiralSTC" base_class_type="nav_core::BaseGlobalPlanner">
+        <description>
+      Plans a path that covers all accessible points in a costmap by using Spiral-STC.
+      Spiral-STC works by following the walls and spiraling inwards until it cannot go further.
+      Then it uses A* to go back outside of the current spiral and then spirals again.
+        </description>
+    </class>
+    <class name="tracking_pid/TrackingPidLocalPlanner" type="tracking_pid::TrackingPidLocalPlanner" base_class_type="nav_core::BaseLocalPlanner">
+        <description>
+      A implementation of a local planner using either a DWA or Trajectory Rollout approach based on configuration parameters.
+        </description>
+    </class>
+    <class type="full_coverage_path_planner::CoverageLayer" base_class_type="costmap_2d::Layer">
+        <description>Coverage layer</description>
+    </class>
+
+</library>

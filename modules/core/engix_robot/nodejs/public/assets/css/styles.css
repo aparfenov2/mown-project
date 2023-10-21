@@ -1,0 +1,65 @@
+body {
+  font-family:Lato;
+}
+
+#joystick {
+  background-image:url("../../assets/img/arrows.png");
+  background-size:200px 200px;
+  background-repeat:no-repeat;
+  width:300px;
+  height:300px;
+  background-position:center;
+}
+
+.joystick-container {
+  width:300px;
+  height:300px;
+}
+
+.swiper-slide:nth-child(1n) {
+  width:100%;
+  height: 100vh;
+}
+
+@media screen and (min-aspect-ratio: 12/12) {
+  .swiper-slide:nth-child(1n) {
+    width:50%;
+  }
+}
+
+.swiper-slide:nth-child(2n) {
+  width:100%;
+}
+
+
+
+@media screen and (min-aspect-ratio: 12/12) {
+  .swiper-slide:nth-child(2n) {
+    width:50%;
+  }
+}
+
+#dynamic {
+  height:100%;
+  width:100%;
+  margin-right:2px;
+  border-radius:3px;
+  background-color:rgb(200, 16, 46);
+}
+
+.sensor-label {
+  background-color:rgba(0, 0, 0, 0.5);
+}
+
+.progress {
+  width:80px;
+  height:20px;
+  background-color:rgba(0, 0, 0, 0);
+  background-image:url("../../assets/img/bateria.png");
+  background-size:100% 100%; 
+}
+
+.wifi-status {
+  width: 20px;
+  height: 20px;
+}

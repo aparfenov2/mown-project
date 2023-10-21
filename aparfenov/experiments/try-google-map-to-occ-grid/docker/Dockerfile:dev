@@ -1,0 +1,8 @@
+# ------- ROS core --------
+
+# FROM ubuntu:focal
+FROM ros-mower
+
+# RUN mkdir /catkin_ws
+
+WORKDIR /catkin_ws

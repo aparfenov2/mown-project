@@ -1,0 +1,16 @@
+<launch>
+    <arg name="use_ros_bridge" default="false" />
+
+    <include file="$(find engix_localization)/launch/reach_rs.launch"/>
+    <include file="$(find zed_wrapper)/launch/zed2i.launch"/>
+
+
+    <group if="$(arg use_ros_bridge)">
+        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+            <arg name="port" value="9090"/>
+        </include>
+    </group>
+
+    <node pkg="engix_localization" type="test.py" name="test_localization" output="screen">
+    </node>
+</launch>

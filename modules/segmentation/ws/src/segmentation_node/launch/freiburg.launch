@@ -1,0 +1,15 @@
+<launch>
+
+  <!-- <arg name="deeplab_ros_node_params" default="$(find segmentation_node)/cfg/freiburg_rgbd.yaml"/> -->
+  <node name="deeplab_ros_node" pkg="segmentation_node" type="segmentation_node.py" output="screen">
+    <!-- <rosparam file="$(arg deeplab_ros_node_params)" command="load" /> -->
+    <param name="rgb_input" value="/camera/rgb/image_color" />
+    <param name="checkpoint" value="$(find segmentation_node)/model/fcn_hr18s_512x1024_40k_cityscapes_20200601_014216-93db27d0.pth" />
+    <param name="config" value="$(find segmentation_node)/configs/hrnet/fcn_hr18s_512x1024_40k_cityscapes.py" />
+  </node>
+
+  <node name="bag" pkg="rosbag" type="play"
+      args="-l $(find segmentation_node)/bags/rgbd_dataset_freiburg3_long_office_household.bag" />
+
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find segmentation_node)/rviz/deeplab_ros.rviz" /> -->
+</launch>

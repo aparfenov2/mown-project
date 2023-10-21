@@ -1,0 +1,15 @@
+planners:
+  - name: NavfnROS
+    type: navfn/NavfnROS
+
+controllers:
+  - name: DWAPlannerROS
+    type: dwa_local_planner/DWAPlannerROS
+
+# abstract_navigation_server.cpp:48
+global_frame: odom
+# abstract_controller_execution.cpp:67
+map_frame: odom
+# robot_frame: base_link
+
+recovery_behaviors: []

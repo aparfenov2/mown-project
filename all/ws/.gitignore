@@ -1,7 +1,0 @@
-build
-devel
-.catkin_tools
-logs
-pycache
-src/CMakeLists.txt
-.catkin_workspace

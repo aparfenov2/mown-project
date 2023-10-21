@@ -1,0 +1,23 @@
+<launch>
+    <!-- Parameters -->
+    <param name="fixed_frame_id" type="str"    value="world" />
+    <param name="resolution"     type="double" value="0.1"  />
+    <param name="max_range"      type="double" value="100.0"  />
+    <param name="hit_logprob"       type="double" value="10"  />
+    <param name="miss_logprob"      type="double" value="1"  />
+    <param name="max_logprob"       type="double" value="100"  />
+    <param name="min_logprob"      type="double" value="0"  />
+
+    <!-- <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" /> -->
+
+    <!-- <node pkg="rosbag" type="play" name="play_rosbag" args="$(find realtime_occupancy_mapping)/bag/example.bag"/>  -->
+
+    <!-- Run RViz -->
+    <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find realtime_occupancy_mapping)/rviz/example.rviz" /> -->
+
+    <!-- <node pkg="rviz" type="rviz" name="rviz" /> -->
+
+    <!-- Run real-time occupancy mapping node -->
+    <node pkg="mapping" type="map_server" name="mapping"  output="screen"/>
+
+</launch>

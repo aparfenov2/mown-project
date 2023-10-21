@@ -1,0 +1,6 @@
+*.pyc
+.ros
+.vscode
+**/ws/*
+!**/ws/src
+tmp/*

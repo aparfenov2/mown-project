@@ -1,0 +1,15 @@
+<package format="2">
+    <name>pidnet_py</name>
+    <version>1.0.0</version>
+    <description>ddrnet_py</description>
+  <author email="margarita.grinvald@mavt.ethz.ch">Margarita Grinvald</author>
+  <maintainer email="margarita.grinvald@mavt.ethz.ch">Margarita Grinvald</maintainer>
+  <license>BSD</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>std_msgs</depend>
+    <depend>std_srvs</depend>
+    <depend>tf</depend>
+
+</package>

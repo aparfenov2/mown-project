@@ -1,0 +1,13 @@
+<launch>
+
+<!--
+  <include file="$(find my_nav)/launch/velocity_smoother.launch.xml"/>
+-->
+    <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen">
+      <remap from="cmd_vel" to="/mobile_base/commands/velocity"/>
+<!--
+      <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>
+-->
+    </node>
+
+</launch>

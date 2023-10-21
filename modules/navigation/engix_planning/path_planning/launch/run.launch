@@ -1,0 +1,3 @@
+<launch>
+    <node name="PathPlanningNode" pkg="path_planning" type="main.py" respawn="true" respawn_delay="5" output="screen"/>
+</launch>

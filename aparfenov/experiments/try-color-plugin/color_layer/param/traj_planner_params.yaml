@@ -1,0 +1,21 @@
+# http://wiki.ros.org/base_local_planner#Parameters
+
+publish_cost_grid_pc: true
+publish_traj_pc: true
+# occdist_scale: 0.1
+
+max_vel_x: 2.0 # default: 0.5
+max_vel_theta: 1.0 # default: 1.0
+min_vel_theta: -1.0 # default: -1.0
+acc_lim_theta: 3.2 # default: 3.2
+acc_lim_x: 2.5 # default: 2.5
+
+meter_scoring: true
+holonomic_robot: false # no strafing
+sim_time: 2.0
+pdist_scale: 1.0 # default: 0.6   The weighting for how much the controller should stay close to the path it was given, maximal possible value is 5.0
+gdist_scale: 1.0 # default: 0.8   The weighting for how much the controller should attempt to reach its local goal, also controls speed, maximal possible value is 5.0
+occdist_scale: 1.0 # default: 0.01  The weighting for how much the controller should attempt to avoid obstacles
+heading_scoring: false # default:   false Whether to score based on the robot's heading to the path or its distance from the path
+dwa: false
+controller_frequency: 10
