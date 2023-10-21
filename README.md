@@ -115,3 +115,26 @@ run_all.sh --studio
 Папка experiments
 --------------------------
 Здесь лежат исходники всех экспериментов.
+
+Тест костмапы на основе сегментации
+--------------------------
+тест отрисовки costmap в foxglove, сгенерированной на основе данных сегментации с камеры
+Внимание: работает только с pidnet_py. Ddrnet имеет другие цвета, надо настраивать.
+Внимание: pidnet для запуска требует наличие папки data с файлами весов. Скачать можно здесь:
+http://kan-rt.ddns.net:18000/incoming/pidnet/PIDNet_S_ImageNet.pth.tar
+http://kan-rt.ddns.net:18000/incoming/pidnet/best.pt
+положить в папку data там же, где и run_all.sh.
+Внимание: pidnet использует другой образ докера, см. папку docker.pytorch, и аргумент --ws docker.pytorch
+
+запускаем след. ноды:
+./run_all.sh --sim world:=baylands              запуск симулятора с миром baylands и роботом turtlebot
+./run_all.sh --segm --segm_net ddr_net:=false --ws docker.pytorch       запуск сетки pidnet (python)
+или
+./run_all.sh --segm --segm_net                  запуск сетки ddrnet (опционально)
+./run_all.sh costmap_demo:=true                 запуск ноды, формирующей costmap_2d на основе grid_map['color']
+
+run_all.sh --rosbridge                          запуск моста foxglove_bridge
+run_all.sh --studio                             запуск http web сервера foxglove
+
+проверяем что на панели 3d отображается топик /seg_costmap/costmap/costmap
+Реализация процессинга: см. all.launch: group segm, segm_net, costmap_demo

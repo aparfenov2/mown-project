@@ -5,8 +5,8 @@ CONTAINER_NAME="all"
 # ROBOT="ya_model"
 UNKNOWN_ARGS=()
 ROSARGS=()
-
 # parameters like rosbridge_port can be specified directly: rosbridge_port:=8081
+export TURTLEBOT3_MODEL=burger
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -24,6 +24,8 @@ while [[ "$#" -gt 0 ]]; do
         --rtabmap) ROSARGS+=("rtabmap:=true") && CONTAINER_NAME="${CONTAINER_NAME}-rtabmap"; ;;
         --backend) ROSARGS+=("backend:=true") && CONTAINER_NAME="${CONTAINER_NAME}-backend"; ;;
 
+        --pubfix1) PUBFIX=1; CONTAINER_NAME="${CONTAINER_NAME}-pub"; ;;
+        --pubfix2) PUBFIX=2; CONTAINER_NAME="${CONTAINER_NAME}-pub"; ;;
         --inner) INNER=1 ;;
         --name) CONTAINER_NAME="${CONTAINER_NAME}-$2"; shift; ;;
         --build) BUILD=1; ;;
@@ -38,6 +40,7 @@ done
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
     export PYTHONPYCACHEPREFIX="/cdir/ws/pycache/"
+    export ROSCONSOLE_FORMAT='[${severity}] [${node}]: ${message}'
 
     set -ex
     [ -n "${BUILD}" ] && {
@@ -55,6 +58,15 @@ done
     export GAZEBO_MODEL_PATH="/cdir/ws/src/gazebo_models"
     # echo GAZEBO_MODEL_PATH="${GAZEBO_MODEL_PATH}"
 
+    [ "$PUBFIX" == "1" ] && {
+        rostopic pub -1 /gps/fix sensor_msgs/NavSatFix "{latitude: 55.154722,longitude: 61.316833}"
+        exit 0
+    }
+    [ "$PUBFIX" == "2" ] && {
+        rostopic pub -1 /gps/fix sensor_msgs/NavSatFix "{latitude: 55.154722,longitude: 61.326833}"
+        exit 0
+    }
+
     # read robot name from param server if not specified
     rosparam list || {
         roscore &
@@ -70,7 +82,7 @@ done
         ROSARGS+=("robot:=$ROBOT")
     }
 
-    roslaunch my_utils_common all.launch ${ROSARGS[@]} ${UNKNOWN_ARGS[@]}
+    roslaunch /cdir/all.launch ${ROSARGS[@]} ${UNKNOWN_ARGS[@]}
     # roslaunch engix_gazebo engix_playpen.launch
     exit 0
 }
@@ -94,10 +106,8 @@ VOLUMES=()
 for f in $(find ws/src -type l); do
     VOLUMES+=("-v $(readlink -f $f):/cdir/$f")
 done
-
-[ -e "data" ] && {
-    VOLUMES+=("-v $(readlink -f data):/cdir/data")
-}
+VOLUMES+=("-v $(readlink -f all.launch):/cdir/all.launch")
+VOLUMES+=("-v $(readlink -f data):/cdir/data")
 
 [ -n "$JETSON" ] && {
     JETSON_ARGS="--ws docker_jetson"

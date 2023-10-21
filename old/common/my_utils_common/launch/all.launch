@@ -6,6 +6,9 @@
     <arg name="reset_sim" default="false" />
     <arg name="segm" default="false" />
     <arg name="segm_net" default="false" />
+    <arg name="ddr_net" default="true" />
+    <arg name="segm_topic" value="/segmentation_node/mask_color" if="$(arg ddr_net)" />
+    <arg name="segm_topic" value="/segmentation_node/segmentation" unless="$(arg ddr_net)" />
     <arg name="planning" default="false"/>
     <arg name="mb" default="false" />
     <arg name="paused" default="false" />
@@ -27,6 +30,7 @@
     <!-- rtabmap is supposed to be used in sim mode only to provide global merged pointcloud. In real robot ZED2 already provides the cloud. -->
     <arg name="rtabmap" default="false" />
     <arg name="backend" default="false" />
+    <arg name="costmap_demo" default="false" />
 
     <!-- sim -->
     <group if="$(arg sim)">
@@ -111,9 +115,15 @@
 
     <!-- segm_net -->
     <group if="$(arg segm_net)">
-        <node name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
+        <node if="$(arg ddr_net)" name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
             <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
             <remap from="camera/image" to="/camera/rgb/image_raw" />
+        </node>
+        <node unless="$(arg ddr_net)" name="segmentation_node" pkg="pidnet_py" type="pidnet_node.py" output="screen">
+            <param name="publish_rate" value="10" />
+            <param name="rgb_input" value="/camera/rgb/image_raw" />
+            <param name="cfg" value="$(find my_utils_common)/param/pidnet_synth_road.yaml" />
+            <param name="weights" value="/cdir/data/best.pt" />
         </node>
     </group>
 
@@ -132,7 +142,7 @@
         <!-- registered depth to pcl rgb -->
         <node pkg="nodelet" type="nodelet" name="point_cloud2_pcl" args="load depth_image_proc/point_cloud_xyzrgb pcl_proc" respawn="false" output="screen">
             <!-- depth input: depth_registered/image_rect -->
-            <remap from="/rgb/image_rect_color" to="/segmentation_node/mask_color" />
+            <remap from="/rgb/image_rect_color" to="$(arg segm_topic)" />
             <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
 
             <remap from="depth_registered/points" to="/pcl_proc/points2" />
@@ -298,8 +308,8 @@
 
     <!-- ROSBRIDGE -->
     <group if="$(arg rosbridge)">
-        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
-            <arg name="port" value="$(arg rosbridge_port)"/>
+        <include file="$(find foxglove_bridge)/launch/foxglove_bridge.launch">
+            <arg name="port" value="$(arg rosbridge_port)" />
         </include>
     </group>
 
@@ -364,6 +374,27 @@
             <!-- <remap from="scan_cloud" to="/velodyne_points"/> -->
         </node>
 
+    </group>
+
+    <group if="$(arg costmap_demo)">
+        <param name="/planner/topics/mapping_server/segm_points" type="str" value="/pcl_proc/points2"  />
+        <param name="/planner/topics/mapping_server/lidar" type="str" value="/velodyne_points/new"  />
+        <param name="/planner/topics/mapping_server/costmap" type="str" value="/costmap_node/costmap/costmap"  />
+        <param name="/planner/topics/mapping_server/gridmap" type="str" value="/costmap_node/costmap/gridmap"  />
+
+        <node pkg="mapping" type="map_server" name="mapping"   output="screen">
+            <param name="fixed_frame_id" type="str"    value="odom" />
+            <param name="resolution"     type="double" value="0.1"  />
+            <param name="max_range"      type="double" value="40.0"  />
+            <param name="hit_logprob"       type="double" value="10"  />
+            <param name="miss_logprob"      type="double" value="1"  />
+            <param name="max_logprob"       type="double" value="100"  />
+            <param name="min_logprob"      type="double" value="0"  />
+        </node>
+
+        <node pkg="costmap_2d" type="costmap_2d_node" name="seg_costmap" output="screen">
+            <rosparam file="$(find my_utils_common)/param/costmap_demo_color_layer_params.yaml" command="load" ns="costmap" />
+        </node>
     </group>
 
 </launch>

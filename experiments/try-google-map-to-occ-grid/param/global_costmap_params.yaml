@@ -1,0 +1,35 @@
+global_costmap:
+  global_frame: odom
+  robot_base_frame: base_footprint
+
+  always_send_full_costmap: true
+
+  update_frequency: 10.0
+  publish_frequency: 10.0
+  transform_tolerance: 0.5
+
+  track_unknown_space: true
+
+  rolling_window: false
+  width: 40
+  height: 40
+  resolution: 0.1
+  origin_x: -20
+  origin_y: -20
+
+  plugins:
+    # - {name: static_layer,  type: 'costmap_2d::StaticLayer'}
+    # - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
+    - {name: color_layer_a,     type: 'color_layer::ColorLayer'}
+    # - {name: obstacle_layer,  type: 'costmap_2d::ObstacleLayer'}
+    # - {name: unrolling_dwa_layer,     type: 'unrolling_layer::UnrollingLayer'}
+
+  color_layer_a:
+    grid_map_updates_topic: /costmap_node/costmap/gridmap
+    use_road_color: true
+    black_is_obstacle: false
+    grass_color: 0x00ff2600
+    road_color:  0x00ff0000 # pidnet_road
+    non_grass_cost: 254
+
+
