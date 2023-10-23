@@ -1,7 +1,0 @@
-<class_libraries>
-  <library path="lib/libcolor_layer">
-    <class type="color_layer::ColorLayer" base_class_type="costmap_2d::Layer">
-      <description>receives color layer from GridMap and builds cost filed</description>
-    </class>
-  </library>
-</class_libraries>

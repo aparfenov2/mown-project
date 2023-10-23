@@ -1,5 +1,0 @@
-
-matplotlib
-scikit-learn
-Shapely
-tk
