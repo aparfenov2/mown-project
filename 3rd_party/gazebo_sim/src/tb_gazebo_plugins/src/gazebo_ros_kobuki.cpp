@@ -72,7 +72,8 @@ void GazeboRosKobuki::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
   if(prepareWheelAndTorque() == false)
     return;
 
-  prepareOdom();
+  if (prepareOdom() == false)
+    return;
 
   if(prepareVelocityCommand() == false)
     return;
@@ -118,7 +119,10 @@ void GazeboRosKobuki::OnUpdate()
   prev_update_time_ = time_now;
 
   updateJointState();
-  updateOdometry(step_time);
+  if (use_ground_truth_odometry_)
+    update_odometry_gt(step_time);
+  else
+    updateOdometry(step_time);
   updateIMU();
   propagateVelocityCommands();
   updateCliffSensor();

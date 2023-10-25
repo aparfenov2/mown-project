@@ -35,6 +35,7 @@
     <!-- sim -->
     <group if="$(arg sim)">
         <arg name="publish_tf" default="1"/>
+        <arg name="odometry_source" default="WORLD"/>
 
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
             <arg name="use_sim_time" value="$(arg use_sim_time_in_gazebo)"/>
@@ -66,7 +67,7 @@
         </group>
 
         <group if="$(eval robot == 'turtlebot')">
-            <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)"/>
+            <arg name="urdf_file" default="$(find xacro)/xacro '$(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro' publish_tf:=$(arg publish_tf)  odometry_source:=$(arg odometry_source)"/>
             <param name="robot_description" command="$(arg urdf_file)"/>
         </group>
 

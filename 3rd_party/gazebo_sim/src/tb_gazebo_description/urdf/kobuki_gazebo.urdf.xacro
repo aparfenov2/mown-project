@@ -172,6 +172,7 @@
 	  <gazebo>
 	    <plugin name="kobuki_controller" filename="libgazebo_ros_kobuki.so">
 	      <publish_tf>$(arg publish_tf)</publish_tf>
+          <odometry_source>$(arg odometry_source)</odometry_source>
 	      <left_wheel_joint_name>wheel_left_joint</left_wheel_joint_name>
 	      <right_wheel_joint_name>wheel_right_joint</right_wheel_joint_name>
 	      <wheel_separation>.230</wheel_separation>

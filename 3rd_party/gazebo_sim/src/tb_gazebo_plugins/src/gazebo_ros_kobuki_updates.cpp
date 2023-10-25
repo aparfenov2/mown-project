@@ -64,6 +64,87 @@ void GazeboRosKobuki::updateJointState()
 }
 
 /*
+ * Odometry (ground truth)
+ * taken from
+ * https://github.com/ros-simulation/gazebo_ros_pkgs/blob/noetic-devel/gazebo_plugins/src/gazebo_ros_diff_drive.cpp
+ */
+void GazeboRosKobuki::update_odometry_gt(common::Time& step_time)
+{
+
+  ros::Time current_time = ros::Time::now();
+  static ros::Time last_ros_time = ros::Time::now();
+  if (current_time == last_ros_time) {
+    return;
+  }
+  last_ros_time = current_time;
+
+  std::string odom_frame = gazebo_ros_->resolveTF("odom");
+  std::string base_frame = gazebo_ros_->resolveTF("base_footprint");
+  // odom_.header.stamp = joint_state_.header.stamp;
+  odom_.header.stamp = current_time;
+  odom_.header.frame_id = odom_frame;
+  odom_.child_frame_id = base_frame;
+  auto parent = model_;
+
+    tf::Quaternion qt;
+    tf::Vector3 vt;
+
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Pose3d pose = parent->WorldPose();
+#else
+        ignition::math::Pose3d pose = parent->GetWorldPose().Ign();
+#endif
+        qt = tf::Quaternion ( pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W() );
+        vt = tf::Vector3 ( pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z() );
+
+        odom_.pose.pose.position.x = vt.x();
+        odom_.pose.pose.position.y = vt.y();
+        odom_.pose.pose.position.z = vt.z();
+
+        odom_.pose.pose.orientation.x = qt.x();
+        odom_.pose.pose.orientation.y = qt.y();
+        odom_.pose.pose.orientation.z = qt.z();
+        odom_.pose.pose.orientation.w = qt.w();
+
+        // get velocity in /odom frame
+        ignition::math::Vector3d linear;
+#if GAZEBO_MAJOR_VERSION >= 8
+        linear = parent->WorldLinearVel();
+        odom_.twist.twist.angular.z = parent->WorldAngularVel().Z();
+#else
+        linear = parent->GetWorldLinearVel().Ign();
+        odom_.twist.twist.angular.z = parent->GetWorldAngularVel().Ign().Z();
+#endif
+
+        // convert velocity to child_frame_id (aka base_footprint)
+        float yaw = pose.Rot().Yaw();
+        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.X() + sinf ( yaw ) * linear.Y();
+        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.Y() - sinf ( yaw ) * linear.X();
+
+
+    odom_.pose.covariance[0] = 0.00001;
+    odom_.pose.covariance[7] = 0.00001;
+    odom_.pose.covariance[14] = 1000000000000.0;
+    odom_.pose.covariance[21] = 1000000000000.0;
+    odom_.pose.covariance[28] = 1000000000000.0;
+    odom_.pose.covariance[35] = 0.001;
+
+  odom_pub_.publish(odom_); // publish odom message
+
+  if (publish_tf_)
+  {
+    odom_tf_.header = odom_.header;
+    odom_tf_.child_frame_id = odom_.child_frame_id;
+    odom_tf_.transform.translation.x = odom_.pose.pose.position.x;
+    odom_tf_.transform.translation.y = odom_.pose.pose.position.y;
+    odom_tf_.transform.translation.z = odom_.pose.pose.position.z;
+    odom_tf_.transform.rotation = odom_.pose.pose.orientation;
+    tf_broadcaster_.sendTransform(odom_tf_);
+  }
+
+}
+
+/*
  * Odometry (encoders & IMU)
  */
 void GazeboRosKobuki::updateOdometry(common::Time& step_time)
