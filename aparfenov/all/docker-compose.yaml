@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  sim:
+    image: ros-mower
+    container_name: mower-sim
+    network_mode: host
+    privileged: true
+    restart: no
+    working_dir: /cdir
+    entrypoint: ""
+    # command: bash -c " ls -l ./ws/src"
+    command: bash -c "./run_all.sh --inner --sim"
+    environment:
+      DISPLAY:
+      XAUTHORITY:
+      QT_X11_NO_MITSHM: 1
+      NVIDIA_DRIVER_CAPABILITIES: all
+      /tmp/.X11-unix: /tmp/.X11-unix:rw
+    volumes:
+      - ./.ros:/root/.ros
+      - /dev:/dev
+      - ./:/cdir
+      - /home/tasks/robot-mower/svn/3rd_party/gazebo_models/:/cdir/ws/src/gazebo_models
+      - /home/.gazebo/models:/root/.gazebo/models
+      - /home/tasks/robot-mower/svn/aparfenov/common/my_utils_common:/cdir/ws/src/my_utils_common
+      - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo/:/cdir/ws/src/tb_gazebo
+      - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_description/:/cdir/ws/src/tb_gazebo_description
+      - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_msgs/:/cdir/ws/src/tb_gazebo_msgs
+      - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_plugins/:/cdir/ws/src/tb_gazebo_plugins
+      - /home/tasks/robot-mower/svn/3rd_party/velodyne_simulator/:/cdir/ws/src/velodyne_simulator
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
