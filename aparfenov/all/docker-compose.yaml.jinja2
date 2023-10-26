@@ -1,0 +1,120 @@
+# ---------------------------------------------------------------------------------------
+# ----------------- GENERATED FROM TEMPLATE docker-compose.yaml.jinja2 ------------------
+# -------------------------------- DO NOT EDIT !-----------------------------------------
+# ---------------------------------------------------------------------------------------
+{% macro declare_service(name, caller='') %}
+    {{name}}:
+        network_mode: host
+        privileged: true
+        restart: no
+        working_dir: /cdir
+        entrypoint: ""
+        stop_grace_period: 1s
+        {{caller()}}
+        environment:
+            DISPLAY:
+            NVIDIA_DRIVER_CAPABILITIES: all
+            /tmp/.X11-unix: /tmp/.X11-unix:rw
+        volumes:
+            - ./.ros:/root/.ros
+            - /dev:/dev
+            - ./:/cdir
+            - /home/.gazebo/models:/root/.gazebo/models
+            {% for p in bind_paths -%}
+            - {{p}}
+            {% endfor %}
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: 1
+                          capabilities: [gpu]
+{%- endmacro -%}
+
+version: "3.9"
+
+services:
+
+{%- call declare_service('roscore') %}
+        image: ros-mower:core
+        build: docker
+        command: bash -c "./run_cmd.sh --inner roscore"
+        profiles:
+            - optional
+            - backend_demo
+        healthcheck:
+            test: ["CMD", "curl", "http://localhost:11311"]
+            interval: 2s
+            timeout: 5s
+            retries: 5
+{%- endcall %}
+
+{%- call declare_service('sim') %}
+        image: ros-mower:core
+        build: docker
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner --sim"
+        profiles:
+            - optional
+            - backend_demo
+{%- endcall %}
+
+{%- call declare_service('rviz') %}
+        image: ros-mower:core
+        build: docker
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner --rviz"
+        profiles:
+            - optional
+{%- endcall %}
+
+{%- call declare_service('teleop') %}
+        image: ros-mower:core
+        build: docker
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner --teleop"
+        profiles:
+            - optional
+{%- endcall %}
+
+{%- call declare_service('backend') %}
+        image: ros-mower:google
+        build: docker.google_map
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner backend:=true"
+        profiles:
+            - optional
+            - backend_demo
+{%- endcall %}
+
+{%- call declare_service('rosbridge') %}
+        image: ros-mower:google
+        build: docker
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner --rosbridge"
+        profiles:
+            - optional
+            - backend_demo
+{%- endcall %}
+
+    foxglove:
+        image: foxglove:my
+        build: studio
+        restart: no
+        profiles:
+            - optional
+            - backend_demo
+        ports:
+            - 8080:8080
+

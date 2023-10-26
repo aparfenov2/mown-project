@@ -1,40 +1,347 @@
+# ---------------------------------------------------------------------------------------
+# ----------------- GENERATED FROM TEMPLATE docker-compose.yaml.jinja2 ------------------
+# -------------------------------- DO NOT EDIT !-----------------------------------------
+# ---------------------------------------------------------------------------------------
 version: "3.9"
 
 services:
-  sim:
-    image: ros-mower
-    container_name: mower-sim
-    network_mode: host
-    privileged: true
-    restart: no
-    working_dir: /cdir
-    entrypoint: ""
-    # command: bash -c " ls -l ./ws/src"
-    command: bash -c "./run_all.sh --inner --sim"
-    environment:
-      DISPLAY:
-      XAUTHORITY:
-      QT_X11_NO_MITSHM: 1
-      NVIDIA_DRIVER_CAPABILITIES: all
-      /tmp/.X11-unix: /tmp/.X11-unix:rw
-    volumes:
-      - ./.ros:/root/.ros
-      - /dev:/dev
-      - ./:/cdir
-      - /home/tasks/robot-mower/svn/3rd_party/gazebo_models/:/cdir/ws/src/gazebo_models
-      - /home/.gazebo/models:/root/.gazebo/models
-      - /home/tasks/robot-mower/svn/aparfenov/common/my_utils_common:/cdir/ws/src/my_utils_common
-      - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo/:/cdir/ws/src/tb_gazebo
-      - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_description/:/cdir/ws/src/tb_gazebo_description
-      - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_msgs/:/cdir/ws/src/tb_gazebo_msgs
-      - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_plugins/:/cdir/ws/src/tb_gazebo_plugins
-      - /home/tasks/robot-mower/svn/3rd_party/velodyne_simulator/:/cdir/ws/src/velodyne_simulator
+    roscore:
+        network_mode: host
+        privileged: true
+        restart: no
+        working_dir: /cdir
+        entrypoint: ""
+        stop_grace_period: 1s
+        
+        image: ros-mower:core
+        build: docker
+        command: bash -c "./run_cmd.sh --inner roscore"
+        profiles:
+            - optional
+            - backend_demo
+        healthcheck:
+            test: ["CMD", "curl", "http://localhost:11311"]
+            interval: 2s
+            timeout: 5s
+            retries: 5
+        environment:
+            DISPLAY:
+            NVIDIA_DRIVER_CAPABILITIES: all
+            /tmp/.X11-unix: /tmp/.X11-unix:rw
+        volumes:
+            - ./.ros:/root/.ros
+            - /dev:/dev
+            - ./:/cdir
+            - /home/.gazebo/models:/root/.gazebo/models
+            - /home/tasks/robot-mower/svn/aparfenov/visualization:/cdir/ws/src/visualization
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_control:/cdir/ws/src/engix_control
+            - /home/tasks/robot-mower/svn/3rd_party/velodyne_simulator:/cdir/ws/src/velodyne_simulator
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_description:/cdir/ws/src/tb_gazebo_description
+            - /home/tasks/robot-mower/svn/3rd_party/grid_map:/cdir/ws/src/grid_map
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_models:/cdir/ws/src/gazebo_models
+            - /home/tasks/robot-mower/svn/aparfenov/staging/pidnet_py:/cdir/ws/src/pidnet_py
+            - /home/tasks/robot-mower/svn/aparfenov/staging/color_layer:/cdir/ws/src/color_layer
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo:/cdir/ws/src/tb_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/gui:/cdir/ws/src/gui
+            - /home/tasks/robot-mower/svn/aparfenov/planning:/cdir/ws/src/planning
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_plugins:/cdir/ws/src/tb_gazebo_plugins
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/simpcl:/cdir/ws/src/simpcl
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_msgs:/cdir/ws/src/tb_gazebo_msgs
+            - /home/tasks/robot-mower/svn/aparfenov/segmentation/ddrnet:/cdir/ws/src/ddrnet
+            - /home/tasks/robot-mower/svn/aparfenov/common/backend:/cdir/ws/src/backend
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/task_behavior_engine_master:/cdir/ws/src/task_behavior_engine
+            - /home/tasks/robot-mower/svn/3rd_party/catkin_simple:/cdir/ws/src/catkin_simple
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_gazebo:/cdir/ws/src/engix_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/common/my_utils_common:/cdir/ws/src/my_utils_common
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_description:/cdir/ws/src/engix_description
+            
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: 1
+                          capabilities: [gpu]
+    sim:
+        network_mode: host
+        privileged: true
+        restart: no
+        working_dir: /cdir
+        entrypoint: ""
+        stop_grace_period: 1s
+        
+        image: ros-mower:core
+        build: docker
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner --sim"
+        profiles:
+            - optional
+            - backend_demo
+        environment:
+            DISPLAY:
+            NVIDIA_DRIVER_CAPABILITIES: all
+            /tmp/.X11-unix: /tmp/.X11-unix:rw
+        volumes:
+            - ./.ros:/root/.ros
+            - /dev:/dev
+            - ./:/cdir
+            - /home/.gazebo/models:/root/.gazebo/models
+            - /home/tasks/robot-mower/svn/aparfenov/visualization:/cdir/ws/src/visualization
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_control:/cdir/ws/src/engix_control
+            - /home/tasks/robot-mower/svn/3rd_party/velodyne_simulator:/cdir/ws/src/velodyne_simulator
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_description:/cdir/ws/src/tb_gazebo_description
+            - /home/tasks/robot-mower/svn/3rd_party/grid_map:/cdir/ws/src/grid_map
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_models:/cdir/ws/src/gazebo_models
+            - /home/tasks/robot-mower/svn/aparfenov/staging/pidnet_py:/cdir/ws/src/pidnet_py
+            - /home/tasks/robot-mower/svn/aparfenov/staging/color_layer:/cdir/ws/src/color_layer
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo:/cdir/ws/src/tb_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/gui:/cdir/ws/src/gui
+            - /home/tasks/robot-mower/svn/aparfenov/planning:/cdir/ws/src/planning
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_plugins:/cdir/ws/src/tb_gazebo_plugins
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/simpcl:/cdir/ws/src/simpcl
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_msgs:/cdir/ws/src/tb_gazebo_msgs
+            - /home/tasks/robot-mower/svn/aparfenov/segmentation/ddrnet:/cdir/ws/src/ddrnet
+            - /home/tasks/robot-mower/svn/aparfenov/common/backend:/cdir/ws/src/backend
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/task_behavior_engine_master:/cdir/ws/src/task_behavior_engine
+            - /home/tasks/robot-mower/svn/3rd_party/catkin_simple:/cdir/ws/src/catkin_simple
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_gazebo:/cdir/ws/src/engix_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/common/my_utils_common:/cdir/ws/src/my_utils_common
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_description:/cdir/ws/src/engix_description
+            
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: 1
+                          capabilities: [gpu]
+    rviz:
+        network_mode: host
+        privileged: true
+        restart: no
+        working_dir: /cdir
+        entrypoint: ""
+        stop_grace_period: 1s
+        
+        image: ros-mower:core
+        build: docker
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner --rviz"
+        profiles:
+            - optional
+        environment:
+            DISPLAY:
+            NVIDIA_DRIVER_CAPABILITIES: all
+            /tmp/.X11-unix: /tmp/.X11-unix:rw
+        volumes:
+            - ./.ros:/root/.ros
+            - /dev:/dev
+            - ./:/cdir
+            - /home/.gazebo/models:/root/.gazebo/models
+            - /home/tasks/robot-mower/svn/aparfenov/visualization:/cdir/ws/src/visualization
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_control:/cdir/ws/src/engix_control
+            - /home/tasks/robot-mower/svn/3rd_party/velodyne_simulator:/cdir/ws/src/velodyne_simulator
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_description:/cdir/ws/src/tb_gazebo_description
+            - /home/tasks/robot-mower/svn/3rd_party/grid_map:/cdir/ws/src/grid_map
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_models:/cdir/ws/src/gazebo_models
+            - /home/tasks/robot-mower/svn/aparfenov/staging/pidnet_py:/cdir/ws/src/pidnet_py
+            - /home/tasks/robot-mower/svn/aparfenov/staging/color_layer:/cdir/ws/src/color_layer
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo:/cdir/ws/src/tb_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/gui:/cdir/ws/src/gui
+            - /home/tasks/robot-mower/svn/aparfenov/planning:/cdir/ws/src/planning
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_plugins:/cdir/ws/src/tb_gazebo_plugins
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/simpcl:/cdir/ws/src/simpcl
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_msgs:/cdir/ws/src/tb_gazebo_msgs
+            - /home/tasks/robot-mower/svn/aparfenov/segmentation/ddrnet:/cdir/ws/src/ddrnet
+            - /home/tasks/robot-mower/svn/aparfenov/common/backend:/cdir/ws/src/backend
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/task_behavior_engine_master:/cdir/ws/src/task_behavior_engine
+            - /home/tasks/robot-mower/svn/3rd_party/catkin_simple:/cdir/ws/src/catkin_simple
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_gazebo:/cdir/ws/src/engix_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/common/my_utils_common:/cdir/ws/src/my_utils_common
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_description:/cdir/ws/src/engix_description
+            
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: 1
+                          capabilities: [gpu]
+    teleop:
+        network_mode: host
+        privileged: true
+        restart: no
+        working_dir: /cdir
+        entrypoint: ""
+        stop_grace_period: 1s
+        
+        image: ros-mower:core
+        build: docker
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner --teleop"
+        profiles:
+            - optional
+        environment:
+            DISPLAY:
+            NVIDIA_DRIVER_CAPABILITIES: all
+            /tmp/.X11-unix: /tmp/.X11-unix:rw
+        volumes:
+            - ./.ros:/root/.ros
+            - /dev:/dev
+            - ./:/cdir
+            - /home/.gazebo/models:/root/.gazebo/models
+            - /home/tasks/robot-mower/svn/aparfenov/visualization:/cdir/ws/src/visualization
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_control:/cdir/ws/src/engix_control
+            - /home/tasks/robot-mower/svn/3rd_party/velodyne_simulator:/cdir/ws/src/velodyne_simulator
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_description:/cdir/ws/src/tb_gazebo_description
+            - /home/tasks/robot-mower/svn/3rd_party/grid_map:/cdir/ws/src/grid_map
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_models:/cdir/ws/src/gazebo_models
+            - /home/tasks/robot-mower/svn/aparfenov/staging/pidnet_py:/cdir/ws/src/pidnet_py
+            - /home/tasks/robot-mower/svn/aparfenov/staging/color_layer:/cdir/ws/src/color_layer
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo:/cdir/ws/src/tb_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/gui:/cdir/ws/src/gui
+            - /home/tasks/robot-mower/svn/aparfenov/planning:/cdir/ws/src/planning
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_plugins:/cdir/ws/src/tb_gazebo_plugins
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/simpcl:/cdir/ws/src/simpcl
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_msgs:/cdir/ws/src/tb_gazebo_msgs
+            - /home/tasks/robot-mower/svn/aparfenov/segmentation/ddrnet:/cdir/ws/src/ddrnet
+            - /home/tasks/robot-mower/svn/aparfenov/common/backend:/cdir/ws/src/backend
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/task_behavior_engine_master:/cdir/ws/src/task_behavior_engine
+            - /home/tasks/robot-mower/svn/3rd_party/catkin_simple:/cdir/ws/src/catkin_simple
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_gazebo:/cdir/ws/src/engix_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/common/my_utils_common:/cdir/ws/src/my_utils_common
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_description:/cdir/ws/src/engix_description
+            
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: 1
+                          capabilities: [gpu]
+    backend:
+        network_mode: host
+        privileged: true
+        restart: no
+        working_dir: /cdir
+        entrypoint: ""
+        stop_grace_period: 1s
+        
+        image: ros-mower:google
+        build: docker.google_map
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner backend:=true"
+        profiles:
+            - optional
+            - backend_demo
+        environment:
+            DISPLAY:
+            NVIDIA_DRIVER_CAPABILITIES: all
+            /tmp/.X11-unix: /tmp/.X11-unix:rw
+        volumes:
+            - ./.ros:/root/.ros
+            - /dev:/dev
+            - ./:/cdir
+            - /home/.gazebo/models:/root/.gazebo/models
+            - /home/tasks/robot-mower/svn/aparfenov/visualization:/cdir/ws/src/visualization
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_control:/cdir/ws/src/engix_control
+            - /home/tasks/robot-mower/svn/3rd_party/velodyne_simulator:/cdir/ws/src/velodyne_simulator
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_description:/cdir/ws/src/tb_gazebo_description
+            - /home/tasks/robot-mower/svn/3rd_party/grid_map:/cdir/ws/src/grid_map
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_models:/cdir/ws/src/gazebo_models
+            - /home/tasks/robot-mower/svn/aparfenov/staging/pidnet_py:/cdir/ws/src/pidnet_py
+            - /home/tasks/robot-mower/svn/aparfenov/staging/color_layer:/cdir/ws/src/color_layer
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo:/cdir/ws/src/tb_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/gui:/cdir/ws/src/gui
+            - /home/tasks/robot-mower/svn/aparfenov/planning:/cdir/ws/src/planning
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_plugins:/cdir/ws/src/tb_gazebo_plugins
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/simpcl:/cdir/ws/src/simpcl
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_msgs:/cdir/ws/src/tb_gazebo_msgs
+            - /home/tasks/robot-mower/svn/aparfenov/segmentation/ddrnet:/cdir/ws/src/ddrnet
+            - /home/tasks/robot-mower/svn/aparfenov/common/backend:/cdir/ws/src/backend
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/task_behavior_engine_master:/cdir/ws/src/task_behavior_engine
+            - /home/tasks/robot-mower/svn/3rd_party/catkin_simple:/cdir/ws/src/catkin_simple
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_gazebo:/cdir/ws/src/engix_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/common/my_utils_common:/cdir/ws/src/my_utils_common
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_description:/cdir/ws/src/engix_description
+            
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: 1
+                          capabilities: [gpu]
+    rosbridge:
+        network_mode: host
+        privileged: true
+        restart: no
+        working_dir: /cdir
+        entrypoint: ""
+        stop_grace_period: 1s
+        
+        image: ros-mower:google
+        build: docker
+        depends_on:
+            roscore:
+                condition: service_healthy
+        command: bash -c "./run_all.sh --inner --rosbridge"
+        profiles:
+            - optional
+            - backend_demo
+        environment:
+            DISPLAY:
+            NVIDIA_DRIVER_CAPABILITIES: all
+            /tmp/.X11-unix: /tmp/.X11-unix:rw
+        volumes:
+            - ./.ros:/root/.ros
+            - /dev:/dev
+            - ./:/cdir
+            - /home/.gazebo/models:/root/.gazebo/models
+            - /home/tasks/robot-mower/svn/aparfenov/visualization:/cdir/ws/src/visualization
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_control:/cdir/ws/src/engix_control
+            - /home/tasks/robot-mower/svn/3rd_party/velodyne_simulator:/cdir/ws/src/velodyne_simulator
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_description:/cdir/ws/src/tb_gazebo_description
+            - /home/tasks/robot-mower/svn/3rd_party/grid_map:/cdir/ws/src/grid_map
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_models:/cdir/ws/src/gazebo_models
+            - /home/tasks/robot-mower/svn/aparfenov/staging/pidnet_py:/cdir/ws/src/pidnet_py
+            - /home/tasks/robot-mower/svn/aparfenov/staging/color_layer:/cdir/ws/src/color_layer
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo:/cdir/ws/src/tb_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/gui:/cdir/ws/src/gui
+            - /home/tasks/robot-mower/svn/aparfenov/planning:/cdir/ws/src/planning
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_plugins:/cdir/ws/src/tb_gazebo_plugins
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/simpcl:/cdir/ws/src/simpcl
+            - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_msgs:/cdir/ws/src/tb_gazebo_msgs
+            - /home/tasks/robot-mower/svn/aparfenov/segmentation/ddrnet:/cdir/ws/src/ddrnet
+            - /home/tasks/robot-mower/svn/aparfenov/common/backend:/cdir/ws/src/backend
+            - /home/tasks/robot-mower/svn/aparfenov/3rd_party/task_behavior_engine_master:/cdir/ws/src/task_behavior_engine
+            - /home/tasks/robot-mower/svn/3rd_party/catkin_simple:/cdir/ws/src/catkin_simple
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_gazebo:/cdir/ws/src/engix_gazebo
+            - /home/tasks/robot-mower/svn/aparfenov/common/my_utils_common:/cdir/ws/src/my_utils_common
+            - /home/tasks/robot-mower/svn/aparfenov/engix_robot/engix_description:/cdir/ws/src/engix_description
+            
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: 1
+                          capabilities: [gpu]
 
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-
+    foxglove:
+        image: foxglove:my
+        build: studio
+        restart: no
+        profiles:
+            - optional
+            - backend_demo
+        ports:
+            - 8080:8080

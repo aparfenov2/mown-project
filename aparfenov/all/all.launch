@@ -1,4 +1,6 @@
 <launch>
+    <env name="ROSCONSOLE_FORMAT" value="[${severity}] [${time}] [${node}]: ${message}"/>
+
     <arg name="rviz" default="false" />
     <arg name="loca" default="false" />
     <arg name="teleop" default="false" />
@@ -104,7 +106,7 @@
     </group>
     <!-- rviz -->
     <group if="$(arg rviz)">
-        <node args="-d $(find my_utils_common)/rviz/cfg.rviz" name="rviz" pkg="rviz" type="rviz" respawn="true"/>
+        <node args="-d /cdir/cfg.rviz" name="rviz" pkg="rviz" type="rviz" respawn="true"/>
     </group>
     <!-- teleop -->
     <group if="$(arg teleop)">
@@ -397,5 +399,20 @@
             <rosparam file="$(find my_utils_common)/param/costmap_demo_color_layer_params.yaml" command="load" ns="costmap" />
         </node>
     </group>
+
+	<group if="$(arg backend)">
+		<node pkg="backend" type="google_map_to_occ_grid.py" name="google_map" output="screen" >
+		    <param name="world_frame_id" value="odom" />
+		    <param name="sensitivity" value="1e-6" />
+		    <param name="run_cfg_srv" value="true" />
+		    <param name="headless" value="true" />
+		    <param name="satellite_mode" value="true" />
+		    <param name="m" value="80" />
+		    <param name="z" value="19.95" />
+		    <param name="window_size" value="1920x1080" />
+		    <param name="resolution" value="0.05" />
+		    <remap from="fix" to="/gps/fix"/>
+		</node>
+	</group>
 
 </launch>
