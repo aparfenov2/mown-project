@@ -6,6 +6,8 @@ Panels:
       Expanded:
         - /DepthCloud1/Auto Size1
         - /TF1/Frames1
+        - /local_cmap1
+        - /pid_mrk1
         - /Image1
       Splitter Ratio: 0.6858407258987427
     Tree Height: 334
@@ -489,11 +491,11 @@ Visualization Manager:
       Value: false
     - Alpha: 0.699999988079071
       Class: rviz/Map
-      Color Scheme: costmap
+      Color Scheme: map
       Draw Behind: false
       Enabled: true
       Name: local_cmap
-      Topic: /move_base/local_costmap/costmap
+      Topic: /occ_map
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -650,7 +652,7 @@ Visualization Manager:
       Marker Topic: /exploration_polygon_marker
       Name: ploygon_mrk
       Namespaces:
-        {}
+        explore_points: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -673,13 +675,13 @@ Visualization Manager:
       Use Timestamp: false
       Value: false
     - Class: rviz/Marker
-      Enabled: false
-      Marker Topic: /visualization_marker
+      Enabled: true
+      Marker Topic: /exploration_polygon_marker
       Name: pid_mrk
       Namespaces:
-        {}
+        explore_points: true
       Queue Size: 100
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -796,7 +798,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.8667111992835999
+      Distance: 15.66917896270752
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

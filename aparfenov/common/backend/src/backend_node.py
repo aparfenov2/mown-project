@@ -86,7 +86,7 @@ class BackendNode:
         rospy.Subscriber("/clicked_point", geometry_msgs.msg.PointStamped, self.pointCb)
         rospy.Subscriber("/ui_cmd", std_msgs.msg.String, self.cmdUiCb)
         self.point_viz_pub = rospy.Publisher("exploration_polygon_marker", visualization_msgs.msg.Marker, queue_size=10)
-        self.pub = rospy.Publisher(rospy.get_param('/planner/topics/task_polygon_planning'), RouteTaskPolygon, queue_size=2)
+        # self.pub = rospy.Publisher(rospy.get_param('/planner/topics/task_polygon_planning'), RouteTaskPolygon, queue_size=2)
         rospy.Timer(rospy.Duration(0.1), self.visTimerCb)
 
     def cmdUiCb(self, cmd_msg: std_msgs.msg.String):
@@ -104,7 +104,7 @@ class BackendNode:
                 new_point.x = p.x
                 new_point.y = p.y
                 message.target_polygon.points.append(new_point)
-            self.pub.publish(message)
+            # self.pub.publish(message)
 
     def pointCb(self, point_msg: geometry_msgs.msg.PointStamped):
         point = point_msg.point

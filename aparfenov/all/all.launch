@@ -401,6 +401,9 @@
     </group>
 
 	<group if="$(arg backend)">
+		<node pkg="backend" type="backend_node.py" name="backend_node" output="screen" >
+        </node>
+
 		<node pkg="backend" type="google_map_to_occ_grid.py" name="google_map" output="screen" >
 		    <param name="world_frame_id" value="odom" />
 		    <param name="sensitivity" value="1e-6" />
