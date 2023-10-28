@@ -1,3 +1,0 @@
-<launch>
-    <node name="localization_bridge" pkg="planning_utils" type="localization_bridge.py" respawn="true" respawn_delay="5" output="screen"/>
-</launch>

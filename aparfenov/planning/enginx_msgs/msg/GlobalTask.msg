@@ -1,2 +1,0 @@
-string task_type
-geometry_msgs/Polygon polygon
