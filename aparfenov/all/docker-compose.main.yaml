@@ -1,20 +1,3 @@
-version: "3.9"
-x-common-mounts: &common-mounts
-    - /home/tasks/robot-mower/svn/3rd_party/gazebo_models_downloaded:/cdir/ws/src/gazebo_models_downloaded
-    - /home/tasks/robot-mower/svn/3rd_party/tracking_pid:/cdir/ws/src/tracking_pid
-    - /home/tasks/robot-mower/svn/3rd_party/velodyne_simulator:/cdir/ws/src/velodyne_simulator
-    - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_description:/cdir/ws/src/tb_gazebo_description
-    - /home/tasks/robot-mower/svn/3rd_party/grid_map:/cdir/ws/src/grid_map
-    - /home/tasks/robot-mower/svn/3rd_party/gazebo_models:/cdir/ws/src/gazebo_models
-    - /home/tasks/robot-mower/svn/aparfenov/staging/pidnet_py:/cdir/ws/src/pidnet_py
-    - /home/tasks/robot-mower/svn/aparfenov/staging/color_layer:/cdir/ws/src/color_layer
-    - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo:/cdir/ws/src/tb_gazebo
-    - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_plugins:/cdir/ws/src/tb_gazebo_plugins
-    - /home/tasks/robot-mower/svn/3rd_party/gazebo_sim/src/tb_gazebo_msgs:/cdir/ws/src/tb_gazebo_msgs
-    - /home/tasks/robot-mower/svn/modules/msgs/engix_msgs:/cdir/ws/src/engix_msgs
-    - /home/tasks/robot-mower/svn/aparfenov/common/backend:/cdir/ws/src/backend
-    - /home/tasks/robot-mower/svn/3rd_party/catkin_simple:/cdir/ws/src/catkin_simple
-    - /home/tasks/robot-mower/svn/aparfenov/common/my_utils_common:/cdir/ws/src/my_utils_common
 # docker-compose.main.yaml - docker-compose template
 # docker-compose.yaml - render of the template. Do not edit !
 

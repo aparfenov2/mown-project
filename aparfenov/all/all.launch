@@ -150,32 +150,6 @@
 
             <remap from="depth_registered/points" to="/pcl_proc/points2" />
         </node>
-        <!--
-        <node name="color_filter" pkg="simpcl" type="color_filter" output="screen">
-            <remap from="points_in" to="/pcl_proc/points2"/>
-            <remap from="points_out" to="/pcl_proc/filtered"/>
-
-            <param name="use_hsi" type="int" value="0"/>
-
-            <param name="r_min" type="double" value="32"/>
-            <param name="r_max" type="double" value="32"/>
-
-            <param name="g_min" type="double" value="0"/>
-            <param name="g_max" type="double" value="0"/>
-
-            <param name="b_min" type="double" value="0"/>
-            <param name="b_max" type="double" value="0"/>
-        </node>
-
-        <node pkg="nodelet" type="nodelet" name="point_cloud2_laserscan" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet pcl_proc" respawn="false" output="screen" required="true" clear_params="true">
-            <param name="min_height" type="double" value="0.1"/>
-            <param name="max_height" type="double" value="2.0"/>
-            <param name="target_frame" type="str" value="base_link"/>
-
-            <remap from="cloud_in" to="/pcl_proc/filtered" />
-            <remap from="scan" to="/pcl_proc/scan" />
-        </node>
- -->
     </group>
 
     <!-- loca -->
@@ -274,41 +248,6 @@
 
     </group>
 
-    <!-- planning system -->
-    <group if="$(arg planning)">
-        <!-- <rosparam command="load" file="$(find my_utils_common)/param/planning_stack_params.yaml" ns="planner" /> -->
-
-        <!-- <include file="$(find move_base_mod)/launch/move_base.launch">
-            <arg name="cmd_vel_topic" value="/mobile_base/commands/velocity" />
-            <arg name="odom_topic" value="odom" />
-        </include> -->
-
-        <include file="$(find engix_planning)/launch/planning.launch">
-            <arg name="robot" value="$(arg robot)" />
-        </include>
-
-        <include file="$(find my_utils_common)/launch/map.launch"/>
-
-        <param name="planner/topics/velocity_commands" value="$(arg cmd_vel_topic)"/>
-        <!-- <include file="$(find route_util)/launch/utils.launch"/> -->
-        <!-- <include file="$(find mapping)/launch/run.launch"/> -->
-
-        <!-- Run the costmap node -->
-        <!-- <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node"> -->
-        <!-- <rosparam file="$(find my_utils_common)/param/global_costmap_params_test.yaml" command="load" ns="costmap" /> -->
-        <!-- <rosparam file="$(find my_utils_common)/param/global_costmap_params.yaml" command="load" ns="costmap" /> -->
-        <!-- </node>    -->
-    </group>
-
-    <!-- Command panel -->
-    <group if="$(arg command_panel)">
-        <include file="$(find command_panel)/launch/run.launch"/>
-    </group>
-
-    <group if="$(arg backend)">
-        <node pkg="backend" type="backend.py" name="backend" output="screen" />
-    </group>
-
     <!-- ROSBRIDGE -->
     <group if="$(arg rosbridge)">
         <include file="$(find foxglove_bridge)/launch/foxglove_bridge.launch">
@@ -400,8 +339,48 @@
         </node>
     </group>
 
+<!-- Backend and planning emulation -->
+
+    <param name="/planner/topics/task_polygon_planning" value="/planner/task_polygon_planning"/>
+
+    <group if="$(arg planning)">
+        <arg name="target_x_vel" default="0.5"/>
+        <arg name="target_yaw_vel" default="0.4"/>
+        <!--Tracking_pid cannot just accept a nav_msgs/Path, it can only go to a PoseStamped,
+        so the path_interpolator drags a PoseStamped over a Path at a given speed-->
+        <node name="interpolator" pkg="tracking_pid" type="path_interpolator">
+            <param name="target_x_vel" value="$(arg target_x_vel)"/>
+            <param name="target_yaw_vel" value="$(arg target_yaw_vel)"/>
+            <remap from="path" to="/path_to_follow"/>
+            <!-- <remap from="trajectory" to="trajectory"/> -->
+        </node>
+
+        <!--Tracking_pid tries to get the robot as close to it's goal point as possible-->
+        <node name="controller" pkg="tracking_pid" type="controller" output="screen">
+            <remap from="move_base/cmd_vel" to="$(arg cmd_vel_topic)"/>
+            <remap from="local_trajectory" to="trajectory"/>
+            <param name="controller_debug_enabled" value="True"/>
+            <param name="track_base_link" value="true"/>
+            <param name="l" value="0.5"/>
+            <param name="Ki_long" value="0.0"/>
+            <param name="Kp_long" value="2.0"/>
+            <param name="Kd_long" value="0.5"/>
+            <param name="Ki_lat" value="0.0"/>
+            <param name="Kp_lat" value="4.0"/>
+            <param name="Kd_lat" value="0.3"/>
+        </node>
+
+        <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
+
+		<node pkg="backend" type="planner_emu.py" name="planner_emu" output="screen" >
+            <param name="debug" value="true" />
+        </node>
+	</group>
+
 	<group if="$(arg backend)">
+
 		<node pkg="backend" type="backend_node.py" name="backend_node" output="screen" >
+            <!-- <remap from="path_to_follow" to="path_to_follow"/> -->
         </node>
 
 		<node pkg="backend" type="google_map_to_occ_grid.py" name="google_map" output="screen" >

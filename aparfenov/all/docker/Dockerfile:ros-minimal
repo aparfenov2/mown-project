@@ -1,0 +1,4 @@
+# basic ros functionality without any tools
+FROM ros:noetic-ros-core
+# need curl for health check
+RUN apt update && apt install -y curl
