@@ -129,15 +129,17 @@ services:
             - optional
             - backend_demo
 
-    move_base:
+    costmap_demo:
         <<: *ros-client-base
+        image: ros-mower:pytorch
+        build:
+            dockerfile: docker/Dockerfile:pytorch
         command: >
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
             && . /cdir/ws/devel/setup.bash
-            && roslaunch /cdir/all.launch mb:=true $ROSARGS"
+            && roslaunch /cdir/all.launch costmap_demo:=true segm:=true segm_net:=true ddr_net:=false $ROSARGS"
         profiles:
             - optional
-            - backend_demo
 
     rosbridge:
         <<: *ros-client-base
