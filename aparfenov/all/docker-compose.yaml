@@ -1,0 +1,151 @@
+
+x-common-env: &common-env
+    DISPLAY:
+    NVIDIA_DRIVER_CAPABILITIES: all
+    /tmp/.X11-unix: /tmp/.X11-unix:rw
+    PYTHONPYCACHEPREFIX: /cdir/ws/pycache/
+    ROSCONSOLE_FORMAT: "[${severity}] [${node}]: ${message}"
+    GAZEBO_MODEL_PATH: /cdir/ws/src/gazebo_models
+    ROBOT: turtlebot
+
+x-allow-gpu: &allow-gpu
+    privileged: true
+    deploy:
+        resources:
+            reservations:
+                devices:
+                    - driver: nvidia
+                      count: 1
+                      capabilities: [gpu]
+
+x-common-ros-image: &common-ros-image
+    image: ros-mower:core
+    build: docker
+    network_mode: host
+    restart: no
+    stop_grace_period: 1s
+    working_dir: /cdir
+    entrypoint: ""
+    volumes:
+        *common-mounts
+
+x-depends-on-roscore: &depends-on-roscore
+    roscore:
+        condition: service_healthy
+
+services:
+    build_ws:
+        <<: *common-ros-image
+        working_dir: /cdir/ws
+        environment:
+            <<: *common-env
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && catkin config \
+            --extend /opt/ros/$$ROS_DISTRO \
+            --cmake-args \
+            -DCMAKE_BUILD_TYPE=Release
+            && catkin build
+            "
+        profiles:
+            - optional
+
+    roscore:
+        <<: *common-ros-image
+        environment:
+            <<: *common-env
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roscore"
+        profiles:
+            - optional
+            - backend_demo
+        healthcheck:
+            test: ["CMD", "curl", "http://localhost:11311"]
+            interval: 2s
+            timeout: 5s
+            retries: 5
+
+    sim:
+        <<: [*common-ros-image, *allow-gpu]
+
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch sim:=true robot:=$$ROBOT"
+        profiles:
+            - optional
+            - backend_demo
+        environment:
+            <<: *common-env
+        depends_on:
+            <<: *depends-on-roscore
+
+    rviz:
+        <<: [*common-ros-image, *allow-gpu]
+
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch rviz:=true robot:=$$ROBOT"
+        profiles:
+            - optional
+        environment:
+            <<: *common-env
+        depends_on:
+            <<: *depends-on-roscore
+
+    teleop:
+        <<: [*common-ros-image, *allow-gpu]
+        # run with docker-compose run --rm teleop to attach console
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch teleop:=true robot:=$$ROBOT"
+        profiles:
+            - optional
+        environment:
+            <<: *common-env
+        depends_on:
+            <<: *depends-on-roscore
+
+    backend:
+        <<: [*common-ros-image, *allow-gpu]
+
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch backend:=true robot:=$$ROBOT"
+        profiles:
+            - optional
+            - backend_demo
+        environment:
+            <<: *common-env
+        depends_on:
+            <<: *depends-on-roscore
+
+    rosbridge:
+        <<: [*common-ros-image, *allow-gpu]
+
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch rosbridge:=true"
+        profiles:
+            - optional
+            - backend_demo
+        environment:
+            <<: *common-env
+        depends_on:
+            <<: *depends-on-roscore
+
+    foxglove:
+        image: foxglove:my
+        build: studio
+        restart: no
+        profiles:
+            - optional
+            - backend_demo
+        ports:
+            - 8080:8080
