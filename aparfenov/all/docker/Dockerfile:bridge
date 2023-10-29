@@ -86,9 +86,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-perception=1.5.0-1*
 
-RUN apt-get update && apt-get install -y ros-noetic-gazebo-msgs
+RUN apt-get update && apt-get install -y ros-noetic-gazebo-msgs ros-noetic-navigation
 
 RUN apt-get update && apt-get install -y ros-$ROS_DISTRO-foxglove-bridge ros-noetic-foxglove-msgs
+RUN apt-get update && apt-get install -y ros-noetic-hector-gazebo-plugins
 
 # # install ros packages
 # RUN apt-get update && apt-get install -y --no-install-recommends \

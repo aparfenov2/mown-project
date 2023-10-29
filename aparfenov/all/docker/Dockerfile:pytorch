@@ -97,3 +97,6 @@ RUN apt-get update && apt-get install -y python3-pip
 RUN python3 -m pip install --no-cache-dir --upgrade pip
 RUN python3 -m pip install yacs tqdm
 RUN python3 -m pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu114
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-noetic-navigation
