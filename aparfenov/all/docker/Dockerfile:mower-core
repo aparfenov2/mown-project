@@ -1,14 +1,14 @@
 # ------- Mower core packages without GUI --------
 
-# FROM ubuntu:focal
-FROM nvidia/cudagl:11.0.3-devel-ubuntu20.04
+FROM ubuntu:focal
+# FROM nvidia/cudagl:11.0.3-devel-ubuntu20.04
 
-RUN rm /etc/apt/sources.list.d/cuda.list
-RUN echo "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64 /" | tee /etc/apt/sources.list.d/cuda.list
-RUN apt-key del 3bf863cc
-RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
-RUN apt-key del 7fa2af80
-RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+# RUN rm /etc/apt/sources.list.d/cuda.list
+# RUN echo "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64 /" | tee /etc/apt/sources.list.d/cuda.list
+# RUN apt-key del 3bf863cc
+# RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
+# RUN apt-key del 7fa2af80
+# RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
@@ -84,17 +84,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-perception=1.5.0-1*
 
 # install ros packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-noetic-desktop=1.5.0-1*
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     ros-noetic-desktop=1.5.0-1*
 
 # install ros packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-noetic-desktop-full=1.5.0-1*
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     ros-noetic-desktop-full=1.5.0-1*
 
 # ddrnet
-ARG version="8.0.0-1+cuda11.0"
-RUN apt-get update && apt-get install -y libnvinfer8=${version} libnvonnxparsers8=${version} libnvparsers8=${version} libnvinfer-plugin8=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python3-libnvinfer=${version}
-RUN dpkg -l | grep TensorRT
+# ARG version="8.0.0-1+cuda11.0"
+# RUN apt-get update && apt-get install -y libnvinfer8=${version} libnvonnxparsers8=${version} libnvparsers8=${version} libnvinfer-plugin8=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python3-libnvinfer=${version}
+# RUN dpkg -l | grep TensorRT
 
 # Turtlebot 3
 RUN apt-get update && apt-get install -y ros-noetic-joy ros-noetic-teleop-twist-joy \
@@ -118,8 +118,8 @@ RUN apt install -y ros-noetic-turtlebot3-simulations
 RUN apt-get update && apt-get install -y ros-noetic-octomap-msgs
 
 # kitti_to_rosbag
-RUN apt-get update && apt-get install -y libgflags-dev libgoogle-glog-dev
-RUN apt-get update && apt-get install -y libtool libtool-bin
+# RUN apt-get update && apt-get install -y libgflags-dev libgoogle-glog-dev
+# RUN apt-get update && apt-get install -y libtool libtool-bin
 
 RUN apt-get update && apt-get install -y python3-pip
 
@@ -159,29 +159,29 @@ RUN apt-get update && apt-get install -y python3-pip
 #       ros-${ROS_DISTRO}-tf \
 #       python3-catkin-lint python3-pip
 
-WORKDIR /tmp
+# WORKDIR /tmp
 
-COPY requirements.txt ./
+# COPY requirements.txt ./
 
-# Install requirements
-RUN python3 -m pip install --no-cache-dir --upgrade pip && \
-    python3 -m pip install --no-cache-dir -r requirements.txt
-RUN rm requirements.txt
+# # Install requirements
+# RUN python3 -m pip install --no-cache-dir --upgrade pip && \
+#     python3 -m pip install --no-cache-dir -r requirements.txt
+# RUN rm requirements.txt
 
-RUN apt-get install -y python3-tk
-RUN python3 -m pip install -U catkin_tools
+# RUN apt-get install -y python3-tk
+# RUN python3 -m pip install -U catkin_tools
 
-ENV ROS_DISTRO=noetic
-ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
+# ENV ROS_DISTRO=noetic
+# ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
 
-RUN echo 'source ${ROS_ROOT}/setup.bash' >> /root/.bashrc
+# RUN echo 'source ${ROS_ROOT}/setup.bash' >> /root/.bashrc
 
-WORKDIR /catkin_ws
+# WORKDIR /catkin_ws
 
-RUN pip3 install osrf-pycommon
+# RUN pip3 install osrf-pycommon
 
-# debug support
-RUN apt-get update && apt-get install -y xterm gdb
+# # debug support
+# RUN apt-get update && apt-get install -y xterm gdb
 
 # color-picker
 # RUN sudo ln -s $(which python3) /usr/bin/python
@@ -196,30 +196,30 @@ RUN apt-get update && apt-get install -y ros-noetic-robot-localization
 # RUN apt-get update && apt-get install -y ros-noetic-hector-localization
 
 # gazebo GPS
-RUN apt-get update && apt-get install -y ros-noetic-hector-gazebo-plugins
+# RUN apt-get update && apt-get install -y ros-noetic-hector-gazebo-plugins
 
-RUN apt-get install -y ros-noetic-rosbridge-suite
+# RUN apt-get install -y ros-noetic-rosbridge-suite
 RUN apt-get update && apt-get install -y ros-noetic-rtabmap-ros
 
-RUN apt-get update && apt-get install -y libturbojpeg
-RUN ln -s $(which python3) /usr/bin/python
+# RUN apt-get update && apt-get install -y libturbojpeg
+# RUN ln -s $(which python3) /usr/bin/python
 
 # RUN add-apt-repository ppa:deadsnakes/ppa
 # RUN apt-get update
-RUN apt-get install python3-tk
-RUN python3 -m pip install Rtree
-RUN python3 -m pip install casadi
-RUN python3 -m pip install msgpack-rpc-python
-RUN python3 -m pip install dubins
+# RUN apt-get install python3-tk
+# RUN python3 -m pip install Rtree
+# RUN python3 -m pip install casadi
+# RUN python3 -m pip install msgpack-rpc-python
+# RUN python3 -m pip install dubins
 
 # RUN apt-get update && apt-get install -y ros-noetic-robot-pose-ekf
 # RUN apt-get update && apt-get install ros-noetic-depthimage-to-laserscan
-RUN apt-get update && apt-get install -y ros-noetic-pybind11-catkin
+# RUN apt-get update && apt-get install -y ros-noetic-pybind11-catkin
 # RUN apt-get update && apt-get install -y ros-noetic-teb-local-planner - bad_alloc
 # for teb-local-planner
-RUN apt-get update && apt-get install -y ros-noetic-costmap-converter ros-noetic-mbf-costmap-nav
+# RUN apt-get update && apt-get install -y ros-noetic-costmap-converter ros-noetic-mbf-costmap-nav
 # for mpc-local-planner (plus all for teb)
-RUN apt-get update && apt-get install -y ros-noetic-control-box-rst
+# RUN apt-get update && apt-get install -y ros-noetic-control-box-rst
 # RUN apt-get update && apt-get install -y coinor-libipopt-dev
 # RUN apt-get update && apt-get install -y ros-noetic-mpc-local-planner
-RUN apt-get update && apt-get install -y ros-$ROS_DISTRO-foxglove-bridge
+# RUN apt-get update && apt-get install -y ros-$ROS_DISTRO-foxglove-bridge

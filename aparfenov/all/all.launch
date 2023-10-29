@@ -27,7 +27,7 @@
     <arg name="use_sim_time_in_gazebo" value="true"/>
     <arg name="base_frame" value="base_link" if="$(eval robot == 'ya_model')" />
     <arg name="rosbridge" default="false" />
-    <arg name="rosbridge_port" default="8088" />
+    <arg name="rosbridge_port" default="8765" />
     <arg name="command_panel" default="false" />
     <!-- rtabmap is supposed to be used in sim mode only to provide global merged pointcloud. In real robot ZED2 already provides the cloud. -->
     <arg name="rtabmap" default="false" />
@@ -370,7 +370,7 @@
             <param name="Kd_lat" value="0.3"/>
         </node>
 
-        <node args="0 0 0 0 0 0 odom map 100" name="odom_to_map" pkg="tf" type="static_transform_publisher"/>
+        <node args="0 0 0 0 0 0 odom map" name="odom_to_map" pkg="tf2_ros" type="static_transform_publisher"/>
 
 		<node pkg="backend" type="planner_emu.py" name="planner_emu" output="screen" >
             <param name="debug" value="true" />

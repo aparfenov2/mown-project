@@ -31,8 +31,9 @@ x-depends-on-roscore: &depends-on-roscore
 
 # шаблон сервиса, используещего образ ros-mower
 x-ros-image-base: &ros-image-base
-    image: ros-mower:core
-    build: docker
+    image: ros-mower:mower-core
+    build:
+        dockerfile: docker/Dockerfile:mower-core
     network_mode: host
     restart: no
     stop_grace_period: 1s
@@ -50,6 +51,9 @@ x-ros-client-base: &ros-client-base
 services:
     build:
         <<: *ros-image-base
+        image: ros-mower:build
+        build:
+            dockerfile: docker/Dockerfile:build
         working_dir: /cdir/ws
         command: >
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
@@ -79,6 +83,9 @@ services:
 
     sim:
         <<: *ros-client-base
+        image: ros-mower:mower-sim
+        build:
+            dockerfile: docker/Dockerfile:mower-sim
         command: >
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
             && . /cdir/ws/devel/setup.bash
@@ -89,10 +96,25 @@ services:
 
     rviz:
         <<: *ros-client-base
+        image: ros-mower:mower-gui
+        build:
+            dockerfile: docker/Dockerfile:mower-gui
         command: >
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
             && . /cdir/ws/devel/setup.bash
             && roslaunch /cdir/all.launch rviz:=true $ROSARGS"
+        profiles:
+            - optional
+
+    rqt:
+        <<: *ros-client-base
+        image: ros-mower:mower-gui
+        build:
+            dockerfile: docker/Dockerfile:mower-gui
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && rqt $ROSARGS"
         profiles:
             - optional
 
@@ -143,9 +165,9 @@ services:
 
     rosbridge:
         <<: *ros-client-base
-        image: ros-mower:google
+        image: ros-mower:bridge
         build:
-            dockerfile: docker/Dockerfile:google
+            dockerfile: docker/Dockerfile:bridge
         command: >
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
             && . /cdir/ws/devel/setup.bash
