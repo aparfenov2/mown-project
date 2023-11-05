@@ -162,6 +162,7 @@ services:
             && roslaunch /cdir/all.launch costmap_demo:=true segm:=true segm_net:=true ddr_net:=false $ROSARGS"
         profiles:
             - optional
+            - costmap_demo
 
     bridge:
         <<: *ros-client-base

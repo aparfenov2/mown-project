@@ -216,3 +216,4 @@ RUN apt-get update && apt-get install -y python3-pip
 RUN apt-get update && apt-get install -y firefox firefox-geckodriver
 RUN python3 -m pip install selenium
 RUN python3 -m pip install utm
+RUN apt-get update && apt-get install -y ros-noetic-foxglove-msgs
