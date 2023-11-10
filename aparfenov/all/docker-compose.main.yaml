@@ -31,7 +31,7 @@ x-depends-on-roscore: &depends-on-roscore
 
 # шаблон сервиса, используещего образ ros-mower
 x-ros-image-base: &ros-image-base
-    image: ros-mower:mower-core
+    image: kan-rt.ddns.net:8929/docker/ros-mower:mower-core
     build:
         dockerfile: docker/Dockerfile:mower-core
     network_mode: host
@@ -51,7 +51,7 @@ x-ros-client-base: &ros-client-base
 services:
     build:
         <<: *ros-image-base
-        image: ros-mower:build
+        image: kan-rt.ddns.net:8929/docker/ros-mower:build
         build:
             dockerfile: docker/Dockerfile:build
         working_dir: /cdir/ws
@@ -83,7 +83,7 @@ services:
 
     sim:
         <<: *ros-client-base
-        image: ros-mower:mower-sim
+        image: kan-rt.ddns.net:8929/docker/ros-mower:mower-sim
         build:
             dockerfile: docker/Dockerfile:mower-sim
         command: >
@@ -96,7 +96,7 @@ services:
 
     rviz:
         <<: *ros-client-base
-        image: ros-mower:mower-gui
+        image: kan-rt.ddns.net:8929/docker/ros-mower:mower-gui
         build:
             dockerfile: docker/Dockerfile:mower-gui
         command: >
@@ -108,7 +108,7 @@ services:
 
     rqt:
         <<: *ros-client-base
-        image: ros-mower:mower-gui
+        image: kan-rt.ddns.net:8929/docker/ros-mower:mower-gui
         build:
             dockerfile: docker/Dockerfile:mower-gui
         command: >
@@ -130,7 +130,7 @@ services:
 
     backend:
         <<: *ros-client-base
-        image: ros-mower:google
+        image: kan-rt.ddns.net:8929/docker/ros-mower:google
         build:
             dockerfile: docker/Dockerfile:google
         command: >
@@ -153,7 +153,7 @@ services:
 
     costmap_demo:
         <<: *ros-client-base
-        image: ros-mower:pytorch
+        image: kan-rt.ddns.net:8929/docker/ros-mower:pytorch
         build:
             dockerfile: docker/Dockerfile:pytorch
         command: >
@@ -166,7 +166,7 @@ services:
 
     bridge:
         <<: *ros-client-base
-        image: ros-mower:bridge
+        image: kan-rt.ddns.net:8929/docker/ros-mower:bridge
         build:
             dockerfile: docker/Dockerfile:bridge
         command: >
@@ -178,7 +178,7 @@ services:
             - backend_demo
 
     foxglove:
-        image: foxglove:my
+        image: kan-rt.ddns.net:8929/docker/foxglove:my
         build: studio
         restart: no
         profiles:
