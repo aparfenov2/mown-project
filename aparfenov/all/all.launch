@@ -342,20 +342,20 @@
 <!-- Backend and planning emulation -->
 
     <param name="/planner/topics/task_polygon_planning" value="/planner/task_polygon_planning"/>
-
+<!--
     <group if="$(arg planning)">
         <arg name="target_x_vel" default="0.5"/>
         <arg name="target_yaw_vel" default="0.4"/>
-        <!--Tracking_pid cannot just accept a nav_msgs/Path, it can only go to a PoseStamped,
-        so the path_interpolator drags a PoseStamped over a Path at a given speed-->
+        <!-1-Tracking_pid cannot just accept a nav_msgs/Path, it can only go to a PoseStamped,
+        so the path_interpolator drags a PoseStamped over a Path at a given speed-1->
         <node name="interpolator" pkg="tracking_pid" type="path_interpolator">
             <param name="target_x_vel" value="$(arg target_x_vel)"/>
             <param name="target_yaw_vel" value="$(arg target_yaw_vel)"/>
             <remap from="path" to="/path_to_follow"/>
-            <!-- <remap from="trajectory" to="trajectory"/> -->
+            <!-1- <remap from="trajectory" to="trajectory"/> -1->
         </node>
 
-        <!--Tracking_pid tries to get the robot as close to it's goal point as possible-->
+        <!-1-Tracking_pid tries to get the robot as close to it's goal point as possible-1->
         <node name="controller" pkg="tracking_pid" type="controller" output="screen">
             <remap from="move_base/cmd_vel" to="$(arg cmd_vel_topic)"/>
             <remap from="local_trajectory" to="trajectory"/>
@@ -375,6 +375,26 @@
 		<node pkg="backend" type="planner_emu.py" name="planner_emu" output="screen" >
             <param name="debug" value="true" />
         </node>
+	</group>
+ -->
+    <group if="$(arg planning)">
+        <arg name="move_forward_only" default="false"/>
+        <node args="0 0 0 0 0 0 odom map" name="odom_to_map" pkg="tf2_ros" type="static_transform_publisher"/>
+
+        <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+            <param name="base_global_planner" value="carrot_planner/CarrotPlanner" />
+            <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+            <param name="DWAPlannerROS/publish_cost_grid_pc" value="true" />
+            <param name="DWAPlannerROS/publish_traj_pc" value="true" />
+            <param name="DWAPlannerROS/occdist_scale" value="64.0" />
+
+            <rosparam file="/cdir/global_costmap_params.yaml" command="load" ns="global_costmap" />
+            <rosparam file="/cdir/local_costmap_params.yaml" command="load" ns="local_costmap" />
+            <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
+            <remap from="odom" to="$(arg odom_topic)"/>
+            <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
+        </node>
+
 	</group>
 
 	<group if="$(arg backend)">
