@@ -64,7 +64,7 @@ services:
             && catkin build
             "
         profiles:
-            - optional
+            - all
 
     roscore:
         <<: *ros-image-base
@@ -73,7 +73,7 @@ services:
             && . /cdir/ws/devel/setup.bash
             && roscore"
         profiles:
-            - optional
+            - all
             - backend_demo
         healthcheck:
             test: ["CMD", "curl", "http://localhost:11311"]
@@ -91,8 +91,13 @@ services:
             && . /cdir/ws/devel/setup.bash
             && roslaunch /cdir/all.launch sim:=true $ROSARGS"
         profiles:
-            - optional
+            - all
             - backend_demo
+        healthcheck:
+            test: ["CMD-SHELL", ". /opt/ros/$$ROS_DISTRO/setup.sh && rostopic list | grep /mobile_base/commands/velocity"]
+            interval: 2s
+            timeout: 2s
+            retries: 40
 
     rviz:
         <<: *ros-client-base
@@ -104,7 +109,7 @@ services:
             && . /cdir/ws/devel/setup.bash
             && roslaunch /cdir/all.launch rviz:=true $ROSARGS"
         profiles:
-            - optional
+            - all
 
     rqt:
         <<: *ros-client-base
@@ -116,7 +121,7 @@ services:
             && . /cdir/ws/devel/setup.bash
             && rqt $ROSARGS"
         profiles:
-            - optional
+            - all
 
     teleop:
         <<: *ros-client-base
@@ -126,7 +131,7 @@ services:
             && . /cdir/ws/devel/setup.bash
             && roslaunch /cdir/all.launch teleop:=true $ROSARGS"
         profiles:
-            - optional
+            - all
 
     backend:
         <<: *ros-client-base
@@ -138,7 +143,7 @@ services:
             && . /cdir/ws/devel/setup.bash
             && roslaunch /cdir/all.launch backend:=true $ROSARGS"
         profiles:
-            - optional
+            - all
             - backend_demo
 
     planning:
@@ -147,8 +152,13 @@ services:
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
             && . /cdir/ws/devel/setup.bash
             && roslaunch /cdir/all.launch planning:=true $ROSARGS"
+        depends_on:
+            roscore:
+                condition: service_healthy
+            sim:
+                condition: service_healthy
         profiles:
-            - optional
+            - all
             - backend_demo
 
     costmap_demo:
@@ -161,7 +171,7 @@ services:
             && . /cdir/ws/devel/setup.bash
             && roslaunch /cdir/all.launch costmap_demo:=true segm:=true segm_net:=true ddr_net:=false $ROSARGS"
         profiles:
-            - optional
+            - all
             - costmap_demo
 
     bridge:
@@ -174,7 +184,7 @@ services:
             && . /cdir/ws/devel/setup.bash
             && roslaunch /cdir/all.launch rosbridge:=true $ROSARGS"
         profiles:
-            - optional
+            - all
             - backend_demo
 
     foxglove:
@@ -182,7 +192,7 @@ services:
         build: studio
         restart: no
         profiles:
-            - optional
+            - all
             - backend_demo
         ports:
             - 8080:8080
