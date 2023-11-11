@@ -12,7 +12,7 @@ up: gen_dc
 down: gen_dc
 	docker compose $(DOWN)
 
-all: gen_dc
+all: gen_dc download_segmodel
 	ROSARGS="world:=baylands" docker compose --profile backend_demo --profile costmap_demo $(UP)
 
 backend_demo: gen_dc
@@ -31,6 +31,15 @@ push: gen_dc
 build: gen_dc
 	docker compose run build
 
+download_segmodel: data/PIDNet_S_ImageNet.pth.tar data/best.pt
+data/PIDNet_S_ImageNet.pth.tar:
+	mkdir data || true
+	cd data && wget http://kan-rt.ddns.net:18000/incoming/pidnet/PIDNet_S_ImageNet.pth.tar
+
+data/best.pt:
+	mkdir data || true
+	cd data && wget http://kan-rt.ddns.net:18000/incoming/pidnet/best.pt
+
 sim: gen_dc
 	docker compose $(UP) $@
 
@@ -46,7 +55,7 @@ backend: gen_dc
 planning: gen_dc
 	docker compose $(UP) $@
 
-costmap_demo: gen_dc
+costmap_demo: gen_dc download_segmodel
 	docker compose $(UP) $@
 
 bridge: gen_dc
