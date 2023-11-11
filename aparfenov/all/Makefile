@@ -1,4 +1,4 @@
-UP=up --no-recreate
+UP=up $(DAEMON) --no-recreate
 DOWN=down --remove-orphans
 
 .PHONY: gen_dc
@@ -13,10 +13,7 @@ down: gen_dc
 	docker compose $(DOWN)
 
 all: gen_dc
-	docker compose --profile backend_demo --profile costmap_demo $(UP) --rosargs world:=baylands
-
-all-d: gen_dc
-	docker compose --profile backend_demo --profile costmap_demo $(UP) -d --rosargs world:=baylands
+	ROSARGS="world:=baylands" docker compose --profile backend_demo --profile costmap_demo $(UP)
 
 backend_demo: gen_dc
 	docker compose --profile backend_demo $(UP)
