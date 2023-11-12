@@ -2,6 +2,8 @@
     <arg name="world"/>
     <arg name="robot"/>
     <arg name="use_sim_time_in_gazebo" default="True"/>
+
+    <arg name="odometry_source" default="WORLD"/>
     
     <arg name="publish_tf" default="1"/>
     <arg name="gui" default="true"/>
@@ -14,7 +16,7 @@
     </include>
 
     <group if="$(eval robot == 'turtlebot')">
-        <arg name="urdf_file" default="$(find xacro)/xacro $(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf.xacro publish_tf:=$(arg publish_tf) prefix:=$(arg robot)"/>
+        <arg name="urdf_file" default="$(find xacro)/xacro $(find tb_gazebo_description)/robots/kobuki_hexagons_kinect.urdf_2.xacro publish_tf:=$(arg publish_tf) prefix:=$(arg robot) odometry_source:=$(arg odometry_source)"/>
         <param name="robot_description" command="$(arg urdf_file)"/>
         <param name="tf_prefix" value="$(arg robot)"/>
     </group>

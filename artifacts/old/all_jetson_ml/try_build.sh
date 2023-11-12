@@ -1,1 +1,0 @@
-../all/try_build.sh

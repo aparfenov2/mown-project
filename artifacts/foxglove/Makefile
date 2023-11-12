@@ -1,18 +1,15 @@
 include .env
 
-
 build:
-	./build.sh
+	docker build -t ${IMAGE_NAME} -f studio/Dockerfile studio/
 
 run:
-	./run.sh
+	docker run -d -it -p ${PORT}:8080 --name ${CONTAINER_NAME} ${IMAGE_NAME}
 
 start:
-	xhost +local:root
 	docker start ${CONTAINER_NAME}
 
 join:
-	xhost +local:root
 	docker exec -ti ${CONTAINER_NAME} bash
 
 stop:
