@@ -8,14 +8,17 @@ VELODYNE_SIM_VOLUME="$PWD/../../3rd_party/velodyne_simulator:/catkin_ws/src/velo
 SCRIPTS_VOLUME="$PWD/scripts/:/catkin_ws/scripts"
 ENGIX_DESC_VOLUME="$PWD/../../modules/core/engix_description/:/catkin_ws/src/engix_description"
 ENGIX_ROBOT_VOLUME="$PWD/../../modules/core/engix_robot/:/catkin_ws/src/engix_robot/"
-SCRIPTS_VOLUME="$PWD/../../scripts/gazebo/:/catkin_ws/scripts"
 
+echo Run container
+
+xhost +local:root
 docker run \
 	-d \
 	-it \
 	--net=host \
 	--name $CONTAINER_NAME \
 	--gpus all \
+	--volume /dev:/dev \
 	-v /tmp/.X11-unix:/tmp/.X11-unix \
 	-e DISPLAY=$DISPLAY \
 	-e QT_X11_NO_MITSHM=1 \
@@ -28,8 +31,11 @@ docker run \
 	-v $ENGIX_ROBOT_VOLUME \
     $IMAGE_NAME
 
+echo Build ws inside container
+
 docker exec $CONTAINER_NAME bash -c /catkin_ws/scripts/build.sh
 
+echo Run sim
 
 xhost +local:root
 docker exec $CONTAINER_NAME bash -c /catkin_ws/scripts/run.sh

@@ -6,9 +6,11 @@
     <arg name="rosbridge" default="false" />
     <arg name="foxglove_bridge" default="false" />
     <arg name="map" default="false" />
+    <arg name="backend" default="false" />
+    
 
     <group if="$(arg sim)">
-        <arg name="world"/>
+        <!-- <arg name="world"/>
         <arg name="robot"/>
         <arg name="use_sim_time_in_gazebo" default="true" />
 
@@ -16,7 +18,11 @@
             <arg name="use_sim_time_in_gazebo" value="$(arg use_sim_time_in_gazebo)"/>
             <arg name="robot" value="$(arg robot)"/>
             <arg name="world" value="$(arg world)"/>
-        </include>
+        </include> -->
+
+        <node name="gazebo_bridge_localization" pkg="gazebo_bridge_localization" type="turtlebot_tf_localization.py" output="screen">
+            <rosparam command="load" file="$(find gazebo_bridge_localization)/params/config.yaml" />
+        </node>
     </group>
 
     <group if="$(arg teleop)">
@@ -62,6 +68,11 @@
 
     <group if="$(arg map)">
         <include file="$(find engix_launch)/launch/map.launch"/>
+    </group>
+
+    <group if="$(arg backend)">
+		<node pkg="backend" type="backend_node.py" name="backend_node" output="screen" >
+        </node>
     </group>
 
 </launch>
