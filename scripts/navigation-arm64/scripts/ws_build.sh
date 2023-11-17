@@ -8,6 +8,7 @@ function build_all() {
     packages+="move_controller "
     packages+="engix_msgs "
     packages+="navigation_launch "
+    packages+="engix_localization "
     catkin build ${packages}
 }
 

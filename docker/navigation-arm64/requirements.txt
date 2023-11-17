@@ -6,3 +6,4 @@ Rtree
 casadi
 msgpack-rpc-python
 osrf-pycommon
+utm

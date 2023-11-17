@@ -26,6 +26,16 @@ PROJECT(engix_localization)
 # )
 
 # find_package(Eigen3 REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+    roslaunch
+    rospy
+)
+
+catkin_python_setup()
+
+catkin_package(
+)
+
 
 ###################################
 ## catkin specific configuration ##

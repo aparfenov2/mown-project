@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="engix_localization" type="run_engix_localization.py" name="engix_localization" output="screen"/>
+</launch>
