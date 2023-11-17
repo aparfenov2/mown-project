@@ -38,6 +38,7 @@ done
 [ -n "$INNER" ] && {
     . "/opt/ros/$ROS_DISTRO/setup.bash"
     export PYTHONPYCACHEPREFIX="/cdir/ws/pycache/"
+    export ROSCONSOLE_FORMAT='[${severity}] [${node}]: ${message}'
 
     set -ex
     [ -n "${BUILD}" ] && {
@@ -56,10 +57,7 @@ done
     # echo GAZEBO_MODEL_PATH="${GAZEBO_MODEL_PATH}"
 
     # read robot name from param server if not specified
-    rosparam list || {
-        roscore &
-        sleep 2
-    }
+    rosparam list
     [ -n "$ROBOT" ] && {
         rosparam set robot $ROBOT
     }
@@ -70,7 +68,7 @@ done
         ROSARGS+=("robot:=$ROBOT")
     }
 
-    roslaunch my_utils_common all.launch ${ROSARGS[@]} ${UNKNOWN_ARGS[@]}
+    roslaunch /cdir/all.launch ${ROSARGS[@]} ${UNKNOWN_ARGS[@]}
     # roslaunch engix_gazebo engix_playpen.launch
     exit 0
 }

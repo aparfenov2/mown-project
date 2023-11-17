@@ -106,7 +106,7 @@ private:
   bool prepareJointState();
   void preparePublishTf();
   bool prepareWheelAndTorque();
-  void prepareOdom();
+  bool prepareOdom();
   bool prepareVelocityCommand();
   bool prepareCliffSensor();
   bool prepareBumper();
@@ -116,6 +116,7 @@ private:
   // internal functions for update
   void updateJointState();
   void updateOdometry(common::Time& step_time);
+  void update_odometry_gt(common::Time& step_time);
   void updateIMU();
   void propagateVelocityCommands();
   void updateCliffSensor();
@@ -129,6 +130,8 @@ private:
   ros::NodeHandle nh_, nh_priv_;
   /// node name
   std::string node_name_;
+
+  bool use_ground_truth_odometry_;
 
   /// TF Prefix
   std::string tf_prefix_;

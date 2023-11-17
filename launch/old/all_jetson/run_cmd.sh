@@ -1,1 +1,0 @@
-../all/run_cmd.sh

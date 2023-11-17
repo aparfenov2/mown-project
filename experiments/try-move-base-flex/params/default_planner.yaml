@@ -1,2 +1,0 @@
-base_global_planner: NavfnROS
-base_local_planner: DWAPlannerROS

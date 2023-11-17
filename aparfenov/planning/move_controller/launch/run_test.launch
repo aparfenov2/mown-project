@@ -1,5 +1,0 @@
-<launch>
-    <!-- <node name="control_test" pkg="move_controller" type="control_test.py" output="screen"/> -->
-    <node name="test_ceres" pkg="move_controller" type="test_ceres" output="screen"/>
-</launch>
-

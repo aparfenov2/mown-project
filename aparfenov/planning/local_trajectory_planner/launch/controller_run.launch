@@ -1,4 +1,0 @@
-<launch>
-    <node name="LocalTrajectoryPlanner" pkg="local_trajectory_planner" type="controller.py" respawn="true" respawn_delay="5" output="screen"/>
-</launch>
-

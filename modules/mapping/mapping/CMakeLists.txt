@@ -16,13 +16,13 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS
     pcl_ros
     grid_map_core
     grid_map_ros
-    grid_map_cv
-    grid_map_filters
-    grid_map_loader
-    grid_map_msgs
-    grid_map_octomap
-    grid_map_rviz_plugin
-    grid_map_visualization
+    # grid_map_cv
+    # grid_map_filters
+    # grid_map_loader
+    # grid_map_msgs
+    # grid_map_octomap
+    # grid_map_rviz_plugin
+    # grid_map_visualization
 )
 
 find_package(Eigen3 REQUIRED)
@@ -48,12 +48,6 @@ include_directories(
 add_executable(map_server
     src/map_server.cpp
 )
-add_executable(label_server
-    src/label_server.cpp
-)
 target_link_libraries(map_server
-    ${catkin_LIBRARIES}
-)
-target_link_libraries(label_server
     ${catkin_LIBRARIES}
 )

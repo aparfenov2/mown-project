@@ -150,11 +150,25 @@ bool GazeboRosKobuki::prepareWheelAndTorque()
   return true;
 }
 
-void GazeboRosKobuki::prepareOdom()
+bool GazeboRosKobuki::prepareOdom()
 {
   odom_pose_[0] = 0.0;
   odom_pose_[1] = 0.0;
   odom_pose_[2] = 0.0;
+
+  if (sdf_->HasElement("odometry_source"))
+  {
+    std::string odometry_source = sdf_->GetElement("odometry_source")->Get<std::string>();
+    use_ground_truth_odometry_ = odometry_source == "WORLD";
+    ROS_INFO_STREAM("using odometry source " << " [" << odometry_source <<"]");
+  }
+  else
+  {
+    ROS_ERROR_STREAM("Couldn't find 'odometry_source' parameter in the model description!"
+                     << " Did you specify it?" << " [" << node_name_ <<"]");
+    return false;
+  }
+  return true;
 }
 
 /*
