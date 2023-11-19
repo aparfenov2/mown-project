@@ -8,6 +8,13 @@ for f in $(find ws/src -type l); do
     VOLUMES+=("$(readlink -f $f):/cdir/$f")
 done
 
+for f in $(find ws_planning/src -type l); do
+    if ! readlink -f $f > /dev/null; then
+        echo "failed to map $f"
+    fi
+    VOLUMES+=("$(readlink -f $f):/catkin_ws/${f#*/}")
+done
+
 [ -e "data" ] && {
     VOLUMES+=("$(readlink -f data):/cdir/data")
 }

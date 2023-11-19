@@ -1,6 +1,6 @@
 <launch>
-    <arg name="world"/>
-    <arg name="robot"/>
+    <arg name="world" default="agriculture"/>
+    <arg name="robot" default="turtlebot"/>
     <arg name="use_sim_time_in_gazebo" default="True"/>
 
     <arg name="odometry_source" default="WORLD"/>
@@ -21,9 +21,28 @@
         <param name="tf_prefix" value="$(arg robot)"/>
     </group>
 
-    <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base -robot_namespace $(arg robot)" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+    <!-- Gazebo model spawner -->
+    <group if="$(eval world == 'empty')">
+        <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base -robot_namespace $(arg robot)" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+    </group>
+    <group if="$(eval world == 'playpen')">
+        <node args="-urdf -x 0 -y 0 -z 0 -Y 0 -param robot_description -model mobile_base -robot_namespace $(arg robot)" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+    </group>
+    <group if="$(eval world == 'agriculture')">
+        <node args="-urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base -robot_namespace $(arg robot)" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+    </group>
+    <group if="$(eval world == 'yosemite')">
+        <node args="-urdf -x 0 -y 0 -z 0.5 -Y 0 -param robot_description -model mobile_base -robot_namespace $(arg robot)" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+    </group>
+    <group if="$(eval world == 'turtletown')">
+        <node args="-urdf -x 5.5 -y -5.7 -z 1.2 -Y 3.14 -param robot_description -model mobile_base -robot_namespace $(arg robot)" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+    </group>
+    <group if="$(eval world == 'baylands')">
+        <node args="-urdf -x 0 -y 0 -z 0.21 -param robot_description -model mobile_base -robot_namespace $(arg robot)" name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"/>
+    </group>
 
-    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 1 odom turtlebot/odom 2" />
+    <node pkg="tf" type="static_transform_publisher" name="tb_odom_to_odom" args="0 0 0 0 0 0 1 turtlebot/odom odom 10" />
+    <node pkg="tf" type="static_transform_publisher" name="tb_footprint_to_footprint" args="0 0 0 0 0 0 1 turtlebot/base_footprint base_footprint 10" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
       <param name="publish_frequency" type="double" value="50.0" />

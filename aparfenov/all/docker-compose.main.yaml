@@ -6,6 +6,7 @@
     - ./:/cdir
     - /tmp/.X11-unix:/tmp/.X11-unix:rw
     - ~/.gazebo/models:/root/.gazebo/models
+    - ./ws_planning:/catkin_ws
 
 x-common-env: &common-env
     DISPLAY:
@@ -24,11 +25,6 @@ x-allow-gpu: &allow-gpu
                       count: 1
                       capabilities: [gpu]
 
-x-depends-on-roscore: &depends-on-roscore
-    depends_on:
-        roscore:
-            condition: service_healthy
-
 # шаблон сервиса, используещего образ ros-mower
 x-ros-image-base: &ros-image-base
     image: kan-rt.ddns.net:8929/docker/ros-mower:mower-core
@@ -46,7 +42,12 @@ x-ros-image-base: &ros-image-base
 
 # шаблон клиента ros
 x-ros-client-base: &ros-client-base
-    <<: [*ros-image-base, *allow-gpu, *depends-on-roscore]
+    <<: [*ros-image-base, *allow-gpu]
+    depends_on:
+        roscore:
+            condition: service_healthy
+        sim:
+            condition: service_healthy
 
 services:
     build:
@@ -89,7 +90,7 @@ services:
         command: >
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
             && . /cdir/ws/devel/setup.bash
-            && roslaunch /cdir/all.launch sim:=true $ROSARGS"
+            && roslaunch simulator_launch gazebo.launch $ROSARGS"
         profiles:
             - all
             - backend_demo
@@ -98,6 +99,9 @@ services:
             interval: 2s
             timeout: 2s
             retries: 40
+        depends_on:
+            roscore:
+                condition: service_healthy
 
     rviz:
         <<: *ros-client-base
@@ -146,17 +150,35 @@ services:
             - all
             - backend_demo
 
+    planning_build:
+        <<: *ros-image-base
+        image: ros-mower-core-dev-x86
+        build:
+            context: ../../artifacts/core-dev-x86
+            dockerfile: ../../artifacts/core-dev-x86/Dockerfile
+        command: >
+            bash -c "
+            PATH=/catkin_ws/src/ws_scripts/:$$PATH
+            && cd /catkin_ws/src/ws_scripts/
+            && . /opt/ros/$$ROS_DISTRO/setup.bash
+            && ./ws_build.sh
+            "
+        profiles:
+            - all
+
     planning:
         <<: *ros-client-base
+        image: ros-mower-core-dev-x86
+        build:
+            context: ../../artifacts/core-dev-x86
+            dockerfile: ../../artifacts/core-dev-x86/Dockerfile
         command: >
-            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
-            && . /cdir/ws/devel/setup.bash
-            && roslaunch /cdir/all.launch planning:=true $ROSARGS"
-        depends_on:
-            roscore:
-                condition: service_healthy
-            sim:
-                condition: service_healthy
+            bash -c "
+            PATH=/catkin_ws/src/ws_scripts/:$$PATH
+            && cd /catkin_ws/src/ws_scripts/
+            && . /opt/ros/$$ROS_DISTRO/setup.bash
+            && ws_run.sh --navigation
+            "
         profiles:
             - all
             - backend_demo
@@ -173,6 +195,11 @@ services:
         profiles:
             - all
             - costmap_demo
+        healthcheck:
+            test: ["CMD-SHELL", ". /opt/ros/$$ROS_DISTRO/setup.sh && rostopic list | grep /segmentation_node/segmentation"]
+            interval: 2s
+            timeout: 2s
+            retries: 40
 
     bridge:
         <<: *ros-client-base
@@ -186,6 +213,13 @@ services:
         profiles:
             - all
             - backend_demo
+        depends_on:
+            roscore:
+                condition: service_healthy
+            sim:
+                condition: service_healthy
+            costmap_demo:
+                condition: service_healthy
 
     foxglove:
         image: kan-rt.ddns.net:8929/docker/foxglove:my
