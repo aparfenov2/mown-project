@@ -152,7 +152,7 @@ services:
 
     planning_build:
         <<: *ros-image-base
-        image: ros-mower-core-dev-x86
+        image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
         build:
             context: ../../artifacts/core-dev-x86
             dockerfile: ../../artifacts/core-dev-x86/Dockerfile
@@ -168,7 +168,7 @@ services:
 
     planning:
         <<: *ros-client-base
-        image: ros-mower-core-dev-x86
+        image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
         build:
             context: ../../artifacts/core-dev-x86
             dockerfile: ../../artifacts/core-dev-x86/Dockerfile
