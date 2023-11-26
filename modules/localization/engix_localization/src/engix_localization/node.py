@@ -34,14 +34,15 @@ class EngixLocalizationNode(AbstractNode):
         self.localization_publisher = rospy.Publisher('/planner/localization',
                                                       Localization,
                                                       queue_size=1)
-        rospy.Subscriber('/fix', NavSatFix, self.reach_nav_sat_callback)
-        rospy.Subscriber('/vel', TwistStamped, self.reach_vel_callback)
+        rospy.Subscriber('/gps/fix', NavSatFix, self.reach_nav_sat_callback)
+        rospy.Subscriber('/gps/vel', TwistStamped, self.reach_vel_callback)
         rospy.Subscriber('/zed2i/zed_node/imu/data', Imu, self.zed_imu_callback)
 
-        timer_interval = rospy.Duration(1.0)  # 1 Hz
+        # TODO: Remove timer and timer's callback
+        # timer_interval = rospy.Duration(1.0)  # 1 Hz
 
         # Create a timer with the specified interval and callback function
-        self.timer = rospy.Timer(timer_interval, self.timer_callback)
+        # self.timer = rospy.Timer(timer_interval, self.timer_callback)
 
     def timer_callback(self, event):
         # Your callback function code here
