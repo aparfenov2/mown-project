@@ -12,14 +12,14 @@
   <exec_depend>tf</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>abstractnode</exec_depend>
-
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>nav_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>engix_msgs</build_depend>
-
+  <exec_depend>pyproj</exec_depend>
   <build_depend>reach_rs_driver</build_depend>
+
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>engix_msgs</depend>
+
   <!-- <build_depend>zed_wrapper</build_depend> -->
   <!-- <build_depend>ce30c_driver</build_depend> -->
 

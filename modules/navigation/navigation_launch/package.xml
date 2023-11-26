@@ -1,0 +1,13 @@
+<package>
+  <name>navigation_launch</name>
+  <version>1.0.0</version>
+  <description>Navigation launch module</description>
+  <maintainer email="kos1694@gmail.com">Konstantin Usenko</maintainer>
+  <license>BSD</license>
+  <author>Konstantin Usenko</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>global_planner</run_depend>
+  <run_depend>move_controller</run_depend>
+  <run_depend>engix_msgs</run_depend>
+</package>

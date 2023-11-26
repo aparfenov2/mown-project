@@ -1,0 +1,24 @@
+<launch>
+    <arg name="control" default="false" />
+    <arg name="global_planner" default="false" />
+
+    <group if="$(arg control)">
+        <arg name="config"/>
+
+        <node name="move_controller" pkg="move_controller" type="main.py" output="screen">
+            <rosparam command="load" file="$(find move_controller)/params/$(arg config)/config.yaml" />
+        </node>
+    </group>
+
+    <group if="$(arg global_planner)">
+        <arg name="config"/>
+
+        <node name="global_planner" pkg="global_planner" type="main.py">
+            <rosparam command="load" file="$(find global_planner)/params/$(arg config)/config.yaml" />
+        </node>
+    </group>
+
+    <group if="$(arg xavier_localization)">
+        <include file="$(find engix_localization)/launch/engix_localization.launch"/>
+    </group>
+</launch>
