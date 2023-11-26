@@ -17,4 +17,8 @@
             <rosparam command="load" file="$(find global_planner)/params/$(arg config)/config.yaml" />
         </node>
     </group>
+
+    <group if="$(arg xavier_localization)">
+        <include file="$(find engix_localization)/launch/engix_localization.launch"/>
+    </group>
 </launch>

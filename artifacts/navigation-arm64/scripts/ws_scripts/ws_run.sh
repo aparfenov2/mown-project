@@ -9,9 +9,17 @@ function run_control() {
     roslaunch navigation_launch main.launch control:=True config:=mower_v1
 }
 
+function run_localization() {
+    source /catkin_ws/devel/setup.bash
+    roslaunch navigation_launch main.launch xavier_localization:=True
+}
+
 function run_navigation() {
     source /catkin_ws/devel/setup.bash
-    roslaunch navigation_launch main.launch control:=True global_planner:=True config:=mower_v1
+    roslaunch navigation_launch main.launch control:=True \
+        global_planner:=True \
+        xavier_localization:=True \
+        config:=mower_v1
 }
 
 function main() {
@@ -27,13 +35,18 @@ function main() {
             run_planning
             ;;
 
+        --localization)
+            echo "Run localization"
+            run_localization
+            ;;
+
         --navigation)
             echo "Run navigation"
             run_navigation
             ;;
 
         *)
-            echo "Wrong argument. Usage: ws_build [--sim | --planning | --gui]"
+            echo "Wrong argument. Usage: ws_build [--control | --planning | --localization | -- navigation]"
             ;;
         esac
     else
