@@ -1,5 +1,4 @@
 UP=up $(DAEMON) --no-recreate
-DOWN=down --remove-orphans
 
 .PHONY: gen_dc
 
@@ -10,26 +9,29 @@ up: gen_dc
 	docker compose $(UP) $(ARGS)
 
 down: gen_dc
-	docker compose $(DOWN)
+	docker compose $@ --remove-orphans
 
 all: gen_dc download_segmodel
 	ROSARGS="world:=baylands" docker compose --profile backend_demo --profile costmap_demo $(UP)
 
 backend_demo: gen_dc
-	docker compose --profile backend_demo $(UP)
+	docker compose --profile $@ $(UP)
 
 build_images: gen_dc
 	docker compose --profile all build
 
 pull: gen_dc
-	docker compose --profile all pull
+	docker compose --profile all $@
 
 push: gen_dc
-	docker compose --profile all push
+	docker compose --profile all $@
 
 # docker-compose individual services
-build: gen_dc
-	docker compose run build
+planning_build: gen_dc
+	docker compose run $@
+
+build: planning_build
+	docker compose run $@
 
 download_segmodel: data/PIDNet_S_ImageNet.pth.tar data/best.pt
 data/PIDNet_S_ImageNet.pth.tar:

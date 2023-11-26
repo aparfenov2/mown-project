@@ -1,1 +1,4 @@
+**/ws_planning/*
+!**/ws_planning/src
+
 docker-compose.yaml

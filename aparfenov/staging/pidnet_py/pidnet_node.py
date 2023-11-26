@@ -31,16 +31,16 @@ class PIDNetNode:
         self._last_msg = None
         self._msg_lock = threading.Lock()
 
-        self._publish_rate = rospy.get_param('~publish_rate', 100)
-        rgb_input = rospy.get_param('~rgb_input', '/camera/rgb/image_color')
-
-        rospy.Subscriber(rgb_input, Image, self.image_callback, queue_size=1)
-        self.label_pub = rospy.Publisher('~segmentation', Image, queue_size=1)
-        self.vis_pub = rospy.Publisher('~segmentation_vis', Image, queue_size=1)
-
         config_file = rospy.get_param('~cfg', 'experiments/map/map_hrnet_ocr_w18_small_v2_512x1024_sgd_lr1e-2_wd5e-4_bs_12_epoch484.yaml')
         model_state_file = rospy.get_param('~weights', 'best.pth')
         self.net = PIDNet(config_file, model_state_file)
+
+        self._publish_rate = rospy.get_param('~publish_rate', 100)
+        self.label_pub = rospy.Publisher('~segmentation', Image, queue_size=1)
+        self.vis_pub = rospy.Publisher('~segmentation_vis', Image, queue_size=1)
+
+        rgb_input = rospy.get_param('~rgb_input', '/camera/rgb/image_color')
+        rospy.Subscriber(rgb_input, Image, self.image_callback, queue_size=1)
 
     def image_callback(self, msg):
         rospy.logdebug("Got an image.")
