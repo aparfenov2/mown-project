@@ -24,6 +24,12 @@
     <arg name="odom_topic" value="/engix_velocity_controller/odom" if="$(eval robot == 'ya_model')" /> -->
     <arg name="cmd_vel_topic" value="/cmd_vel" if="$(eval robot == 'ya_model')" />
     <arg name="odom_topic" value="/odom" if="$(eval robot == 'ya_model')" />
+    <arg name="simulation" default="true"/>
+    <arg if="$(eval robot == 'turtlebot')" name="rgb_topic" default="/turtlebot/camera/rgb/image_raw"/>
+    <arg unless="$(eval robot == 'turtlebot')" name="rgb_topic" default="/camera/rgb/image_rect_color"/>
+    <arg if="$(eval robot == 'turtlebot')" name="depth_topic" default="/turtlebot/camera/depth/image_raw"/>
+    <arg unless="$(eval robot == 'turtlebot')" name="depth_topic" default="/camera/depth_registered/image_raw"/>
+    <arg name="camera_info_topic" default="/turtlebot/camera/rgb/camera_info"/>
     <arg name="use_sim_time_in_gazebo" value="true"/>
     <arg name="base_frame" value="base_link" if="$(eval robot == 'ya_model')" />
     <arg name="rosbridge" default="false" />
@@ -120,11 +126,11 @@
     <group if="$(arg segm_net)">
         <node if="$(arg ddr_net)" name="segmentation_node" pkg="ddrnet" type="ddrnet" output="screen">
             <param name="weights_file" value="$(find ddrnet)/model/DDRNet_CS.engine" />
-            <remap from="camera/image" to="/camera/rgb/image_raw" />
+            <remap from="camera/image" to="$(arg rgb_topic)" />
         </node>
         <node unless="$(arg ddr_net)" name="segmentation_node" pkg="pidnet_py" type="pidnet_node.py" output="screen">
             <param name="publish_rate" value="10" />
-            <param name="rgb_input" value="/camera/rgb/image_raw" />
+            <param name="rgb_input" value="$(arg rgb_topic)" />
             <param name="cfg" value="$(find my_utils_common)/param/pidnet_synth_road.yaml" />
             <param name="weights" value="/cdir/data/best.pt" />
         </node>
@@ -137,16 +143,16 @@
 
         <!-- register depth image -->
         <node pkg="nodelet" type="nodelet" name="point_cloud2_register" args="load depth_image_proc/register pcl_proc" respawn="false" output="screen">
-            <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
-            <remap from="/depth/camera_info" to="/camera/depth/camera_info" />
-            <remap from="/depth/image_rect" to="/camera/depth/image_raw" />
+            <remap from="/rgb/camera_info" to="$(arg camera_info_topic)" />
+            <remap from="/depth/camera_info" to="/turtlebot/camera/depth/camera_info" />
+            <remap from="/depth/image_rect" to="$(arg depth_topic)" />
         </node>
 
         <!-- registered depth to pcl rgb -->
         <node pkg="nodelet" type="nodelet" name="point_cloud2_pcl" args="load depth_image_proc/point_cloud_xyzrgb pcl_proc" respawn="false" output="screen">
             <!-- depth input: depth_registered/image_rect -->
             <remap from="/rgb/image_rect_color" to="$(arg segm_topic)" />
-            <remap from="/rgb/camera_info" to="/camera/rgb/camera_info" />
+            <remap from="/rgb/camera_info" to="$(arg camera_info_topic)" />
 
             <remap from="depth_registered/points" to="/pcl_proc/points2" />
         </node>
@@ -265,12 +271,6 @@
         <arg name="localization" default="false"/>
 
         <arg unless="$(arg localization)" name="args" default="--delete_db_on_start"/>
-        <arg name="simulation" default="true"/>
-        <arg if="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_raw"/>
-        <arg unless="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_rect_color"/>
-        <arg if="$(arg simulation)" name="depth_topic" default="/camera/depth/image_raw"/>
-        <arg unless="$(arg simulation)" name="depth_topic" default="/camera/depth_registered/image_raw"/>
-        <arg name="camera_info_topic" default="/camera/rgb/camera_info"/>
         <arg name="rtmap_odom_topic_out" default="vo_out"/>
         <arg unless="$(arg rgbd_odometry)" name="rtmap_odom_topic" default="$(arg odom_topic)" />
         <arg if="$(arg rgbd_odometry)" name="rtmap_odom_topic" default="odometry/filtered" />
