@@ -7,11 +7,13 @@ import numpy as np
 import yaml
 import math
 
+import tf2_ros
+
 import geometry_msgs.msg
 import std_msgs.msg
 import visualization_msgs.msg
-from engix_msgs.msg import RouteTaskToPoint, RouteTaskPolygon, CoverageTask
-from geometry_msgs.msg import PointStamped, PolygonStamped, Point32
+from engix_msgs.msg import CoverageTask, LineMovingTask
+from geometry_msgs.msg import PointStamped, PolygonStamped, Point32, PoseStamped
 
 """
 interface Backend
@@ -87,9 +89,19 @@ class BackendNode:
         self.pointsFrame = "unknown"
         self.polygon_is_built = False
 
-        rospy.init_node("backend_node", anonymous=True)
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        self.map_frame = rospy.get_param('~map_frame', 'odom')
+        self.base_link_frame = rospy.get_param('~base_link_frame', 'base_link')
+
         self.point_viz_pub = rospy.Publisher(
             "exploration_polygon_marker", visualization_msgs.msg.Marker, queue_size=10
+        )
+
+        self.pub_move_to_point = rospy.Publisher(
+            "/global_planner/straight_line_task",
+            LineMovingTask,
+            queue_size=2,
         )
         self.pub = rospy.Publisher(
             "/global_planner/coverage_planning_task",
@@ -98,7 +110,8 @@ class BackendNode:
         )
         rospy.Timer(rospy.Duration(0.1), self.visTimerCb)
 
-        rospy.Subscriber("/clicked_point", geometry_msgs.msg.PointStamped, self.pointCb)
+        rospy.Subscriber("/clicked_point", PointStamped, self.pointCb)
+        rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.simple_goal_cb)
         rospy.Subscriber("/ui_cmd", std_msgs.msg.String, self.cmdUiCb)
 
     def cmdUiCb(self, cmd_msg: std_msgs.msg.String):
@@ -120,7 +133,23 @@ class BackendNode:
                 message.target_polygon.points.append(new_point)
             self.pub.publish(message)
 
-    def pointCb(self, point_msg: geometry_msgs.msg.PointStamped):
+    def get_current_pos(self):
+        trans = self.tfBuffer.lookup_transform(self.map_frame, self.base_link_frame, rospy.Time())
+        return trans.transform.translation.x, trans.transform.translation.y
+
+    def simple_goal_cb(self, msg: PoseStamped):
+        message = LineMovingTask()
+        message.header.stamp = rospy.get_rostime()
+        x, y = self.get_current_pos()
+        trg_x, trg_y = msg.pose.position.x, msg.pose.position.y
+
+        message.distance = math.sqrt(math.pow(trg_x - x, 2) + math.pow(trg_y - y, 2))
+        message.target_speed = 1.0
+        self.pub_move_to_point.publish(message)
+        rospy.loginfo("Published LineMovingTask msg, dist=%f, spd=%f", message.distance, message.target_speed)
+
+
+    def pointCb(self, point_msg: PointStamped):
         point = point_msg.point
         if self.points:
             average_distance = polygonPerimeter(self.points) / len(self.points)
@@ -207,4 +236,5 @@ class BackendNode:
 
 
 if __name__ == "__main__":
+    rospy.init_node("backend_node", anonymous=True)
     BackendNode().main()

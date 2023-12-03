@@ -32,6 +32,7 @@
     <arg name="camera_info_topic" default="/turtlebot/camera/rgb/camera_info"/>
     <arg name="use_sim_time_in_gazebo" value="true"/>
     <arg name="base_frame" value="base_link" if="$(eval robot == 'ya_model')" />
+    <arg name="base_frame" value="turtlebot/base_link" if="$(eval robot == 'turtlebot')" />
     <arg name="rosbridge" default="false" />
     <arg name="rosbridge_port" default="8765" />
     <arg name="command_panel" default="false" />
@@ -366,7 +367,8 @@
 	<group if="$(arg backend)">
 
 		<node pkg="backend" type="backend_node.py" name="backend_node" output="screen" >
-            <!-- <remap from="path_to_follow" to="path_to_follow"/> -->
+            <param name="map_frame" value="odom" />
+            <param name="base_link_frame" value="$(arg base_frame)" />
         </node>
 
 		<node pkg="backend" type="google_map_to_occ_grid.py" name="google_map" output="screen" >
