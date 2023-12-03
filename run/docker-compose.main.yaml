@@ -1,0 +1,232 @@
+# docker-compose.main.yaml - docker-compose template
+# docker-compose.yaml - render of the template. Do not edit !
+
+# continue declaration of &common-mounts from _dc-generated.yaml
+    # - ./.ros:/root/.ros
+    - ./:/cdir
+    - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    - ~/.gazebo/models:/root/.gazebo/models
+    - ./ws_planning:/catkin_ws
+
+x-common-env: &common-env
+    DISPLAY:
+    NVIDIA_DRIVER_CAPABILITIES: all
+    PYTHONPYCACHEPREFIX: /cdir/ws/pycache/
+    PYTHONUNBUFFERED: 1
+    ROSCONSOLE_FORMAT: "[$${severity}] [$${node}]: $${message}"
+    GAZEBO_MODEL_PATH: /cdir/ws/src/gazebo_models
+
+x-allow-gpu: &allow-gpu
+    deploy:
+        resources:
+            reservations:
+                devices:
+                    - driver: nvidia
+                      count: 1
+                      capabilities: [gpu]
+
+# шаблон сервиса, используещего образ ros-mower
+x-ros-image-base: &ros-image-base
+    image: kan-rt.ddns.net:8929/docker/ros-mower:mower-core
+    build:
+        dockerfile: docker/Dockerfile:mower-core
+    network_mode: host
+    restart: no
+    stop_grace_period: 1s
+    working_dir: /cdir
+    entrypoint: ""
+    environment:
+        <<: *common-env
+    volumes:
+        *common-mounts
+
+# шаблон клиента ros
+x-ros-client-base: &ros-client-base
+    <<: [*ros-image-base, *allow-gpu]
+    depends_on:
+        roscore:
+            condition: service_healthy
+        sim:
+            condition: service_healthy
+
+services:
+    build:
+        <<: *ros-image-base
+        image: kan-rt.ddns.net:8929/docker/ros-mower:build
+        build:
+            dockerfile: docker/Dockerfile:build
+        working_dir: /cdir/ws
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && catkin config \
+            --extend /opt/ros/$$ROS_DISTRO \
+            --cmake-args \
+            -DCMAKE_BUILD_TYPE=Release
+            && catkin build
+            "
+        profiles:
+            - all
+
+    roscore:
+        <<: *ros-image-base
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roscore"
+        profiles:
+            - all
+            - backend_demo
+        healthcheck:
+            test: ["CMD", "curl", "http://localhost:11311"]
+            interval: 2s
+            timeout: 2s
+            retries: 40
+
+    sim:
+        <<: *ros-client-base
+        image: kan-rt.ddns.net:8929/docker/ros-mower:mower-sim
+        build:
+            dockerfile: docker/Dockerfile:mower-sim
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch simulator_launch gazebo.launch $ROSARGS"
+        profiles:
+            - all
+            - backend_demo
+        healthcheck:
+            test: ["CMD-SHELL", ". /opt/ros/$$ROS_DISTRO/setup.sh && rostopic list | grep /mobile_base/commands/velocity"]
+            interval: 2s
+            timeout: 2s
+            retries: 40
+        depends_on:
+            roscore:
+                condition: service_healthy
+
+    rviz:
+        <<: *ros-client-base
+        image: kan-rt.ddns.net:8929/docker/ros-mower:mower-gui
+        build:
+            dockerfile: docker/Dockerfile:mower-gui
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch rviz:=true $ROSARGS"
+        profiles:
+            - all
+
+    rqt:
+        <<: *ros-client-base
+        image: kan-rt.ddns.net:8929/docker/ros-mower:mower-gui
+        build:
+            dockerfile: docker/Dockerfile:mower-gui
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && rqt $ROSARGS"
+        profiles:
+            - all
+
+    teleop:
+        <<: *ros-client-base
+        # run with docker-compose run --rm teleop to attach console
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch teleop:=true $ROSARGS"
+        profiles:
+            - all
+
+    backend:
+        <<: *ros-client-base
+        image: kan-rt.ddns.net:8929/docker/ros-mower:google
+        build:
+            dockerfile: docker/Dockerfile:google
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch backend:=true $ROSARGS"
+        profiles:
+            - all
+            - backend_demo
+
+    planning_build:
+        <<: *ros-image-base
+        image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
+        build:
+            context: ../../artifacts/core-dev-x86
+            dockerfile: ../../artifacts/core-dev-x86/Dockerfile
+        command: >
+            bash -c "
+            PATH=/catkin_ws/src/ws_scripts/:$$PATH
+            && cd /catkin_ws/src/ws_scripts/
+            && . /opt/ros/$$ROS_DISTRO/setup.bash
+            && ./ws_build.sh
+            "
+        profiles:
+            - all
+
+    planning:
+        <<: *ros-client-base
+        image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
+        build:
+            context: ../../artifacts/core-dev-x86
+            dockerfile: ../../artifacts/core-dev-x86/Dockerfile
+        command: >
+            bash -c "
+            PATH=/catkin_ws/src/ws_scripts/:$$PATH
+            && cd /catkin_ws/src/ws_scripts/
+            && . /opt/ros/$$ROS_DISTRO/setup.bash
+            && ws_run.sh --navigation
+            "
+        profiles:
+            - all
+            - backend_demo
+
+    costmap_demo:
+        <<: *ros-client-base
+        image: kan-rt.ddns.net:8929/docker/ros-mower:pytorch
+        build:
+            dockerfile: docker/Dockerfile:pytorch
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch costmap_demo:=true segm:=true segm_net:=true ddr_net:=false $ROSARGS"
+        profiles:
+            - all
+            - costmap_demo
+        healthcheck:
+            test: ["CMD-SHELL", ". /opt/ros/$$ROS_DISTRO/setup.sh && rostopic list | grep /segmentation_node/segmentation"]
+            interval: 2s
+            timeout: 2s
+            retries: 40
+
+    bridge:
+        <<: *ros-client-base
+        image: kan-rt.ddns.net:8929/docker/ros-mower:bridge
+        build:
+            dockerfile: docker/Dockerfile:bridge
+        command: >
+            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
+            && . /cdir/ws/devel/setup.bash
+            && roslaunch /cdir/all.launch rosbridge:=true $ROSARGS"
+        profiles:
+            - all
+            - backend_demo
+        depends_on:
+            roscore:
+                condition: service_healthy
+            sim:
+                condition: service_healthy
+            costmap_demo:
+                condition: service_healthy
+
+    foxglove:
+        image: kan-rt.ddns.net:8929/docker/foxglove:my
+        build: studio
+        restart: no
+        profiles:
+            - all
+            - backend_demo
+        ports:
+            - 8080:8080
