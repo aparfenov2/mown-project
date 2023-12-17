@@ -12,7 +12,7 @@ import tf2_ros
 import geometry_msgs.msg
 import std_msgs.msg
 import visualization_msgs.msg
-from engix_msgs.msg import CoverageTask, LineMovingTask
+from engix_msgs.msg import CoverageTask, DubinsPlanningTask
 from geometry_msgs.msg import PointStamped, PolygonStamped, Point32, PoseStamped
 
 """
@@ -99,8 +99,8 @@ class BackendNode:
         )
 
         self.pub_move_to_point = rospy.Publisher(
-            "/global_planner/straight_line_task",
-            LineMovingTask,
+            "/global_planner/dubins_planning_task",
+            DubinsPlanningTask,
             queue_size=2,
         )
         self.pub = rospy.Publisher(
@@ -138,15 +138,17 @@ class BackendNode:
         return trans.transform.translation.x, trans.transform.translation.y
 
     def simple_goal_cb(self, msg: PoseStamped):
-        message = LineMovingTask()
+        message = DubinsPlanningTask()
         message.header.stamp = rospy.get_rostime()
-        x, y = self.get_current_pos()
+        # x, y = self.get_current_pos()
         trg_x, trg_y = msg.pose.position.x, msg.pose.position.y
-
-        message.distance = math.sqrt(math.pow(trg_x - x, 2) + math.pow(trg_y - y, 2))
-        message.target_speed = 1.0
+        message.target_pose.x = trg_x
+        message.target_pose.y = trg_y
+        message.target_speed  = 1.0
+        message.turning_radius  = 1.0
+        message.step_size  = 0.5
         self.pub_move_to_point.publish(message)
-        rospy.loginfo("Published LineMovingTask msg, dist=%f, spd=%f", message.distance, message.target_speed)
+        rospy.loginfo("Published DubinsPlanningTask msg, dist=%f, spd=%f", message.distance, message.target_speed)
 
 
     def pointCb(self, point_msg: PointStamped):
