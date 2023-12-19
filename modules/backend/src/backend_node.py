@@ -6,6 +6,7 @@ import roslib
 import numpy as np
 import yaml
 import math
+import json
 
 import tf2_ros
 
@@ -108,18 +109,54 @@ class BackendNode:
             CoverageTask,
             queue_size=2,
         )
+
+        self.ui_updates_pub = rospy.Publisher(
+            "/ui_updates",
+            std_msgs.msg.String,
+            queue_size=2,
+        )
+
+        self.pathgen_props = {
+            "step_size": 0.1,
+            "angle": 30,
+            "auto_angle": True
+        }
+
+        self.ui_state = {
+            "op_mode_state" : "manual",
+            "progress": 10,
+            "curr_speed": 0.5,
+            "pathgen_props": self.pathgen_props
+        }
+
         rospy.Timer(rospy.Duration(0.1), self.visTimerCb)
+        rospy.Timer(rospy.Duration(0.1), self.uiUpdatesTimerCb)
 
         rospy.Subscriber("/clicked_point", PointStamped, self.pointCb)
         rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.simple_goal_cb)
         rospy.Subscriber("/ui_cmd", std_msgs.msg.String, self.cmdUiCb)
 
+
     def cmdUiCb(self, cmd_msg: std_msgs.msg.String):
-        cmd = cmd_msg.data
-        if cmd == "go":
+        jss = cmd_msg.data
+        js = json.loads(jss)
+        cmd = js["cmd"]
+
+        if cmd == "switch_op_mode":
+            self.ui_state["op_mode_state"] = "auto" if js["displayed_value"] == "manual" else "manual"
+
+        if cmd == "add_poly":
+            if not self.polygon_is_built:
+                self.sendUserAlert("add_poly is not implemented. Finish building a poly")
+
+        if cmd == "build_path":
+            self.sendUserAlert("build_path is not implemented. Will be shown after Start.")
+
+        if cmd == "start":
             rospy.loginfo("emit execute msg")
             if not self.polygon_is_built:
                 rospy.logerr("cannot execute: build polygon first")
+                self.sendUserAlert("cannot execute: build polygon first")
                 return
             assert len(self.points) > 2, str(len(self.points))
             message = CoverageTask()
@@ -133,6 +170,38 @@ class BackendNode:
                 message.target_polygon.points.append(new_point)
             self.pub.publish(message)
 
+        if cmd == "stop":
+            self.sendUserAlert("stop is not implemented")
+
+        if cmd == "reset":
+            rospy.loginfo("reset called")
+            self.polygon_is_built = False
+            self.points = []
+
+        if cmd == "set_desired_speed":
+            self.ui_state["curr_speed"] = float(js["desired_speed"])
+
+        if cmd == "set_pathgen_props":
+            self.pathgen_props["step_size"] = float(js["step_size"])
+            self.pathgen_props["angle"] = float(js["angle"])
+            self.pathgen_props["auto_angle"] = bool(js["auto_angle"])
+
+    def sendUserAlert(self, msg):
+        js = {
+            "error": msg
+        }
+        msg = std_msgs.msg.String()
+        msg.data = json.dumps(js)
+        self.ui_updates_pub.publish(msg)
+
+    def uiUpdatesTimerCb(self, arg0):
+        js = {
+            "state": self.ui_state
+        }
+        msg = std_msgs.msg.String()
+        msg.data = json.dumps(js)
+        self.ui_updates_pub.publish(msg)
+
     def get_current_pos(self):
         trans = self.tfBuffer.lookup_transform(self.map_frame, self.base_link_frame, rospy.Time())
         return trans.transform.translation.x, trans.transform.translation.y
@@ -144,7 +213,7 @@ class BackendNode:
         trg_x, trg_y = msg.pose.position.x, msg.pose.position.y
         message.target_pose.x = trg_x
         message.target_pose.y = trg_y
-        message.target_speed  = 1.0
+        message.target_speed  = self.ui_state["curr_speed"]
         message.turning_radius  = 1.0
         message.step_size  = 0.5
         self.pub_move_to_point.publish(message)

@@ -223,7 +223,7 @@ services:
 
     foxglove:
         image: kan-rt.ddns.net:8929/docker/foxglove:my
-        build: studio
+        build: ../apps/studio
         restart: no
         profiles:
             - all
