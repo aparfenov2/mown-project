@@ -20,6 +20,11 @@ docker login kan-rt.ddns.net:8929
     user: docker
     pwd: Engix_1835
 ```
+
+- установить git lfs
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+sudo apt-get install git-lfs
+
 - Сгенерить и добавить ssh ключ в аккаунт github чтобы склонировать репу с субмодулями
 ```
 ssh-keygen, add pub to repo
