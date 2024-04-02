@@ -260,6 +260,9 @@
         <include file="$(find foxglove_bridge)/launch/foxglove_bridge.launch">
             <arg name="port" value="$(arg rosbridge_port)" />
         </include>
+        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" >
+            <arg name="port" value="8080"/>
+        </include>
     </group>
 
     <group ns="rtabmap" if="$(arg rtabmap)">

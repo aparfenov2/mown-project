@@ -6,3 +6,4 @@ RUN apt-get update && apt-get install -y ros-noetic-gazebo-msgs ros-noetic-navig
 
 RUN apt-get update && apt-get install -y ros-$ROS_DISTRO-foxglove-bridge ros-noetic-foxglove-msgs
 RUN apt-get update && apt-get install -y ros-noetic-hector-gazebo-plugins
+RUN apt-get update && apt-get install -y ros-noetic-rosbridge-suite
