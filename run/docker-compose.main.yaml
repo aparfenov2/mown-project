@@ -155,7 +155,7 @@ services:
         image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
         build:
             context: ../../artifacts/core-dev-x86
-            dockerfile: ../../artifacts/core-dev-x86/Dockerfile
+            dockerfile: docker/core-dev-x86/Dockerfile
         command: >
             bash -c "
             PATH=/catkin_ws/src/ws_scripts/:$$PATH
@@ -171,7 +171,7 @@ services:
         image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
         build:
             context: ../../artifacts/core-dev-x86
-            dockerfile: ../../artifacts/core-dev-x86/Dockerfile
+            dockerfile: docker/core-dev-x86/Dockerfile
         command: >
             bash -c "
             PATH=/catkin_ws/src/ws_scripts/:$$PATH

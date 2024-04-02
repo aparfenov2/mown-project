@@ -1,4 +1,4 @@
-# ------- ROS core --------
+# ------- tensorrt env for ddrnet (obsolete) --------
 
 # FROM ubuntu:focal
 FROM nvidia/cudagl:11.0.3-devel-ubuntu20.04
@@ -51,12 +51,6 @@ ENV ROS_DISTRO noetic
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-ros-core=1.5.0-1* \
     && rm -rf /var/lib/apt/lists/*
-
-# setup entrypoint
-# COPY ./ros_entrypoint.sh /
-
-# ENTRYPOINT ["/ros_entrypoint.sh"]
-# CMD ["bash"]
 
 # ------- ROS base --------
 # install bootstrap tools
