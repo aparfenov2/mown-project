@@ -1,6 +1,6 @@
 # ------- google map node env --------
 
-FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-core
+FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-core-base
 
 
 RUN apt-get update && apt-get install -y firefox firefox-geckodriver

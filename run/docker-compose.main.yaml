@@ -139,9 +139,6 @@ services:
 
     backend:
         <<: *ros-client-base
-        image: kan-rt.ddns.net:8929/docker/ros-mower:google
-        build:
-            dockerfile: docker/Dockerfile:google
         command: >
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
             && . /cdir/ws/devel/setup.bash
@@ -152,7 +149,7 @@ services:
 
     planning_build:
         <<: *ros-image-base
-        image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
+        image: kan-rt.ddns.net:8929/docker/ros-mower:core-dev-x86
         build:
             context: ../artifacts/core-dev-x86
             dockerfile: ../docker/core-dev-x86/Dockerfile
@@ -168,7 +165,7 @@ services:
 
     planning:
         <<: *ros-client-base
-        image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
+        image: kan-rt.ddns.net:8929/docker/ros-mower:core-dev-x86
         build:
             context: ../artifacts/core-dev-x86
             dockerfile: ../docker/core-dev-x86/Dockerfile
@@ -217,8 +214,6 @@ services:
             roscore:
                 condition: service_healthy
             sim:
-                condition: service_healthy
-            costmap_demo:
                 condition: service_healthy
 
     foxglove:

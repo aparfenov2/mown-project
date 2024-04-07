@@ -9,7 +9,7 @@ up: gen_dc
 	docker compose $(UP) $(ARGS)
 
 down: gen_dc
-	docker compose $@ --remove-orphans
+	docker compose --profile all $@ --remove-orphans
 
 all: gen_dc download_segmodel
 	ROSARGS="world:=baylands" docker compose --profile backend_demo --profile costmap_demo $(UP)

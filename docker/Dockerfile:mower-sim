@@ -1,6 +1,6 @@
 # ------- ROS GUI tools, Gazebo and other stuff that requires opengl, nvidia drivers --------
 
-FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-gui
+FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-gui-base
 
 # install ros packages
 RUN apt-get update && apt-get install -y --no-install-recommends \

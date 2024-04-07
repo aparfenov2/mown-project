@@ -7,6 +7,8 @@ import std_msgs.msg
 from engix_msgs.msg import CoverageTask, DubinsPlanningTask
 from geometry_msgs.msg import PointStamped, PolygonStamped, Point32, PoseStamped
 
+import utm
+
 """
 interface Backend 2 for Flutter UI
 """
@@ -16,7 +18,6 @@ class BackendNode:
     def __init__(self):
         self.points = []
         self.pointsFrame = "unknown"
-        self.polygon_is_built = False
 
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
@@ -53,7 +54,6 @@ class BackendNode:
             "pathgen_props": self.pathgen_props
         }
 
-        rospy.Timer(rospy.Duration(0.1), self.visTimerCb)
         rospy.Timer(rospy.Duration(0.1), self.uiUpdatesTimerCb)
 
         rospy.Subscriber("/ui_flutter_in", std_msgs.msg.String, self.cmdUiCb)
@@ -69,10 +69,6 @@ class BackendNode:
         if cmd == "switch_op_mode":
             self.ui_state["op_mode_state"] = "auto" if js["displayed_value"] == "manual" else "manual"
 
-        if cmd == "add_poly":
-            if not self.polygon_is_built:
-                self.sendUserAlert("add_poly is not implemented. Finish building a poly")
-
         if cmd == "build_path":
             self.sendUserAlert("build_path is not implemented. Will be shown after Start.")
 
@@ -83,31 +79,8 @@ class BackendNode:
                 trg_x, trg_y = 0, 0                
                 self.exec_go_to_point(trg_x, trg_y)
 
-        if cmd == "start":
-            rospy.loginfo("emit execute msg")
-            if not self.polygon_is_built:
-                rospy.logerr("cannot execute: build polygon first")
-                self.sendUserAlert("cannot execute: build polygon first")
-                return
-            assert len(self.points) > 2, str(len(self.points))
-            message = CoverageTask()
-            message.header.stamp = rospy.get_rostime()
-            message.auto_angle = True
-            message.approximate = True
-            for p in self.points:
-                new_point = Point32()
-                new_point.x = p.x
-                new_point.y = p.y
-                message.target_polygon.points.append(new_point)
-            self.pub_mown_task.publish(message)
-
         if cmd == "stop":
             self.sendUserAlert("stop is not implemented")
-
-        if cmd == "reset":
-            rospy.loginfo("reset called")
-            self.polygon_is_built = False
-            self.points = []
 
         if cmd == "set_desired_speed":
             self.ui_state["curr_speed"] = float(js["desired_speed"])
@@ -137,6 +110,25 @@ class BackendNode:
         trans = self.tfBuffer.lookup_transform(self.map_frame, self.base_link_frame, rospy.Time())
         return trans.transform.translation.x, trans.transform.translation.y
 
+    def exec_coverage(self):
+        rospy.loginfo("emit execute msg")
+        if not self.polygon_is_built:
+            rospy.logerr("cannot execute: build polygon first")
+            self.sendUserAlert("cannot execute: build polygon first")
+            return
+        assert len(self.points) > 2, str(len(self.points))
+        message = CoverageTask()
+        message.header.stamp = rospy.get_rostime()
+        message.auto_angle = True
+        message.approximate = True
+        for p in self.points:
+            new_point = Point32()
+            new_point.x = p.x
+            new_point.y = p.y
+            message.target_polygon.points.append(new_point)
+        self.pub_mown_task.publish(message)
+
+
     def exec_go_to_point(self, trg_x, trg_y):
         message = DubinsPlanningTask()
         message.header.stamp = rospy.get_rostime()
@@ -148,9 +140,6 @@ class BackendNode:
         message.step_size  = 0.5
         self.pub_mown_task_move_to_point.publish(message)
         rospy.loginfo("Published DubinsPlanningTask msg, dist=%f, spd=%f", message.distance, message.target_speed)
-
-    def visTimerCb(self, arg0):
-        self.pub_mown_tasklishCurrentPoints()
 
     def main(self):
         rospy.spin()

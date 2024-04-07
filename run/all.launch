@@ -39,6 +39,7 @@
     <!-- rtabmap is supposed to be used in sim mode only to provide global merged pointcloud. In real robot ZED2 already provides the cloud. -->
     <arg name="rtabmap" default="false" />
     <arg name="backend" default="false" />
+    <arg name="backend_old" default="false" />
     <arg name="costmap_demo" default="false" />
 
     <!-- sim -->
@@ -261,7 +262,7 @@
             <arg name="port" value="$(arg rosbridge_port)" />
         </include>
         <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" >
-            <arg name="port" value="8080"/>
+            <arg name="port" value="8085"/>
         </include>
     </group>
 
@@ -367,7 +368,7 @@
 
 	</group>
 
-	<group if="$(arg backend)">
+	<group if="$(arg backend_old)">
 
 		<node pkg="backend" type="backend_node.py" name="backend_node" output="screen" >
             <param name="map_frame" value="odom" />
@@ -384,8 +385,29 @@
 		    <param name="z" value="19.95" />
 		    <param name="window_size" value="1920x1080" />
 		    <param name="resolution" value="0.05" />
-		    <remap from="fix" to="/gps/fix"/>
+		    <remap from="fix" to="/turtlebot/gps/fix"/>
 		</node>
+	</group>
+
+	<group if="$(arg backend)">
+
+		<node pkg="backend" type="backend_node2.py" name="backend_node" output="screen" >
+            <param name="map_frame" value="odom" />
+            <param name="base_link_frame" value="$(arg base_frame)" />
+        </node>
+<!-- 
+        <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
+
+            <param name="magnetic_declination_radians" value="0"/>
+        
+            <param name="yaw_offset" value="0"/>
+        
+            <remap from="/imu/data" to="/turtlebot/imu" />
+            <remap from="/gps/fix" to="/turtlebot/gps/fix" />
+            <remap from="/odometry/filtered" to="/turtlebot/odom" />
+        
+          </node>        
+ -->
 	</group>
 
 </launch>

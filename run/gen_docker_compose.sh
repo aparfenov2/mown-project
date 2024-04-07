@@ -26,4 +26,4 @@ for f in "${VOLUMES[@]}"; do
 done
 
 cat docker-compose.main.yaml >> $DCG
-xhost +
+xhost + || true

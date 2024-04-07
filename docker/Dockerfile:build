@@ -1,6 +1,6 @@
 # ------- Mower colcon build env --------
 
-FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-core
+FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-core-base
 
 
 # install ros packages

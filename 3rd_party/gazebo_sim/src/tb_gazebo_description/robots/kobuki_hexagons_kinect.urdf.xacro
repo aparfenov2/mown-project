@@ -82,10 +82,10 @@
             <updateRate>4.0</updateRate>
             <bodyName>gps_sensor</bodyName>
             <frameId>gps_sensor</frameId>
-            <topicName>/gps/fix</topicName>
+            <topicName>gps/fix</topicName>
             <velocityTopicName>/gps/fix_velocity</velocityTopicName>
-            <referenceLatitude>55.16444</referenceLatitude>
-            <referenceLongitude>61.436844</referenceLongitude>
+            <referenceLatitude>55.160006</referenceLatitude>
+            <referenceLongitude>61.362394</referenceLongitude>
             <referenceHeading>90</referenceHeading>
             <referenceAltitude>10</referenceAltitude>
             <offset>0 0 0</offset>
@@ -100,6 +100,56 @@
         </plugin>
     </gazebo>
 
+    <!-- ================== IMU Sensor ================= -->
+    <joint name="fixed_imu" type="fixed">
+        <parent link="base_link"/>
+        <child link="imu_sensor"/>
+    </joint>
+
+    <link name="imu_sensor">
+        <collision>
+            <origin xyz="0 0 ${gps_height/2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${gps_width} ${gps_width} ${gps_height}"/>
+            </geometry>
+        </collision>
+
+        <visual>
+            <origin xyz="0 0 ${gps_height/2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${gps_width} ${gps_width} ${gps_height}"/>
+            </geometry>
+            <material name="orange"/>
+        </visual>
+
+        <inertial>
+            <origin xyz="0 0 1" rpy="0 0 0"/>
+            <mass value="1"/>
+            <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+        </inertial>
+    </link>
+
+    <gazebo reference="imu_sensor">
+        <material>Gazebo/Orange</material>
+        <gravity>true</gravity>
+        <sensor name="imu_sensor" type="imu">
+          <always_on>true</always_on>
+          <update_rate>100</update_rate>
+          <visualize>true</visualize>
+          <topic>__default_topic__</topic>
+          <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+            <topicName>imu</topicName>
+            <bodyName>imu_sensor</bodyName>
+            <updateRateHZ>10.0</updateRateHZ>
+            <gaussianNoise>0.0</gaussianNoise>
+            <xyzOffset>0 0 0</xyzOffset>
+            <rpyOffset>0 0 0</rpyOffset>
+            <frameName>imu_sensor</frameName>
+            <initialOrientationAsReference>false</initialOrientationAsReference>
+          </plugin>
+          <pose>0 0 0 0 0 0</pose>
+        </sensor>
+      </gazebo>
 
     <xacro:kobuki/>
     <xacro:stack_hexagons parent="base_link"/>

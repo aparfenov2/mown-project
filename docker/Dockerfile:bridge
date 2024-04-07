@@ -1,6 +1,6 @@
 # ------- messsage defininitions for foxglove-bridge --------
 
-FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-core
+FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-core-base
 
 RUN apt-get update && apt-get install -y ros-noetic-gazebo-msgs ros-noetic-navigation
 

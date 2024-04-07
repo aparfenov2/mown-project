@@ -1,6 +1,6 @@
 # ------- pidnet pytorch env --------
 
-FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-gui
+FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-gui-base
 
 
 RUN apt-get update && apt-get install -y python3-pip
