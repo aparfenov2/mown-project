@@ -8,16 +8,18 @@ from engix_msgs.msg import CoverageTask, DubinsPlanningTask
 from geometry_msgs.msg import PointStamped, PolygonStamped, Point32, PoseStamped
 
 import utm
+from typing import Tuple
 
 """
 interface Backend 2 for Flutter UI
 """
 
+def convert_to_utm(latitude: float, longitude: float) -> Tuple[float, float]:
+    easting, northing, _, _ = utm.from_latlon(latitude, longitude)
+    return (easting, northing)
 
 class BackendNode:
     def __init__(self):
-        self.points = []
-        self.pointsFrame = "unknown"
 
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
@@ -75,8 +77,10 @@ class BackendNode:
         if cmd == "submit_task":
             task = js["task"]
             if "target_point" in task and task["target_point"] is not None:
-                # TODO: conv geo coords to local
-                trg_x, trg_y = 0, 0                
+                trg_x, trg_y = convert_to_utm(
+                    task["target_point"]["latitude"],
+                    task["target_point"]["longitude"]
+                    )
                 self.exec_go_to_point(trg_x, trg_y)
 
         if cmd == "stop":
@@ -110,23 +114,23 @@ class BackendNode:
         trans = self.tfBuffer.lookup_transform(self.map_frame, self.base_link_frame, rospy.Time())
         return trans.transform.translation.x, trans.transform.translation.y
 
-    def exec_coverage(self):
-        rospy.loginfo("emit execute msg")
+    def exec_coverage(self, points):
         if not self.polygon_is_built:
             rospy.logerr("cannot execute: build polygon first")
             self.sendUserAlert("cannot execute: build polygon first")
             return
-        assert len(self.points) > 2, str(len(self.points))
+        assert len(points) > 2, str(len(points))
         message = CoverageTask()
         message.header.stamp = rospy.get_rostime()
         message.auto_angle = True
         message.approximate = True
-        for p in self.points:
+        for p in points:
             new_point = Point32()
             new_point.x = p.x
             new_point.y = p.y
             message.target_polygon.points.append(new_point)
         self.pub_mown_task.publish(message)
+        rospy.loginfo("emit execute msg %s", str(message))
 
 
     def exec_go_to_point(self, trg_x, trg_y):
@@ -139,7 +143,7 @@ class BackendNode:
         message.turning_radius  = 1.0
         message.step_size  = 0.5
         self.pub_mown_task_move_to_point.publish(message)
-        rospy.loginfo("Published DubinsPlanningTask msg, dist=%f, spd=%f", message.distance, message.target_speed)
+        rospy.loginfo("Published DubinsPlanningTask msg %s", str(message))
 
     def main(self):
         rospy.spin()
