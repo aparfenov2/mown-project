@@ -30,7 +30,8 @@ x-ros-image-base: &ros-image-base
     image: kan-rt.ddns.net:8929/docker/ros-mower:mower-core
     build:
         dockerfile: docker/Dockerfile:mower-core
-    network_mode: host
+    networks:
+        - ros
     restart: no
     stop_grace_period: 1s
     working_dir: /cdir
@@ -210,6 +211,8 @@ services:
         profiles:
             - all
             - backend_demo
+        ports:
+            - 8085:8085
         depends_on:
             roscore:
                 condition: service_healthy
@@ -225,3 +228,6 @@ services:
             - backend_demo
         ports:
             - 8080:8080
+
+networks:
+  ros:

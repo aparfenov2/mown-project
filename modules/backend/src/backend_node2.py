@@ -75,13 +75,7 @@ class BackendNode:
             self.sendUserAlert("build_path is not implemented. Will be shown after Start.")
 
         if cmd == "submit_task":
-            task = js["task"]
-            if "target_point" in task and task["target_point"] is not None:
-                trg_x, trg_y = convert_to_utm(
-                    task["target_point"]["latitude"],
-                    task["target_point"]["longitude"]
-                    )
-                self.exec_go_to_point(trg_x, trg_y)
+            self.on_submit_task(js)
 
         if cmd == "stop":
             self.sendUserAlert("stop is not implemented")
@@ -94,7 +88,32 @@ class BackendNode:
             self.pathgen_props["angle"] = float(js["angle"])
             self.pathgen_props["auto_angle"] = bool(js["auto_angle"])
 
+    def on_submit_task(self, js):
+        task = js["task"]
+        if "target_point" in task and task["target_point"] is not None:
+            trg_x, trg_y = convert_to_utm(
+                    task["target_point"]["latitude"],
+                    task["target_point"]["longitude"]
+                    )
+            self.exec_go_to_point(trg_x, trg_y)
+            return
+        pts = []
+        if len(task["polygons"]) == 0:
+            self.sendUserAlert("len(polygons) == 0")
+            return
+        if len(task["polygons"]) > 1:
+            self.sendUserAlert("len(polygons) > 1. Using only 1st poly.")
+        class _A: pass
+        for poly in task["polygons"]:
+            for p in poly:
+                pp = _A()
+                pp.x, pp.y = convert_to_utm(p["latitude"], p["longitude"])
+                pts.append(pp)
+            break
+        self.exec_coverage(pts)
+
     def sendUserAlert(self, msg):
+        rospy.logerror("sending to user: %s", msg)
         js = {
             "error": msg
         }
@@ -115,10 +134,6 @@ class BackendNode:
         return trans.transform.translation.x, trans.transform.translation.y
 
     def exec_coverage(self, points):
-        if not self.polygon_is_built:
-            rospy.logerr("cannot execute: build polygon first")
-            self.sendUserAlert("cannot execute: build polygon first")
-            return
         assert len(points) > 2, str(len(points))
         message = CoverageTask()
         message.header.stamp = rospy.get_rostime()
