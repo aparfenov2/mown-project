@@ -92,8 +92,8 @@ class BackendNode:
         task = js["task"]
         if "target_point" in task and task["target_point"] is not None:
             trg_x, trg_y = convert_to_utm(
-                    task["target_point"]["latitude"],
-                    task["target_point"]["longitude"]
+                    task["target_point"]["coordinates"][1],
+                    task["target_point"]["coordinates"][0]
                     )
             self.exec_go_to_point(trg_x, trg_y)
             return
@@ -107,7 +107,7 @@ class BackendNode:
         for poly in task["polygons"]:
             for p in poly:
                 pp = _A()
-                pp.x, pp.y = convert_to_utm(p["latitude"], p["longitude"])
+                pp.x, pp.y = convert_to_utm(p["coordinates"][1], p["coordinates"][0])
                 pts.append(pp)
             break
         self.exec_coverage(pts)
