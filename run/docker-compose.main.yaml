@@ -15,6 +15,7 @@ x-common-env: &common-env
     PYTHONUNBUFFERED: 1
     ROSCONSOLE_FORMAT: "[$${severity}] [$${node}]: $${message}"
     GAZEBO_MODEL_PATH: /cdir/ws/src/gazebo_models
+    ROS_MASTER_URI: http://roscore:11311
 
 x-allow-gpu: &allow-gpu
     deploy:
@@ -30,7 +31,6 @@ x-ros-image-base: &ros-image-base
     image: kan-rt.ddns.net:8929/docker/ros-mower:mower-core
     build:
         dockerfile: docker/Dockerfile:mower-core
-    network_mode: host
     restart: no
     stop_grace_period: 1s
     working_dir: /cdir
