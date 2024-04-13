@@ -15,6 +15,7 @@ function build_all() {
     packages+="engix_utils "
     packages+="backend "
     packages+="coverage_path_planner "
+    packages+="patchworkpp "
     
     catkin build ${packages}
 }

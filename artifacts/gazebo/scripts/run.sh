@@ -7,7 +7,7 @@ rosdep update
 WORLD="empty"
 ROBOT="turtlebot"
 USE_GAZEBO_SIM_TIME="True"
-GUI="False"
+GUI="True"
 
 
 roslaunch simulator_launch gazebo.launch world:=$WORLD robot:=$ROBOT use_sim_time_in_gazebo:=$USE_GAZEBO_SIM_TIME gui:=$GUI
