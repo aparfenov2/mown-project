@@ -4,3 +4,4 @@
 **/ws/*
 !**/ws/src
 tmp/*
+data/*

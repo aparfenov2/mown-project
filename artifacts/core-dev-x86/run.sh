@@ -7,6 +7,7 @@ IMAGE_NAME="$IMAGE_NAME:$TAG"
 SCRIPTS_VOLUMES="$PWD/scripts/:/catkin_ws/scripts/"
 THIRD_PARTY_VOLUMES="$PWD/../../3rd_party/:/catkin_ws/src/3rd_party"
 WORK_SPASE_VOLUMES="$PWD/../../modules:/catkin_ws/src"
+DATA_VOLUMES="$PWD/../../data:/catkin_ws/data"
 
 docker run \
 	-d \
@@ -20,6 +21,7 @@ docker run \
 	-v $SCRIPTS_VOLUMES \
 	-v $WORK_SPASE_VOLUMES \
 	-v $THIRD_PARTY_VOLUMES \
+	-v $DATA_VOLUMES \
     $IMAGE_NAME
 
 docker exec $CONTAINER_NAME bash -c /catkin_ws/scripts/run_inside_container.sh

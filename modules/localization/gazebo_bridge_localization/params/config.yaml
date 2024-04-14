@@ -1,5 +1,5 @@
 topics:
-  odometry: '/ground_truth/state'
+  odometry: '/turtlebot/odom'
   localization: '/engix/localization'
 
 # source_frame: 'turtlebot/odom'
