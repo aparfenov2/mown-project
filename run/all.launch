@@ -395,19 +395,12 @@
             <param name="map_frame" value="odom" />
             <param name="base_link_frame" value="$(arg base_frame)" />
         </node>
-<!-- 
-        <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
-
-            <param name="magnetic_declination_radians" value="0"/>
-        
-            <param name="yaw_offset" value="0"/>
-        
-            <remap from="/imu/data" to="/turtlebot/imu" />
-            <remap from="/gps/fix" to="/turtlebot/gps/fix" />
-            <remap from="/odometry/filtered" to="/turtlebot/odom" />
-        
-          </node>        
- -->
-	</group>
+        <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
+            <remap from="cmd_vel_out" to="$(arg cmd_vel_topic)"/>
+            <remap from="tab_vel" to="/ui_flatter_vel"/>
+            <remap from="planning_vel" to="/move_controller/cmd_vel"/>
+            <rosparam file="/cdir/cmd_vel_mux.yaml" command="load"/>
+        </node>
+    </group>
 
 </launch>

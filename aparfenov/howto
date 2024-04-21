@@ -1,0 +1,13 @@
+<!-- 
+        <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
+
+            <param name="magnetic_declination_radians" value="0"/>
+        
+            <param name="yaw_offset" value="0"/>
+        
+            <remap from="/imu/data" to="/turtlebot/imu" />
+            <remap from="/gps/fix" to="/turtlebot/gps/fix" />
+            <remap from="/odometry/filtered" to="/turtlebot/odom" />
+        
+          </node>        
+ -->

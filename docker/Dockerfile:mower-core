@@ -3,3 +3,4 @@
 FROM kan-rt.ddns.net:8929/docker/ros-mower:mower-core-base
 
 RUN python3 -m pip install utm
+RUN apt update && apt install -y ros-noetic-twist-mux

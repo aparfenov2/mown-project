@@ -1,5 +1,5 @@
 topics:
-  twist: '/turtlebot/mobile_base/commands/velocity'
+  twist: '/move_controller/cmd_vel'
   path: '/global_planner/path'
   localization: '/engix/localization'
 
