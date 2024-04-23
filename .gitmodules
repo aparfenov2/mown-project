@@ -40,3 +40,6 @@
 [submodule "apps/studio"]
 	path = apps/studio
 	url = git@github.com:kantengri/studio.git
+[submodule "3rd_party/gazebo_models"]
+	path = 3rd_party/gazebo_models
+	url = http://kan-rt.ddns.net:8929/ap/gazebo_models.git
