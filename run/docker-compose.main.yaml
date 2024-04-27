@@ -15,6 +15,7 @@ x-common-env: &common-env
     PYTHONUNBUFFERED: 1
     ROSCONSOLE_FORMAT: "[$${severity}] [$${node}]: $${message}"
     GAZEBO_MODEL_PATH: /cdir/ws/src/gazebo_models
+    ROS_MASTER_URI: http://roscore:11311
 
 x-allow-gpu: &allow-gpu
     deploy:
@@ -30,7 +31,6 @@ x-ros-image-base: &ros-image-base
     image: kan-rt.ddns.net:8929/docker/ros-mower:mower-core
     build:
         dockerfile: docker/Dockerfile:mower-core
-    network_mode: host
     restart: no
     stop_grace_period: 1s
     working_dir: /cdir
@@ -139,9 +139,6 @@ services:
 
     backend:
         <<: *ros-client-base
-        image: kan-rt.ddns.net:8929/docker/ros-mower:google
-        build:
-            dockerfile: docker/Dockerfile:google
         command: >
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
             && . /cdir/ws/devel/setup.bash
@@ -152,10 +149,10 @@ services:
 
     planning_build:
         <<: *ros-image-base
-        image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
+        image: kan-rt.ddns.net:8929/docker/ros-mower:core-dev-x86
         build:
-            context: ../../artifacts/core-dev-x86
-            dockerfile: ../../artifacts/core-dev-x86/Dockerfile
+            context: ../artifacts/core-dev-x86
+            dockerfile: ../docker/core-dev-x86/Dockerfile
         command: >
             bash -c "
             PATH=/catkin_ws/src/ws_scripts/:$$PATH
@@ -168,10 +165,10 @@ services:
 
     planning:
         <<: *ros-client-base
-        image: kan-rt.ddns.net:8929/docker/ros-mower-core-dev-x86
+        image: kan-rt.ddns.net:8929/docker/ros-mower:core-dev-x86
         build:
-            context: ../../artifacts/core-dev-x86
-            dockerfile: ../../artifacts/core-dev-x86/Dockerfile
+            context: ../artifacts/core-dev-x86
+            dockerfile: ../docker/core-dev-x86/Dockerfile
         command: >
             bash -c "
             PATH=/catkin_ws/src/ws_scripts/:$$PATH
@@ -213,17 +210,17 @@ services:
         profiles:
             - all
             - backend_demo
+        ports:
+            - 8085:8085
         depends_on:
             roscore:
                 condition: service_healthy
             sim:
                 condition: service_healthy
-            costmap_demo:
-                condition: service_healthy
 
     foxglove:
         image: kan-rt.ddns.net:8929/docker/foxglove:my
-        build: studio
+        build: ../apps/studio
         restart: no
         profiles:
             - all

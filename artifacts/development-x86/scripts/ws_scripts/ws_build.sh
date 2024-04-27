@@ -15,6 +15,9 @@ function build_all() {
     packages+="engix_utils "
     packages+="backend "
     packages+="coverage_path_planner "
+    packages+="simulator_launch "
+    packages+="gazebo_bridge_localization "
+    packages+="backend "
     
     catkin build ${packages}
 }

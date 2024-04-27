@@ -39,6 +39,7 @@
     <!-- rtabmap is supposed to be used in sim mode only to provide global merged pointcloud. In real robot ZED2 already provides the cloud. -->
     <arg name="rtabmap" default="false" />
     <arg name="backend" default="false" />
+    <arg name="backend_old" default="false" />
     <arg name="costmap_demo" default="false" />
 
     <!-- sim -->
@@ -260,6 +261,9 @@
         <include file="$(find foxglove_bridge)/launch/foxglove_bridge.launch">
             <arg name="port" value="$(arg rosbridge_port)" />
         </include>
+        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" >
+            <arg name="port" value="8085"/>
+        </include>
     </group>
 
     <group ns="rtabmap" if="$(arg rtabmap)">
@@ -364,7 +368,7 @@
 
 	</group>
 
-	<group if="$(arg backend)">
+	<group if="$(arg backend_old)">
 
 		<node pkg="backend" type="backend_node.py" name="backend_node" output="screen" >
             <param name="map_frame" value="odom" />
@@ -381,8 +385,22 @@
 		    <param name="z" value="19.95" />
 		    <param name="window_size" value="1920x1080" />
 		    <param name="resolution" value="0.05" />
-		    <remap from="fix" to="/gps/fix"/>
+		    <remap from="fix" to="/turtlebot/gps/fix"/>
 		</node>
 	</group>
+
+	<group if="$(arg backend)">
+
+		<node pkg="backend" type="backend_node2.py" name="backend_node" output="screen" >
+            <param name="map_frame" value="odom" />
+            <param name="base_link_frame" value="$(arg base_frame)" />
+        </node>
+        <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
+            <remap from="cmd_vel_out" to="$(arg cmd_vel_topic)"/>
+            <remap from="tab_vel" to="/ui_flatter_vel"/>
+            <remap from="planning_vel" to="/move_controller/cmd_vel"/>
+            <rosparam file="/cdir/cmd_vel_mux.yaml" command="load"/>
+        </node>
+    </group>
 
 </launch>

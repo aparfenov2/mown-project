@@ -20,9 +20,9 @@
             <arg name="world" value="$(arg world)"/>
         </include> -->
 
-        <node name="gazebo_bridge_localization" pkg="gazebo_bridge_localization" type="turtlebot_gps_localization.py" output="screen">
+        <!-- <node name="gazebo_bridge_localization" pkg="gazebo_bridge_localization" type="turtlebot_gps_localization.py" output="screen">
             <rosparam command="load" file="$(find gazebo_bridge_localization)/params/config.yaml" />
-        </node>
+        </node> -->
     </group>
 
     <group if="$(arg teleop)">

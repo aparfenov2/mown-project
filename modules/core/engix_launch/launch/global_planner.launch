@@ -1,7 +1,7 @@
 <launch>
     <arg name="config"/>
 
-    <node name="global_planner" pkg="global_planner" type="main.py">
+    <node name="global_planner" pkg="global_planner" type="main.py"  output="screen">
         <rosparam command="load" file="$(find global_planner)/params/$(arg config)/config.yaml" />
     </node>
 

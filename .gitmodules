@@ -16,9 +16,6 @@
 [submodule "all/ws/src/velodyne_simulator"]
 	path = 3rd_party/velodyne_simulator
 	url = https://bitbucket.org/DataspeedInc/velodyne_simulator.git
-[submodule "3rd_party/gazebo_models"]
-	path = 3rd_party/gazebo_models
-	url = git@github.com:osrf/gazebo_models.git
 [submodule "3rd_party/tracking_pid"]
 	path = 3rd_party/tracking_pid
 	url = git@github.com:nobleo/tracking_pid.git
@@ -43,3 +40,6 @@
 [submodule "apps/studio"]
 	path = apps/studio
 	url = git@github.com:kantengri/studio.git
+[submodule "3rd_party/gazebo_models"]
+	path = 3rd_party/gazebo_models
+	url = http://kan-rt.ddns.net:8929/ap/gazebo_models.git

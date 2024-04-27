@@ -1,7 +1,7 @@
-# ------- tensorrt env for ddrnet (obsolete) --------
+# ------- Mower core packages with GUI, assuming nvidia acceleration required --------
+# also base image for mower-sim, pytorch
 
-# FROM ubuntu:focal
-FROM nvidia/cudagl:11.0.3-devel-ubuntu20.04
+FROM nvidia/cudagl:11.4.1-devel-ubuntu20.04
 
 RUN rm /etc/apt/sources.list.d/cuda.list
 RUN echo "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64 /" | tee /etc/apt/sources.list.d/cuda.list
@@ -81,12 +81,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-desktop=1.5.0-1*
 
-# install ros packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-noetic-desktop-full=1.5.0-1*
-
-# ddrnet
-ARG version="8.0.0-1+cuda11.0"
-RUN apt-get update && apt-get install -y libnvinfer8=${version} libnvonnxparsers8=${version} libnvparsers8=${version} libnvinfer-plugin8=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python3-libnvinfer=${version}
-RUN dpkg -l | grep TensorRT
+# ANYbotics/elevation_mapping
+RUN apt-get update && apt-get install -y ros-noetic-octomap-msgs
 

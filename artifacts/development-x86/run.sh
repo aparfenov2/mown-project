@@ -9,12 +9,14 @@ THIRD_PARTY_VOLUMES="$PWD/../../3rd_party/:/catkin_ws/src/3rd_party"
 WORK_SPASE_VOLUMES="$PWD/../../modules:/catkin_ws/src"
 DATA_VOLUMES="$PWD/../../data:/catkin_ws/data"
 
+xhost +local:root
 docker run \
 	-d \
 	-it \
 	--net=host \
 	--name $CONTAINER_NAME \
 	--gpus all \
+	--volume /dev:/dev \
 	-v /tmp/.X11-unix:/tmp/.X11-unix \
 	-e DISPLAY=$DISPLAY \
 	-e QT_X11_NO_MITSHM=1 \

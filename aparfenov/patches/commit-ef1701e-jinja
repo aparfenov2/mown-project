@@ -1,0 +1,559 @@
+From ef1701ea0754387ce18704695ed5045a335ce6be Mon Sep 17 00:00:00 2001
+From: "Aleksey.Parfenov" <Aleksey.Parfenov@waveaccess.global>
+Date: Sat, 28 Oct 2023 11:21:33 +0500
+Subject: better docker-compose.yaml without dependencies
+
+
+diff --git a/aparfenov/all/.gitignore b/aparfenov/all/.gitignore
+index 35f78b1..5f07bc7 100644
+--- a/aparfenov/all/.gitignore
++++ b/aparfenov/all/.gitignore
+@@ -1 +1 @@
+-docker-compose.yaml
++_dc-generated.yaml
+diff --git a/aparfenov/all/_run_in_docker.sh b/aparfenov/all/_run_in_docker.sh
+deleted file mode 120000
+index cb735a9..0000000
+--- a/aparfenov/all/_run_in_docker.sh
++++ /dev/null
+@@ -1 +0,0 @@
+-../docker/_run_in_docker.sh
+\ No newline at end of file
+diff --git a/aparfenov/all/dc.sh b/aparfenov/all/dc.sh
+index b750277..1caf6f1 100755
+--- a/aparfenov/all/dc.sh
++++ b/aparfenov/all/dc.sh
+@@ -1,18 +1,46 @@
+-python gen_docker_compose.py
+ 
+ [ -z "$1" ] && {
+     echo specify up [service_name] or down [something]
+     exit 1
+ }
+ 
++VOLUMES=()
++for f in $(find ws/src -type l); do
++    VOLUMES+=("$(readlink -f $f):/cdir/$f")
++done
++
++[ -e "data" ] && {
++    VOLUMES+=("$(readlink -f data):/cdir/data")
++}
++DCG="_dc-generated.yaml"
++echo "version: \"3.9\"" > $DCG
++echo "x-common-mounts: &common-mounts" >> $DCG
++echo "    - ./.ros:/root/.ros" >> $DCG
++echo "    - /dev:/dev" >> $DCG
++echo "    - ./:/cdir" >> $DCG
++echo "    - /home/.gazebo/models:/root/.gazebo/models" >> $DCG
++
++for f in "${VOLUMES[@]}"; do
++    echo "    - $f" >> $DCG
++done
++
++cat docker-compose.yaml >> $DCG
++
++DOCKER_COMPOSE="docker-compose -f $DCG"
++
+ [ "$1" == "up" ] && {
+     shift
+-    docker-compose up --no-recreate $@
++    ${DOCKER_COMPOSE} up --no-recreate $@
+     exit $?
+ }
+ [ "$1" == "down" ] && {
+     shift
+-    docker-compose down --remove-orphans $@
++    ${DOCKER_COMPOSE} down --remove-orphans $@
++    exit $?
++}
++[ "$1" == "run" ] && {
++    shift
++    ${DOCKER_COMPOSE} run --rm $@
+     exit $?
+ }
+-docker-compose $@
++${DOCKER_COMPOSE} $@
+diff --git a/aparfenov/all/dev_build.sh b/aparfenov/all/dev_build.sh
+deleted file mode 100755
+index e7fb178..0000000
+--- a/aparfenov/all/dev_build.sh
++++ /dev/null
+@@ -1,32 +0,0 @@
+-#!/bin/bash
+-DOCKER_IMAGE_NAME=$(cat docker/image)
+-DOCKER_CONTAINER_NAME=$(cat docker/image)
+-docker stop $DOCKER_CONTAINER_NAME || true && docker rm $DOCKER_CONTAINER_NAME || true
+-
+-docker build -t $(cat docker/image) docker/
+-SCRIPTS_FOLDER='../scripts'
+-
+-VOLUMES=()
+-for f in $(find ws/src -type l); do
+-	ff=${f:7}
+-    VOLUMES+=("-v $(readlink -f $f):/catkin_ws/src/$ff")
+-done
+-
+-for file in "$SCRIPTS_FOLDER"/*; do
+-	ff=${file:11}
+-	chmod +x $file
+-	VOLUMES+=("-v $(readlink -f $file):/usr/bin/$ff")
+-
+-done
+-sudo xhost +local:root
+-
+-docker run \
+-	-it \
+-	-p 8088:8088 \
+-	--name $DOCKER_CONTAINER_NAME \
+-	--gpus all \
+-	-v /tmp/.X11-unix:/tmp/.X11-unix \
+-	-e DISPLAY=$DISPLAY \
+-	-e QT_X11_NO_MITSHM=1 \
+-	${VOLUMES[@]} \
+-    $DOCKER_IMAGE_NAME bash
+diff --git a/aparfenov/all/dev_start.sh b/aparfenov/all/dev_start.sh
+deleted file mode 100755
+index 1903b17..0000000
+--- a/aparfenov/all/dev_start.sh
++++ /dev/null
+@@ -1,10 +0,0 @@
+-#!/bin/bash
+-container_name=$(cat docker/image)
+-
+-if [ "$( docker container inspect -f '{{.State.Running}}' $container_name )" == "false" ]; then
+-    echo Start $container_name ...
+-    xhost +local:root
+-    docker start $container_name
+-fi
+-
+-docker exec -ti $container_name bash
+\ No newline at end of file
+diff --git a/aparfenov/all/docker-compose.yaml b/aparfenov/all/docker-compose.yaml
+new file mode 100644
+index 0000000..230673d
+--- /dev/null
++++ b/aparfenov/all/docker-compose.yaml
+@@ -0,0 +1,151 @@
++
++x-common-env: &common-env
++    DISPLAY:
++    NVIDIA_DRIVER_CAPABILITIES: all
++    /tmp/.X11-unix: /tmp/.X11-unix:rw
++    PYTHONPYCACHEPREFIX: /cdir/ws/pycache/
++    ROSCONSOLE_FORMAT: "[${severity}] [${node}]: ${message}"
++    GAZEBO_MODEL_PATH: /cdir/ws/src/gazebo_models
++    ROBOT: turtlebot
++
++x-allow-gpu: &allow-gpu
++    privileged: true
++    deploy:
++        resources:
++            reservations:
++                devices:
++                    - driver: nvidia
++                      count: 1
++                      capabilities: [gpu]
++
++x-common-ros-image: &common-ros-image
++    image: ros-mower:core
++    build: docker
++    network_mode: host
++    restart: no
++    stop_grace_period: 1s
++    working_dir: /cdir
++    entrypoint: ""
++    volumes:
++        *common-mounts
++
++x-depends-on-roscore: &depends-on-roscore
++    roscore:
++        condition: service_healthy
++
++services:
++    build_ws:
++        <<: *common-ros-image
++        working_dir: /cdir/ws
++        environment:
++            <<: *common-env
++        command: >
++            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
++            && catkin config \
++            --extend /opt/ros/$$ROS_DISTRO \
++            --cmake-args \
++            -DCMAKE_BUILD_TYPE=Release
++            && catkin build
++            "
++        profiles:
++            - optional
++
++    roscore:
++        <<: *common-ros-image
++        environment:
++            <<: *common-env
++        command: >
++            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
++            && . /cdir/ws/devel/setup.bash
++            && roscore"
++        profiles:
++            - optional
++            - backend_demo
++        healthcheck:
++            test: ["CMD", "curl", "http://localhost:11311"]
++            interval: 2s
++            timeout: 5s
++            retries: 5
++
++    sim:
++        <<: [*common-ros-image, *allow-gpu]
++
++        command: >
++            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
++            && . /cdir/ws/devel/setup.bash
++            && roslaunch /cdir/all.launch sim:=true robot:=$$ROBOT"
++        profiles:
++            - optional
++            - backend_demo
++        environment:
++            <<: *common-env
++        depends_on:
++            <<: *depends-on-roscore
++
++    rviz:
++        <<: [*common-ros-image, *allow-gpu]
++
++        command: >
++            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
++            && . /cdir/ws/devel/setup.bash
++            && roslaunch /cdir/all.launch rviz:=true robot:=$$ROBOT"
++        profiles:
++            - optional
++        environment:
++            <<: *common-env
++        depends_on:
++            <<: *depends-on-roscore
++
++    teleop:
++        <<: [*common-ros-image, *allow-gpu]
++        # run with docker-compose run --rm teleop to attach console
++        command: >
++            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
++            && . /cdir/ws/devel/setup.bash
++            && roslaunch /cdir/all.launch teleop:=true robot:=$$ROBOT"
++        profiles:
++            - optional
++        environment:
++            <<: *common-env
++        depends_on:
++            <<: *depends-on-roscore
++
++    backend:
++        <<: [*common-ros-image, *allow-gpu]
++
++        command: >
++            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
++            && . /cdir/ws/devel/setup.bash
++            && roslaunch /cdir/all.launch backend:=true robot:=$$ROBOT"
++        profiles:
++            - optional
++            - backend_demo
++        environment:
++            <<: *common-env
++        depends_on:
++            <<: *depends-on-roscore
++
++    rosbridge:
++        <<: [*common-ros-image, *allow-gpu]
++
++        command: >
++            bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
++            && . /cdir/ws/devel/setup.bash
++            && roslaunch /cdir/all.launch rosbridge:=true"
++        profiles:
++            - optional
++            - backend_demo
++        environment:
++            <<: *common-env
++        depends_on:
++            <<: *depends-on-roscore
++
++    foxglove:
++        image: foxglove:my
++        build: studio
++        restart: no
++        profiles:
++            - optional
++            - backend_demo
++        ports:
++            - 8080:8080
+diff --git a/aparfenov/all/docker-compose.yaml.jinja2 b/aparfenov/all/docker-compose.yaml.jinja2
+deleted file mode 100644
+index 5467962..0000000
+--- a/aparfenov/all/docker-compose.yaml.jinja2
++++ /dev/null
+@@ -1,117 +0,0 @@
+-version: "3.9"
+-
+-# ---------------------------------------------------------------------------------------
+-# ----------------- GENERATED FROM TEMPLATE docker-compose.yaml.jinja2 ------------------
+-# -------------------------------- DO NOT EDIT !-----------------------------------------
+-# ---------------------------------------------------------------------------------------
+-x-common-env: &common-env
+-    DISPLAY:
+-    NVIDIA_DRIVER_CAPABILITIES: all
+-    /tmp/.X11-unix: /tmp/.X11-unix:rw
+-    PYTHONPYCACHEPREFIX: /cdir/ws/pycache/
+-    ROSCONSOLE_FORMAT: "[${severity}] [${node}]: ${message}"
+-    GAZEBO_MODEL_PATH: /cdir/ws/src/gazebo_models
+-
+-x-common-mounts: &common-mounts
+-    - ./.ros:/root/.ros
+-    - /dev:/dev
+-    - ./:/cdir
+-    - /home/.gazebo/models:/root/.gazebo/models
+-    {% for p in bind_paths -%}
+-    - {{p}}
+-    {% endfor %}
+-
+-x-allow-gpu: &allow-gpu
+-    privileged: true
+-    deploy:
+-        resources:
+-            reservations:
+-                devices:
+-                    - driver: nvidia
+-                      count: 1
+-                      capabilities: [gpu]
+-
+-x-common-ros-image: &common-ros-image
+-    image: ros-mower:core
+-    build: docker
+-    network_mode: host
+-    restart: no
+-    stop_grace_period: 1s
+-    working_dir: /cdir
+-    entrypoint: ""
+-
+-x-depends-on-roscore: &depends-on-roscore
+-    roscore:
+-        condition: service_healthy
+-
+-{% macro declare_ros_service(name, caller='') %}
+-    {{name}}:
+-        <<: [*common-ros-image, *allow-gpu]
+-        {{caller()}}
+-        environment:
+-            <<: *common-env
+-        volumes:
+-            *common-mounts
+-        depends_on:
+-            <<: *depends-on-roscore
+-{%- endmacro -%}
+-
+-services:
+-    roscore:
+-        <<: *common-ros-image
+-        environment:
+-            <<: *common-env
+-        volumes:
+-            *common-mounts
+-        command: bash -c "./run_cmd.sh --inner roscore"
+-        profiles:
+-            - optional
+-            - backend_demo
+-        healthcheck:
+-            test: ["CMD", "curl", "http://localhost:11311"]
+-            interval: 2s
+-            timeout: 5s
+-            retries: 5
+-
+-{%- call declare_ros_service('sim') %}
+-        command: bash -c "./run_all.sh --inner --sim"
+-        profiles:
+-            - optional
+-            - backend_demo
+-{%- endcall %}
+-
+-{%- call declare_ros_service('rviz') %}
+-        command: bash -c "./run_all.sh --inner --rviz"
+-        profiles:
+-            - optional
+-{%- endcall %}
+-
+-{%- call declare_ros_service('teleop') %}
+-        command: bash -c "./run_all.sh --inner --teleop"
+-        profiles:
+-            - optional
+-{%- endcall %}
+-
+-{%- call declare_ros_service('backend') %}
+-        command: bash -c "./run_all.sh --inner backend:=true"
+-        profiles:
+-            - optional
+-            - backend_demo
+-{%- endcall %}
+-
+-{%- call declare_ros_service('rosbridge') %}
+-        command: bash -c "./run_all.sh --inner --rosbridge"
+-        profiles:
+-            - optional
+-            - backend_demo
+-{%- endcall %}
+-
+-    foxglove:
+-        image: foxglove:my
+-        build: studio
+-        restart: no
+-        profiles:
+-            - optional
+-            - backend_demo
+-        ports:
+-            - 8080:8080
+diff --git a/aparfenov/all/gen_docker_compose.py b/aparfenov/all/gen_docker_compose.py
+deleted file mode 100644
+index fac5d1c..0000000
+--- a/aparfenov/all/gen_docker_compose.py
++++ /dev/null
+@@ -1,17 +0,0 @@
+-import os
+-from jinja2 import Environment, FileSystemLoader
+-
+-environment = Environment(loader=FileSystemLoader("./"))
+-template = environment.get_template("docker-compose.yaml.jinja2")
+-
+-bind_paths = []
+-
+-for fn in os.listdir("ws/src"):
+-    rfn = os.path.realpath("ws/src/" + fn)
+-    bind_paths += [f"{rfn}:/cdir/ws/src/{fn}"]
+-
+-content = template.render(
+-    bind_paths=bind_paths
+-    )
+-with open("docker-compose.yaml", mode="w", encoding="utf-8") as message:
+-    message.write(content)
+diff --git a/aparfenov/all/requirements.txt b/aparfenov/all/requirements.txt
+deleted file mode 100644
+index 8ce973e..0000000
+--- a/aparfenov/all/requirements.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-Jinja2
+diff --git a/aparfenov/all/run_this.sh b/aparfenov/all/run_this.sh
+deleted file mode 120000
+index 637a3da..0000000
+--- a/aparfenov/all/run_this.sh
++++ /dev/null
+@@ -1 +0,0 @@
+-run_all.sh
+\ No newline at end of file
+diff --git a/aparfenov/all/run_webviz.sh b/aparfenov/all/run_webviz.sh
+deleted file mode 100755
+index 30f3ddb..0000000
+--- a/aparfenov/all/run_webviz.sh
++++ /dev/null
+@@ -1,7 +0,0 @@
+-WEBVIZ_DOCKER_NAME=webviz
+-
+-if [[ "$(docker images -q cruise/webviz 2> /dev/null)" == "" ]]; then
+-    docker run -p 8080:8080 --name $WEBVIZ_DOCKER_NAME cruise/webviz
+-else
+-    docker start WEBVIZ_DOCKER_NAME
+-fi
+\ No newline at end of file
+diff --git a/aparfenov/all/test_run_all.sh b/aparfenov/all/test_run_all.sh
+deleted file mode 100755
+index 3d189a1..0000000
+--- a/aparfenov/all/test_run_all.sh
++++ /dev/null
+@@ -1,52 +0,0 @@
+-
+-name='sleepy_mendeleev'
+-
+-if [ ! "$(docker ps -q -f name=$name)" ]; then
+-    if [ "$(docker ps -aq -f status=exited -f name=$name)" ]; then
+-        # cleanup
+-        docker rm $name
+-    fi
+-    # # run your container
+-    # docker run -d --name <name> my-docker-image
+-fi
+-
+-# XSOCK=/tmp/.X11-unix
+-# XAUTH=/tmp/.docker.xauth
+-# touch $XAUTH
+-# xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
+-
+-# docker run -it \
+-#     -e DISPLAY=$DISPLAY \
+-#     -v /tmp/.X11-unix:/tmp/.X11-unix \
+-#     -v `pwd`:/catkin_ws/src \
+-#     --name sleepy_mendeleev \
+-#     ros-mown bash
+-    # --env="DISPLAY=$DISPLAY" \
+-    # --env="QT_X11_NO_MITSHM=1" \
+-    # --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+-    # --env="XAUTHORITY=$XAUTH" \
+-    # --volume="$XAUTH:$XAUTH" \
+-    # --net=host \
+-    # --privileged \
+-    # -v `pwd`:/catkin_ws/src \
+-    # --name sleepy_mendeleev \
+-    # ros-mown bash
+-
+-VOLUMES=()
+-for f in $(find ws/src -type l); do
+-    echo $f 
+-    VOLUMES+=("-v $(readlink -f $f):/catkin_ws/src/${f:7}")
+-done
+-
+-sudo xhost +local:root
+-
+-docker run \
+-	--rm \
+-	-it \
+-	--gpus all \
+-	-v /tmp/.X11-unix:/tmp/.X11-unix \
+-	-e DISPLAY=$DISPLAY \
+-	-e QT_X11_NO_MITSHM=1 \
+-    ${VOLUMES[@]} \
+-    --name $name \
+-    ros-mown bash
+\ No newline at end of file
+diff --git a/aparfenov/all/try_build.sh b/aparfenov/all/try_build.sh
+deleted file mode 100755
+index efaae70..0000000
+--- a/aparfenov/all/try_build.sh
++++ /dev/null
+@@ -1,31 +0,0 @@
+-set -e
+-
+-[ "$1" == "--inner" ] && {
+-    shift
+-    . "/opt/ros/$ROS_DISTRO/setup.bash"
+-    export PYTHONPYCACHEPREFIX="/cdir/pycache/"
+-
+-    set -ex
+-    pushd $PWD
+-    cd /cdir/ws 
+-    # catkin_make
+-    catkin config \
+-      --extend /opt/ros/$ROS_DISTRO \
+-      --cmake-args \
+-        -DCMAKE_BUILD_TYPE=Release
+-    catkin build $@
+-    popd
+-
+-    exit 0
+-}
+-
+-
+-VOLUMES=()
+-for f in $(find ws/src -type l); do
+-    VOLUMES+=("-v $(readlink -f $f):/cdir/$f")
+-done
+-bash _run_in_docker.sh --script $0 \
+-    ${VOLUMES[@]} \
+-    $@
+-
+-# docker run -ti --rm --network=host -v $PWD:/cdir ros-mower $@

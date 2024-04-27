@@ -1,0 +1,13 @@
+topics:
+-
+  name    : tablet
+  topic   : tab_vel
+  timeout : 0.5
+  priority: 100
+-
+  name    : planning
+  topic   : planning_vel
+  timeout : 0.5
+  priority: 10
+
+locks: []
