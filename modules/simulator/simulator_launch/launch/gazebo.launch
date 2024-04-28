@@ -48,6 +48,11 @@
       <param name="publish_frequency" type="double" value="50.0" />
       <!-- <param name="base_frame" value="$(arg name)/base_link"/>
       <param name="tf_prefix" value="$(arg name)"/> -->
+      
+    </node>
+
+    <node name="gazebo_bridge_localization" pkg="gazebo_bridge_localization" type="turtlebot_tf_localization.py" output="screen">
+        <rosparam command="load" file="$(find gazebo_bridge_localization)/params/config.yaml" />
     </node>
 
 </launch>

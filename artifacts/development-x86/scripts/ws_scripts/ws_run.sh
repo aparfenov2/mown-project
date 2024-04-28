@@ -1,7 +1,12 @@
 
 function run_sim() {
     . ws_source.sh
-    roslaunch engix_launch main.launch sim:=True robot:=turtlebot world:=empty
+    WORLD="empty"
+    ROBOT="turtlebot"
+    USE_GAZEBO_SIM_TIME="True"
+    GUI="False"
+
+    roslaunch simulator_launch gazebo.launch world:=$WORLD robot:=$ROBOT use_sim_time_in_gazebo:=$USE_GAZEBO_SIM_TIME gui:=$GUI
 }
 
 function run_planning() {
@@ -46,6 +51,12 @@ function run_backend() {
 function main() {
     if [ "$#" -eq 1 ]; then
         case $1 in
+        --roscore)
+            echo "Run roscore"
+            . ws_source.sh
+            roscore
+            ;;
+    
         --sim)
             echo "Run simulator"
             run_sim

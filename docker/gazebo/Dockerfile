@@ -94,6 +94,6 @@ RUN apt install -y ros-noetic-turtlebot3-msgs
 RUN apt install -y ros-noetic-turtlebot3
 RUN apt install -y ros-noetic-turtlebot3-simulations
 
-RUN apt-get update && apt-get install -y python3-catkin-tools
+RUN apt-get update && apt-get install -y python3-catkin-tools ros-noetic-hector-gazebo-plugins
 
 WORKDIR /catkin_ws

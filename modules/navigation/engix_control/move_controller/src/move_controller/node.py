@@ -77,6 +77,9 @@ class ControlNode(AbstractNode):
             speeds[-i] = min((i - 1) * self.d_linear_velocity, speeds[-i])
 
         return speeds
+    
+    def work(self):
+        self.control()
 
     def control(self):
         lin_vel, ang_vel = self._controller.control(self._frame)
