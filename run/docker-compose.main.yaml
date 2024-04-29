@@ -14,7 +14,7 @@ x-common-env: &common-env
     PYTHONPYCACHEPREFIX: /cdir/ws/pycache/
     PYTHONUNBUFFERED: 1
     ROSCONSOLE_FORMAT: "[$${severity}] [$${node}]: $${message}"
-    GAZEBO_MODEL_PATH: /cdir/ws/src/gazebo_models
+    GAZEBO_MODEL_PATH: /cdir/ws_planning/src/3rd_party/gazebo_models
     ROS_MASTER_URI: http://roscore:11311
 
 x-allow-gpu: &allow-gpu
@@ -84,12 +84,12 @@ services:
 
     sim:
         <<: *ros-client-base
-        image: kan-rt.ddns.net:8929/docker/ros-mower:mower-sim
+        image: kan-rt.ddns.net:8929/docker/ros-mower:development-x86
         build:
-            dockerfile: docker/Dockerfile:mower-sim
+            context: docker/development-x86
         command: >
             bash -c ". /opt/ros/$$ROS_DISTRO/setup.bash
-            && . /cdir/ws/devel/setup.bash
+            && . /cdir/ws_planning/devel/setup.bash
             && roslaunch simulator_launch gazebo.launch $ROSARGS"
         profiles:
             - all
@@ -149,10 +149,9 @@ services:
 
     planning_build:
         <<: *ros-image-base
-        image: kan-rt.ddns.net:8929/docker/ros-mower:core-dev-x86
+        image: kan-rt.ddns.net:8929/docker/ros-mower:development-x86
         build:
-            context: ../artifacts/core-dev-x86
-            dockerfile: ../docker/core-dev-x86/Dockerfile
+            context: docker/development-x86
         command: >
             bash -c "
             PATH=/catkin_ws/src/ws_scripts/:$$PATH
@@ -165,10 +164,9 @@ services:
 
     planning:
         <<: *ros-client-base
-        image: kan-rt.ddns.net:8929/docker/ros-mower:core-dev-x86
+        image: kan-rt.ddns.net:8929/docker/ros-mower:development-x86
         build:
-            context: ../artifacts/core-dev-x86
-            dockerfile: ../docker/core-dev-x86/Dockerfile
+            context: docker/development-x86
         command: >
             bash -c "
             PATH=/catkin_ws/src/ws_scripts/:$$PATH

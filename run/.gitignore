@@ -2,3 +2,5 @@
 !**/ws_planning/src
 
 docker-compose.yaml
+data
+
