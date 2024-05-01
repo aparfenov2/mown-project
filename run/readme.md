@@ -82,3 +82,11 @@ make backend_demo
 
 - Для просмотра карты сегментации в foxglove включить отображение карты /seg_costmap/costmap/costmap
     - При обнаружении дороги она будет отображена как препятствие на карте.
+
+
+## Проблемы, FAQ
+3rd_party/gazebo_models не содержит мир baylands
+git submodule update --init --recursive
+cd 3rd_party/gazebo_models
+git fetch --all
+git reset --hard origin/master

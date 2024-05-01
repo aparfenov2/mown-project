@@ -7,6 +7,7 @@
     - /tmp/.X11-unix:/tmp/.X11-unix:rw
     - ~/.gazebo/models:/root/.gazebo/models
     - ./ws_planning:/catkin_ws
+    - ./ws_planning/src/modules/navigation/engix_control/move_controller/params/gazebo_turtlebot_ui:/catkin_ws/src/modules/navigation/engix_control/move_controller/params/gazebo_turtlebot
 
 x-common-env: &common-env
     DISPLAY:

@@ -3,7 +3,7 @@ topics:
   name    : tablet
   topic   : tab_vel
   timeout : 0.5
-  priority: 100
+  priority: 15
 -
   name    : planning
   topic   : planning_vel

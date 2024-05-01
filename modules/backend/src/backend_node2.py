@@ -4,6 +4,7 @@ import json
 import tf2_ros
 
 import std_msgs.msg
+import nav_msgs.msg
 from engix_msgs.msg import CoverageTask, DubinsPlanningTask
 from geometry_msgs.msg import PointStamped, PolygonStamped, Point32, PoseStamped
 
@@ -15,21 +16,24 @@ interface Backend 2 for Flutter UI
 """
 
 
-def convert_to_utm(latitude: float, longitude: float) -> Tuple[float, float]:
+def ll_to_utm(latitude: float, longitude: float) -> Tuple[float, float]:
     easting, northing, _, _ = utm.from_latlon(latitude, longitude)
     return (easting, northing)
 
+def utm_to_ll(x: float, y: float, a, b) -> Tuple[float, float]:
+    lat, lon = utm.to_latlon(x, y, a, b)
+    return (lat, lon)
 
 class UtmToCartesianConverter:
     def __init__(self, initial_point: Tuple[float, float] = None) -> None:
         self._flag_initial_point = initial_point is not None
         if self._flag_initial_point:
-            self._initial_point = convert_to_utm(*initial_point)
+            self._initial_point = utm.from_latlon(*initial_point)
 
     def convert_points(
         self, points: List[Tuple[float, float]]
     ) -> List[Tuple[float, float]]:
-        converted_points = [convert_to_utm(*point) for point in points]
+        converted_points = [ll_to_utm(*point) for point in points]
 
         if self._flag_initial_point:
             converted_points = [
@@ -40,7 +44,7 @@ class UtmToCartesianConverter:
         return converted_points
 
     def convert_point(self, point: Tuple[float, float]) -> Tuple[float, float]:
-        converted_points = convert_to_utm(*point)
+        converted_points = ll_to_utm(*point)
 
         if self._flag_initial_point:
             converted_points = (
@@ -49,6 +53,13 @@ class UtmToCartesianConverter:
             )
 
         return converted_points
+    
+    def convert_local2ll(self, point: Tuple[float, float]) -> Tuple[float, float]:
+        """ Преобразует точку в локальных координатах робота x,y (относительно начальной позиции) в координаты lat, lon"""
+        assert self._flag_initial_point
+        utm_x = point[0] + self._initial_point[0]
+        utm_y = point[1] + self._initial_point[1]
+        return utm_to_ll(utm_x, utm_y, self._initial_point[2], self._initial_point[3])
 
 
 class BackendNode:
@@ -90,6 +101,30 @@ class BackendNode:
         rospy.Timer(rospy.Duration(0.1), self.uiUpdatesTimerCb)
 
         rospy.Subscriber("/ui_flutter_in", std_msgs.msg.String, self.cmdUiCb)
+        rospy.Subscriber("/seg_costmap/costmap/costmap", nav_msgs.msg.OccupancyGrid, self.segmapCb)
+
+    def segmapCb(self, map_msg: nav_msgs.msg.OccupancyGrid):
+        # принимаем карту препятсвий от сегментатора и отправляем в ui ll координаты ее границ
+        originX = map_msg.info.origin.position.x
+        originY = map_msg.info.origin.position.y
+        x2 = originX + map_msg.info.width * map_msg.info.resolution
+        y2 = originY + map_msg.info.height * map_msg.info.resolution
+
+        lat1, lon1 = self.utm_converter.convert_local2ll((originX, originY))
+        lat2, lon2 = self.utm_converter.convert_local2ll((x2, y2))
+
+        js = {
+            "segmap_ll_bounds": {
+                "lat1": lat1,
+                "lon1": lon1,
+                "lat2": lat2,
+                "lon2": lon2
+            }
+        }
+        msg = std_msgs.msg.String()
+        msg.data = json.dumps(js)
+        self.ui_updates_pub.publish(msg)
+
 
     def cmdUiCb(self, cmd_msg: std_msgs.msg.String):
         jss = cmd_msg.data
@@ -125,7 +160,7 @@ class BackendNode:
     def on_submit_task(self, js):
         task = js["task"]
         if "target_point" in task and task["target_point"] is not None:
-            # trg_x, trg_y = convert_to_utm(
+            # trg_x, trg_y = ll_to_utm(
             #     task["target_point"]["coordinates"][1],
             #     task["target_point"]["coordinates"][0],
             # )
@@ -150,7 +185,7 @@ class BackendNode:
         for poly in task["polygons"]:
             for p in poly:
                 pp = _A()
-                # pp.x, pp.y = convert_to_utm(p["coordinates"][1], p["coordinates"][0])
+                # pp.x, pp.y = ll_to_utm(p["coordinates"][1], p["coordinates"][0])
                 pp.x, pp.y = self.utm_converter.convert_point(
                     (p["coordinates"][1], p["coordinates"][0])
                 )
